@@ -4,31 +4,28 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mall/config/constant_param.dart';
+import 'package:flutter_mall/language_provider.dart';
 import 'package:flutter_mall/login.dart';
+import '../dingbudaohang.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/nav_key.dart';
 
-///
-/// http工具类
-///
+/// http工具类（修复post方法参数必填问题）
 class HttpUtil {
   static Dio? _dio;
 
   static Dio get dio {
     if (_dio == null) {
-      // 配置Dio实例
       BaseOptions options = BaseOptions(
-        baseUrl: "https://api.example.com", // 你的API地址
-        connectTimeout: const Duration(milliseconds: 5000), // 设置连接超时时间为5秒
-        receiveTimeout: const Duration(milliseconds: 5000), // 设置接收数据超时时间为5秒
+        baseUrl: "http://192.168.0.120:8080/",
+        connectTimeout: const Duration(milliseconds: 5000),
+        receiveTimeout: const Duration(milliseconds: 5000),
       );
 
       _dio = Dio(options);
 
-      // 可以添加拦截器、日志等其他配置
-
-      // 添加请求拦截器
       _dio!.interceptors.add(InterceptorsWrapper(
         onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
           if (kDebugMode) {
@@ -38,8 +35,6 @@ class HttpUtil {
             print("url=${options.uri.toString()}");
             print("params=${options.data}");
           }
-
-          // 在请求之前做一些操作，比如添加token等
           return handler.next(options);
         },
         onResponse: (Response response, ResponseInterceptorHandler handler) {
@@ -54,12 +49,9 @@ class HttpUtil {
             print("\n");
             print("\n");
           }
-
-          // 在响应之前做一些操作
           return handler.next(response);
         },
         onError: (DioException e, ErrorInterceptorHandler handler) {
-          // 在错误之前做一些操作
           if (kDebugMode) {
             print("\n");
             print("\n");
@@ -74,9 +66,7 @@ class HttpUtil {
           }
           if (e.response?.statusCode == 401) {
             Navigator.of(NavKey.navKey.currentState!.context).push(
-              MaterialPageRoute(
-                builder: (context) => const Login(),
-              ),
+              MaterialPageRoute(builder: (context) => const Login()),
             );
             return;
           }
@@ -84,16 +74,37 @@ class HttpUtil {
         },
       ));
     }
-
     return _dio!;
   }
 
-  // 封装GET请求
+  static String _getLangFromProvider() {
+    if (NavKey.navKey.currentContext != null) {
+      LanguageProvider langProvider = Provider.of<LanguageProvider>(
+        NavKey.navKey.currentContext!,
+        listen: false,
+      );
+      return langProvider.currentLocale.languageCode;
+    }
+    return 'zh';
+  }
+
   static Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       Map<String, dynamic> header = <String, dynamic>{};
       header["Authorization"] = prefs.getString(token);
+      
+      String currentLang = _getLangFromProvider();
+      switch (currentLang) {
+        case 'ko':
+          header["Accept-Language"] = 'ko';
+          break;
+        case 'en':
+          header["Accept-Language"] = 'en';
+          break;
+        default:
+          header["Accept-Language"] = 'zh';
+      }
 
       Response response = await dio.get(
         path,
@@ -106,16 +117,33 @@ class HttpUtil {
     }
   }
 
-  // 封装POST请求，数据以JSON格式发送
-  static Future<Response> post(String path, {Map<String, dynamic>? data}) async {
+  // 关键修复：将queryParameters改为可选参数并设置默认值
+  static Future<Response> post(
+    String path, {
+    Map<String, dynamic>? data,
+    Map<String, Object> queryParameters = const {}, // 改为可选参数，默认空Map
+  }) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       Map<String, dynamic> header = <String, dynamic>{};
       header["Authorization"] = prefs.getString(token);
+      
+      String currentLang = _getLangFromProvider();
+      switch (currentLang) {
+        case 'ko':
+          header["Accept-Language"] = 'ko';
+          break;
+        case 'en':
+          header["Accept-Language"] = 'en';
+          break;
+        default:
+          header["Accept-Language"] = 'zh';
+      }
 
       Response response = await dio.post(
         path,
         data: jsonEncode(data),
+        queryParameters: queryParameters, // 添加queryParameters参数传递
         options: Options(contentType: 'application/json', headers: header),
       );
       return response;
@@ -124,12 +152,61 @@ class HttpUtil {
     }
   }
 
-  // 封装POST请求，数据以form表单格式发送
   static Future<Response> postForm(String path, {Map<String, dynamic>? data}) async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      Map<String, dynamic> header = <String, dynamic>{};
+      header["Authorization"] = prefs.getString(token);
+      
+      String currentLang = _getLangFromProvider();
+      switch (currentLang) {
+        case 'ko':
+          header["Accept-Language"] = 'ko';
+          break;
+        case 'en':
+          header["Accept-Language"] = 'en-';
+          break;
+        default:
+          header["Accept-Language"] = 'zh';
+      }
+
       Response response = await dio.post(
         path,
         queryParameters: data,
+        options: Options(headers: header),
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// PUT请求方法
+  static Future<Response> put(String path, {Map<String, dynamic>? data}) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      Map<String, dynamic> header = <String, dynamic>{};
+      header["Authorization"] = prefs.getString(token);
+      
+      String currentLang = _getLangFromProvider();
+      switch (currentLang) {
+        case 'ko':
+          header["Accept-Language"] = 'ko';
+          break;
+        case 'en':
+          header["Accept-Language"] = 'en';
+          break;
+        default:
+          header["Accept-Language"] = 'zh';
+      }
+
+      Response response = await dio.put(
+        path,
+        data: jsonEncode(data),
+        options: Options(
+          contentType: 'application/json',
+          headers: header,
+        ),
       );
       return response;
     } catch (e) {
@@ -137,3 +214,4 @@ class HttpUtil {
     }
   }
 }
+    

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mall/app_localizations.dart';
+import 'package:flutter_mall/language_provider.dart';
 import 'package:flutter_mall/provider/cart_model.dart';
 import 'package:flutter_mall/provider/counter.dart';
 import 'package:flutter_mall/utils/shared_preferences_util.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_mall/welcome.dart';
 import 'package:provider/provider.dart';
 
 import 'config/nav_key.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 ///
 /// 应用入口页面
@@ -30,22 +33,30 @@ class MyApp extends StatelessWidget {
     // 使用MultiProvider来管理应用的状态
     return MultiProvider(
       providers: [
-        // 提供一个Counter实例
         ChangeNotifierProvider(create: (_) => Counter()),
-        // 提供一个CartModel实例
         ChangeNotifierProvider(create: (_) => CartModel()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
-      child: MaterialApp(
-        // 设置全局的navigatorKey，以便在应用的任何地方进行导航
-        navigatorKey: NavKey.navKey,
-        title: 'shopping',
-        theme: ThemeData(
-          // 设置应用的主题颜色和使用Material 3设计
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-        ),
-        // 设置应用的首页为Welcome部件
-        home: const Welcome(),
+      child: Consumer<LanguageProvider>(
+        builder: (context, languageProvider, child) {
+          return MaterialApp(
+            navigatorKey: NavKey.navKey,
+            title: 'shopping',
+            locale: languageProvider.currentLocale, // 动态设置当前语言
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('zh'), Locale('ko'),Locale('en')],
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+              useMaterial3: true,
+            ),
+            home: const Welcome(),
+          );
+        },
       ),
     );
   }

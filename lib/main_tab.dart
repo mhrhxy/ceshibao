@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
+import 'bottom_navigation_bar.dart'; // 引入底部导航配置
 
-import 'bottom_navigation_bar.dart';
-
-///
-/// 底部导航
-
-// 参考https://blog.csdn.net/sinat_41144773/article/details/129906589实现
+/// 底部导航主页面
 class MainTab extends StatefulWidget {
   const MainTab({super.key});
 
@@ -14,30 +10,39 @@ class MainTab extends StatefulWidget {
 }
 
 class _MainTabState extends State<MainTab> {
-  int _bottomNavigationIndex = 0; //底部导航的索引
+  int _bottomNavigationIndex = 0; // 底部导航选中索引
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: pages[_bottomNavigationIndex], //页面切换
-        bottomNavigationBar: _bottomNavigationBar() //底部导航
-        );
+      body: pages[_bottomNavigationIndex], // 根据索引切换页面
+      // 关键：将 context 传递给 _bottomNavigationBar 方法
+      bottomNavigationBar: _bottomNavigationBar(context), 
+    );
   }
 
-  //底部导航-样式
-  BottomNavigationBar _bottomNavigationBar() {
+  // 修复：添加 BuildContext 参数，用于传递给 items()
+  BottomNavigationBar _bottomNavigationBar(BuildContext context) {
     return BottomNavigationBar(
-      items: items(),
-      //底部导航-图标和文字的定义，封装到函数里
+      // 修复：调用 items() 时传入 context（获取国际化需要）
+      items: items(context), 
       currentIndex: _bottomNavigationIndex,
       onTap: (flag) {
         setState(() {
-          _bottomNavigationIndex = flag; //使用底部导航索引
+          _bottomNavigationIndex = flag; // 更新选中索引
         });
       },
-      //onTap 点击切换页面
-      fixedColor: Color(int.parse('fa436a', radix: 16)).withAlpha(255),
-      //样式：图标选中时的颜色：蓝色
-      type: BottomNavigationBarType.fixed, //样式：选中图标后的样式是固定的
+      selectedItemColor: Colors.blue, // 选中时颜色
+      unselectedItemColor: Colors.grey, // 未选中时颜色
+      selectedLabelStyle: const TextStyle(
+        color: Colors.blue,
+        fontSize: 12,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        color: Colors.grey,
+        fontSize: 12,
+      ),
+      type: BottomNavigationBarType.fixed, // 固定所有导航项（避免溢出）
     );
   }
 }

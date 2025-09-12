@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'dingbudaohang.dart'; 
 
 ///
-/// 购物车页面
+/// 收藏页面
 ///
 
 ///
-class Cart extends StatefulWidget {
-  const Cart({super.key});
+class Favorite extends StatefulWidget {
+  const Favorite({super.key});
 
   @override
-  State<Cart> createState() => _CartState();
+  State<Favorite> createState() => _Favorite();
 }
 
-class _CartState extends State<Cart> {
+class _Favorite extends State<Favorite> {
 @override
 Widget build(BuildContext context) {
   return Scaffold(

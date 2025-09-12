@@ -1,6 +1,6 @@
 
 // const baseUrl = "http://10.168.96.23:9999";
-const baseUrl = "flutter_mall/lib/config/service_url.dart";
+const baseUrl = "http://192.168.0.120:8080";
 // 首页
 const homeDataUrl = "$baseUrl/api/home/index";
 // 品牌列表
@@ -35,7 +35,17 @@ const historyListDataUrl = "$baseUrl/api/history/queryReadHistoryList";
 const collectionListDataUrl = "$baseUrl/api/collection/queryProductCollectionList";
 // 我的关注
 const focusOnListDataUrl = "$baseUrl/api/member/attention/queryAttentionList";
-// 登录
-const loginDataUrl = "$baseUrl/api/member/login";
+// 账号登录
+const loginDataUrl = "$baseUrl/member/login";
+// 邮箱登录
+const logineamilUrl = "$baseUrl/member/email/login";
+//发送验证码
+const apisendemail = "$baseUrl/email/send";
 // 获取用户信息
 const memberInfoDataUrl = "$baseUrl/api/member/info";
+//注册接口
+const apiregister = "$baseUrl/register";
+// 重置密码
+const resetPasswordUrl = "$baseUrl/member/updatePassword";
+// 忘记密码邮箱重置获取验证码
+const verifyForgotCodeUrl = "$baseUrl/email/forgetPasswordCheckCode";
