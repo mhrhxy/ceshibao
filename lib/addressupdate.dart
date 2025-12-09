@@ -20,7 +20,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _detailAddressController = TextEditingController();
+  final TextEditingController _detailAddressController =
+      TextEditingController();
   final TextEditingController _customTagController = TextEditingController();
 
   // 状态变量
@@ -52,25 +53,38 @@ class _AddAddressPageState extends State<AddAddressPage> {
       final token = prefs.getString('token');
 
       if (token == null || token.isEmpty) {
-        throw Exception(AppLocalizations.of(context)?.translate('please_login') ?? '请先登录');
+        throw Exception(
+          AppLocalizations.of(context)?.translate('please_login') ?? '请先登录',
+        );
       }
 
       // 使用HttpUtil处理HTTP请求，无需手动创建Dio实例和设置Authorization头
 
-      final url = userAddress.replaceAll('{userAddressId}', widget.userAddressId.toString());
+      final url = userAddress.replaceAll(
+        '{userAddressId}',
+        widget.userAddressId.toString(),
+      );
       final response = await HttpUtil.get(url);
 
       if (response.data['code'] == 200) {
         final data = response.data['data'] ?? {};
         _fillFormData(data);
       } else {
-        throw Exception(response.data['msg'] ?? (AppLocalizations.of(context)?.translate('get_address_detail_failed') ?? '获取地址详情失败'));
+        throw Exception(
+          response.data['msg'] ??
+              (AppLocalizations.of(
+                    context,
+                  )?.translate('get_address_detail_failed') ??
+                  '获取地址详情失败'),
+        );
       }
     } catch (e) {
       setState(() {
         _errorMsg = e.toString();
       });
-      developer.log('${AppLocalizations.of(context)?.translate('get_address_detail_failed') ?? '获取地址详情失败'}: $e');
+      developer.log(
+        '${AppLocalizations.of(context)?.translate('get_address_detail_failed') ?? '获取地址详情失败'}: $e',
+      );
       _showErrorSnackBar(_errorMsg!);
     } finally {
       setState(() {
@@ -97,80 +111,95 @@ class _AddAddressPageState extends State<AddAddressPage> {
       if (data['tagName'] != null && data['tagName'].toString().isNotEmpty) {
         tags.addAll((data['tagName'] as String).split(','));
       }
-      _tags = [AppLocalizations.of(context)?.translate('school') ?? '学校', AppLocalizations.of(context)?.translate('home_address') ?? '家', ...tags.where((t) => !['学校', '家', '默认'].contains(t))];
+      _tags = [
+        AppLocalizations.of(context)?.translate('school') ?? '学校',
+        AppLocalizations.of(context)?.translate('home_address') ?? '家',
+        ...tags.where((t) => !['学校', '家', '默认'].contains(t)),
+      ];
       _selectedTag = tags.isNotEmpty ? tags.first : null;
     });
   }
 
-Future<void> _openDaumPostcode() async {
-  // 使用showDialog显示中间悬浮弹窗
-  await showDialog(
-    context: context,
-    barrierDismissible: true,
-    barrierColor: Colors.transparent,
-    builder: (context) {
-      return Center(
-        child: Material(
-          type: MaterialType.transparency,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.98, // 进一步增大宽度
-            height: MediaQuery.of(context).size.height * 0.9, // 进一步增大高度
-            margin: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 5,
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // 弹窗标题
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+  Future<void> _openDaumPostcode() async {
+    // 使用showDialog显示中间悬浮弹窗
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.transparent,
+      builder: (context) {
+        return Center(
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.98, // 进一步增大宽度
+              height: MediaQuery.of(context).size.height * 0.9, // 进一步增大高度
+              margin: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 5,
+                    blurRadius: 10,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(AppLocalizations.of(context)?.translate('search_postcode') ?? '邮编搜索', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.close),
+                ],
+              ),
+              child: Column(
+                children: [
+                  // 弹窗标题
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey.shade200),
                       ),
-                    ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          AppLocalizations.of(
+                                context,
+                              )?.translate('search_postcode') ??
+                              '邮编搜索',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                // 邮编搜索组件 - 使用Expanded确保占满剩余空间并支持滚动
-                Expanded(
-                  flex: 1,
-                  child: DaumPostcodeView(
-                    onComplete: (model) {
-                      Navigator.pop(context);
-                      setState(() {
-                        _zipcode = model.zonecode ?? '';
-                        _addressController.text = model.address ?? '';
-                        _detailAddressController.text = model.buildingName ?? '';
-                      });
-                    },
+                  // 邮编搜索组件 - 使用Expanded确保占满剩余空间并支持滚动
+                  Expanded(
+                    flex: 1,
+                    child: DaumPostcodeView(
+                      onComplete: (model) {
+                        Navigator.pop(context);
+                        setState(() {
+                          _zipcode = model.zonecode ?? '';
+                          _addressController.text = model.address ?? '';
+                          _detailAddressController.text =
+                              model.buildingName ?? '';
+                        });
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
-
+        );
+      },
+    );
+  }
 
   // 切换标签选中状态
   void _toggleTag(String tag) {
@@ -199,19 +228,27 @@ Future<void> _openDaumPostcode() async {
   // 提交表单（新增/修改）
   Future<void> _submitForm() async {
     if (_nameController.text.isEmpty) {
-      _showErrorSnackBar(AppLocalizations.of(context)?.translate('input_consignee') ?? '请输入收货人');
+      _showErrorSnackBar(
+        AppLocalizations.of(context)?.translate('input_consignee') ?? '请输入收货人',
+      );
       return;
     }
     if (_phoneController.text.isEmpty) {
-      _showErrorSnackBar(AppLocalizations.of(context)?.translate('input_phone') ?? '请输入手机号');
+      _showErrorSnackBar(
+        AppLocalizations.of(context)?.translate('input_phone') ?? '请输入手机号',
+      );
       return;
     }
     if (_addressController.text.isEmpty) {
-      _showErrorSnackBar(AppLocalizations.of(context)?.translate('select_address') ?? '请选择地址');
+      _showErrorSnackBar(
+        AppLocalizations.of(context)?.translate('select_address') ?? '请选择地址',
+      );
       return;
     }
     if (_selectedTag == null) {
-      _showErrorSnackBar(AppLocalizations.of(context)?.translate('select_tag') ?? '请选择标签');
+      _showErrorSnackBar(
+        AppLocalizations.of(context)?.translate('select_tag') ?? '请选择标签',
+      );
       return;
     }
 
@@ -224,13 +261,16 @@ Future<void> _openDaumPostcode() async {
       final token = prefs.getString('token');
 
       if (token == null || token.isEmpty) {
-        throw Exception(AppLocalizations.of(context)?.translate('please_login') ?? '请先登录');
+        throw Exception(
+          AppLocalizations.of(context)?.translate('please_login') ?? '请先登录',
+        );
       }
       // 构造提交数据：移除国家/省/市/区，合并地址到addressDetail
       final submitData = {
         "name": _nameController.text,
         "tel": _phoneController.text,
-        "addressDetail": "${_addressController.text} ${_detailAddressController.text}", // 合并基础地址和详细地址
+        "addressDetail":
+            "${_addressController.text} ${_detailAddressController.text}", // 合并基础地址和详细地址
         "defaultAddress": _isDefaultAddress ? "2" : "1",
         "tagName": _selectedTag, // 标签名称（若需多标签可改为拼接字符串）
         "tag": "", // 标签ID（按需调整）
@@ -244,12 +284,26 @@ Future<void> _openDaumPostcode() async {
         await HttpUtil.put(uoputedlist, data: submitData);
       }
 
-      _showErrorSnackBar(widget.userAddressId == null ? (AppLocalizations.of(context)?.translate('add_address_success') ?? '新增地址成功') : (AppLocalizations.of(context)?.translate('update_address_success') ?? '修改地址成功'));
+      _showErrorSnackBar(
+        widget.userAddressId == null
+            ? (AppLocalizations.of(context)?.translate('add_address_success') ??
+                '新增地址成功')
+            : (AppLocalizations.of(
+                  context,
+                )?.translate('update_address_success') ??
+                '修改地址成功'),
+      );
       Navigator.pop(context, true);
     } catch (e) {
       final errorMsg = e.toString();
-      _showErrorSnackBar(widget.userAddressId == null ? '${AppLocalizations.of(context)?.translate('add_address_failed') ?? '新增地址失败'}：$errorMsg' : '${AppLocalizations.of(context)?.translate('update_address_failed') ?? '修改地址失败'}：$errorMsg');
-      developer.log('${AppLocalizations.of(context)?.translate('submit_address_failed') ?? '提交地址失败'}: $e');
+      _showErrorSnackBar(
+        widget.userAddressId == null
+            ? '${AppLocalizations.of(context)?.translate('add_address_failed') ?? '新增地址失败'}：$errorMsg'
+            : '${AppLocalizations.of(context)?.translate('update_address_failed') ?? '修改地址失败'}：$errorMsg',
+      );
+      developer.log(
+        '${AppLocalizations.of(context)?.translate('submit_address_failed') ?? '提交地址失败'}: $e',
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -283,295 +337,454 @@ Future<void> _openDaumPostcode() async {
     return Scaffold(
       appBar: const FixedActionTopBar(),
       backgroundColor: const Color(0xFFF2F3F5),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.red))
-          : Column(
-              children: [
-                Container(
-                  height: 44,
-                  color: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.black),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        widget.userAddressId == null ? (AppLocalizations.of(context)?.translate('add_address') ?? '新增地址') : (AppLocalizations.of(context)?.translate('update_address') ?? '修改地址'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                    child: Column(
+      body:
+          _isLoading
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.red),
+              )
+              : Column(
+                children: [
+                  Container(
+                    height: 44,
+                    color: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.black,
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                   Text(
-                                    AppLocalizations.of(context)?.translate('consignee') ?? '收货人',
-                                    style: TextStyle(fontSize: 14, color: Color(0xFF333333)),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _nameController,
-                                      decoration:  InputDecoration(
-                                        hintText: AppLocalizations.of(context)?.translate('please_input') ?? '请输入',
-                                        border: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Color(0xFFEEEEEE)),
-                                        ),
-                                        hintStyle: TextStyle(color: Color(0xFF999999)),
-                                        contentPadding: EdgeInsets.zero,
-                                      ),
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                   Text(
-                                    AppLocalizations.of(context)?.translate('phone') ?? '手机号',
-                                    style: TextStyle(fontSize: 14, color: Color(0xFF333333)),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _phoneController,
-                                      decoration:  InputDecoration(
-                                        hintText: AppLocalizations.of(context)?.translate('phone_format_example') ?? '010-12345678',
-                                        border: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Color(0xFFEEEEEE)),
-                                        ),
-                                        hintStyle: TextStyle(color: Color(0xFF999999)),
-                                        contentPadding: EdgeInsets.zero,
-                                      ),
-                                      keyboardType: TextInputType.phone,
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.userAddressId == null
+                              ? (AppLocalizations.of(
+                                    context,
+                                  )?.translate('add_address') ??
+                                  '新增地址')
+                              : (AppLocalizations.of(
+                                    context,
+                                  )?.translate('update_address') ??
+                                  '修改地址'),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                   Text(
-                                    AppLocalizations.of(context)?.translate('address') ?? '地址',
-                                    style: TextStyle(fontSize: 14, color: Color(0xFF333333)),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _addressController,
-                                      decoration:  InputDecoration(
-                                        hintText: AppLocalizations.of(context)?.translate('select_address') ?? '请选择地址',
-                                        border: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Color(0xFFEEEEEE)),
-                                        ),
-                                        hintStyle: TextStyle(color: Color(0xFF999999)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 20,
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16,
+                            ),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(
+                                            context,
+                                          )?.translate('consignee') ??
+                                          '收货人',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF333333),
                                       ),
-                                      style: const TextStyle(fontSize: 14),
-                                      readOnly: true,
                                     ),
-                                  ),
-                                  TextButton(
-                                    onPressed: _openDaumPostcode,
-                                    style: TextButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      side: const BorderSide(color: Color(0xFFCCCCCC)),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _nameController,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              AppLocalizations.of(
+                                                context,
+                                              )?.translate('please_input') ??
+                                              '请输入',
+                                          border: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Color(0xFFEEEEEE),
+                                            ),
+                                          ),
+                                          hintStyle: TextStyle(
+                                            color: Color(0xFF999999),
+                                          ),
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(
+                                            context,
+                                          )?.translate('phone') ??
+                                          '手机号',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF333333),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _phoneController,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              AppLocalizations.of(
+                                                context,
+                                              )?.translate(
+                                                'phone_format_example',
+                                              ) ??
+                                              '010-12345678',
+                                          border: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Color(0xFFEEEEEE),
+                                            ),
+                                          ),
+                                          hintStyle: TextStyle(
+                                            color: Color(0xFF999999),
+                                          ),
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                        keyboardType: TextInputType.phone,
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16,
+                            ),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(
+                                            context,
+                                          )?.translate('address') ??
+                                          '地址',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF333333),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _addressController,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              AppLocalizations.of(
+                                                context,
+                                              )?.translate('select_address') ??
+                                              '请选择地址',
+                                          border: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Color(0xFFEEEEEE),
+                                            ),
+                                          ),
+                                          hintStyle: TextStyle(
+                                            color: Color(0xFF999999),
+                                          ),
+                                        ),
+                                        style: const TextStyle(fontSize: 14),
+                                        readOnly: true,
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: _openDaumPostcode,
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        side: const BorderSide(
+                                          color: Color(0xFFCCCCCC),
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        minimumSize: const Size(80, 30),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 6,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        AppLocalizations.of(
+                                              context,
+                                            )?.translate('search_postcode') ??
+                                            '搜索邮编',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16,
+                            ),
+                            margin: const EdgeInsets.only(bottom: 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)?.translate(
+                                            'set_as_default_address',
+                                          ) ??
+                                          '设置为默认地址',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF333333),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Checkbox(
+                                      value: _isDefaultAddress,
+                                      activeColor: Colors.red,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      minimumSize: const Size(80, 30),
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          _isDefaultAddress = value ?? true;
+                                        });
+                                      },
                                     ),
-                                    child:  Text(
-                                      AppLocalizations.of(context)?.translate('search_postcode') ?? '搜索邮编',
-                                      style: TextStyle(fontSize: 12),
+                                  ],
+                                ),
+                                Text(
+                                  AppLocalizations.of(context)?.translate(
+                                        'note_default_address_priority',
+                                      ) ??
+                                      '注：下单时优先使用该地址',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF999999),
+                                  ),
+                                ),
+                                const Divider(
+                                  height: 1,
+                                  color: Color(0xFFEEEEEE),
+                                  indent: 16,
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(
+                                            context,
+                                          )?.translate('tag') ??
+                                          '标签',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF333333),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                          margin: const EdgeInsets.only(bottom: 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                   Text(
-                                    AppLocalizations.of(context)?.translate('set_as_default_address') ?? '设置为默认地址',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xFF333333),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Checkbox(
-                                    value: _isDefaultAddress,
-                                    activeColor: Colors.red,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        _isDefaultAddress = value ?? true;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                AppLocalizations.of(context)?.translate('note_default_address_priority') ?? '注：下单时优先使用该地址',
-                                style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
-                              ),
-                              const Divider(height: 1, color: Color(0xFFEEEEEE), indent: 16),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                 Text(
-                                    AppLocalizations.of(context)?.translate('tag') ?? '标签',
-                                    style: TextStyle(fontSize: 14, color: Color(0xFF333333)),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Wrap(
-                                    spacing: 12,
-                                    children: [
-                                      ..._tags.map((tag) => GestureDetector(
+                                    const SizedBox(width: 16),
+                                    Wrap(
+                                      spacing: 12,
+                                      children: [
+                                        ..._tags.map(
+                                          (tag) => GestureDetector(
                                             onTap: () => _toggleTag(tag),
                                             child: DecoratedBox(
                                               decoration: BoxDecoration(
                                                 border: Border.all(
-                                                  color: _selectedTag == tag ? Colors.red : Color(0xFFCCCCCC),
+                                                  color:
+                                                      _selectedTag == tag
+                                                          ? Colors.red
+                                                          : Color(0xFFCCCCCC),
                                                 ),
-                                                borderRadius: BorderRadius.circular(4),
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
                                               ),
                                               child: Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 6,
+                                                    ),
                                                 child: Text(
                                                   tag,
                                                   style: TextStyle(
-                                                    color: _selectedTag == tag ? Colors.red : Colors.black,
+                                                    color:
+                                                        _selectedTag == tag
+                                                            ? Colors.red
+                                                            : Colors.black,
                                                     fontSize: 13,
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                          )),
-                                      GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _isCustomTagEditing = true;
-                                          });
-                                        },
-                                        child: DecoratedBox(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(color: Color(0xFFCCCCCC)),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child:  Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                            child: Text(
-                                              AppLocalizations.of(context)?.translate('custom') ?? '自定义',
-                                              style: TextStyle(fontSize: 13, color: Colors.black),
-                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              if (_isCustomTagEditing)
-                                Column(
-                                  children: [
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: TextField(
-                                            controller: _customTagController,
-                                            decoration:  InputDecoration(
-                                              hintText: AppLocalizations.of(context)?.translate('input_tag_max_4_chars') ?? '输入标签（最多4字）',
-                                              border: OutlineInputBorder(
-                                                borderSide: BorderSide(color: Color(0xFFCCCCCC)),
-                                                borderRadius: BorderRadius.all(Radius.circular(4)),
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _isCustomTagEditing = true;
+                                            });
+                                          },
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: Color(0xFFCCCCCC),
                                               ),
-                                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
-                                            maxLength: 4,
-                                            style: const TextStyle(fontSize: 13),
-                                            onSubmitted: (_) => _submitCustomTag(),
+                                            child: Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 6,
+                                              ),
+                                              child: Text(
+                                                AppLocalizations.of(
+                                                      context,
+                                                    )?.translate('custom') ??
+                                                    '自定义',
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
-                            ],
+                                if (_isCustomTagEditing)
+                                  Column(
+                                    children: [
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: _customTagController,
+                                              decoration: InputDecoration(
+                                                hintText:
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )?.translate(
+                                                      'input_tag_max_4_chars',
+                                                    ) ??
+                                                    '输入标签（最多4字）',
+                                                border: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Color(0xFFCCCCCC),
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                        Radius.circular(4),
+                                                      ),
+                                                ),
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 8,
+                                                    ),
+                                              ),
+                                              maxLength: 4,
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                              ),
+                                              onSubmitted:
+                                                  (_) => _submitCustomTag(),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _submitForm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        ],
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: Text(
-                      widget.userAddressId == null ? (AppLocalizations.of(context)?.translate('confirm_add') ?? '确认新增') : (AppLocalizations.of(context)?.translate('confirm_update') ?? '确认修改'),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _submitForm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        widget.userAddressId == null
+                            ? (AppLocalizations.of(
+                                  context,
+                                )?.translate('confirm_add') ??
+                                '确认新增')
+                            : (AppLocalizations.of(
+                                  context,
+                                )?.translate('confirm_update') ??
+                                '确认修改'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 }
