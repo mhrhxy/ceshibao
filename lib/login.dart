@@ -42,8 +42,8 @@ class _LoginState extends State<Login> {
   void initState() {
     super.initState();
     // 测试数据
-    _accountController.text = "bms";
-    _passwordController.text = "1234567";
+    _accountController.text = "";
+    _passwordController.text = "";
   }
 
   @override

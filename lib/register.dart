@@ -43,12 +43,12 @@ class _RegisterState extends State<Register> {
   void initState() {
     super.initState();
     // 测试数据初始化（原有逻辑）
-    _accountController.text = "testuser";
-    _passwordController.text = "123456";
-    _confirmPasswordController.text = "123456";
-    _usernameController.text = "testname";
-    _emailController.text = "test@example.com";
-    _phoneController.text = "13800138000";
+    _accountController.text = "";
+    _passwordController.text = "";
+    _confirmPasswordController.text = "";
+    _usernameController.text = "";
+    _emailController.text = "";
+    _phoneController.text = "";
   }
 
   @override

@@ -18,7 +18,7 @@ class HttpUtil {
   static Dio get dio {
     if (_dio == null) {
       BaseOptions options = BaseOptions(
-        baseUrl: "http://192.168.0.76:8080/",
+        baseUrl: "http://192.168.0.120:8080/",
         connectTimeout: const Duration(milliseconds: 5000),
         receiveTimeout: const Duration(milliseconds: 5000),
       );
