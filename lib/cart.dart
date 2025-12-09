@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dingbudaohang.dart'; 
 
 ///
-/// 购物车页面
+/// 比价页面
 ///
 
 ///

@@ -1,14 +1,12 @@
 import 'dart:async';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'package:flutter_mall/login.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'package:flutter_mall/utils/http_util.dart';
-import 'package:flutter_mall/utils/shared_preferences_util.dart';
 
-/// 忘记密码页面（分两步：1.邮箱验证 2.重置密码）
+/// 忘记密码页面（带密码格式校验）
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
 
@@ -17,38 +15,55 @@ class ForgotPassword extends StatefulWidget {
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
-  // 1. 输入控制器（分步骤对应）
+  // 输入控制器
+  final TextEditingController _memberNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _verifyCodeController = TextEditingController();
   final TextEditingController _newPwdController = TextEditingController();
   final TextEditingController _confirmPwdController = TextEditingController();
 
-  // 2. 状态控制变量
-  bool _isLoading = false; // 全局加载状态（按钮/输入框禁用）
-  bool _canGetVerifyCode = true; // 发送验证码按钮状态
-  String _verifyCodeText = ""; // 验证码按钮文本（发送/倒计时）
-  bool _isFirstStep = true; // 步骤标记：true=第一步（邮箱+验证码），false=第二步（重置密码）
-  bool _isObscureNewPwd = true; // 新密码隐藏状态
-  bool _isObscureConfirmPwd = true; // 确认密码隐藏状态
-  bool _isFirstInit = true; // 国际化初始化标记
-  String? _memberName; // 新增：存储接口返回的会员账户名
+  // 状态控制变量
+  bool _isLoading = false;
+  bool _canGetVerifyCode = true;
+  String _verifyCodeText = "";
+  bool _isFirstStep = true;
+  bool _isObscureNewPwd = true;
+  bool _isObscureConfirmPwd = true;
+  bool _isFirstInit = true;
+  String? _memberName;
+  // 新增：密码格式错误提示
+  String? _pwdErrorText;
 
-  // 3. 布局参数（完全复用登录/注册页，确保风格统一）
+  // 布局参数
   final double _labelWidth = 60;
   final double _inputHorizontalMargin = 40;
   final double _logoRightPadding = 30;
 
+  // 新增：密码校验正则（仅允许小写字母、数字、特殊符号）
+  static final RegExp _passwordRegExp = RegExp(
+    r'^[a-z0-9!@#$%^&*(),.?":{}|<>]+$',
+  );
+
   @override
   void initState() {
     super.initState();
-    // 测试数据（可选删除）
+    _memberNameController.text = "test_member";
     _emailController.text = "test@example.com";
+    
+    // 新增：实时监听密码输入，更新错误提示
+    _newPwdController.addListener(() {
+      final pwd = _newPwdController.text.trim();
+      setState(() {
+        _pwdErrorText = pwd.isNotEmpty && !_passwordRegExp.hasMatch(pwd)
+            ? "密码只能包含小写字母、数字和特殊符号"
+            : null;
+      });
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 首次初始化国际化文本（避免initState依赖错误）
     if (_isFirstInit) {
       _verifyCodeText = AppLocalizations.of(context)!.translate('send_code') ;
       _isFirstInit = false;
@@ -57,7 +72,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   @override
   void dispose() {
-    // 释放控制器资源
+    _memberNameController.dispose();
     _emailController.dispose();
     _verifyCodeController.dispose();
     _newPwdController.dispose();
@@ -65,10 +80,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     super.dispose();
   }
 
-  /// 4. 核心逻辑1：发送验证码（复用注册页逻辑，适配忘记密码场景）
+  /// 发送验证码（不变）
   Future<void> _sendVerifyCode() async {
+    // ... 原有逻辑保持不变 ...
     final email = _emailController.text.trim();
-    // 邮箱校验
     if (email.isEmpty) {
       _showToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
       return;
@@ -80,21 +95,18 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
     setState(() => _isLoading = true);
     try {
-      // 调用发送验证码接口（忘记密码场景的type，需与后端确认，这里假设为4）
       Response result = await HttpUtil.post(
-        "$apisendemail?email=$email&type=3", // 复用验证码接口，type区分场景
+        "$apisendemail?email=$email&type=3",
         data: {},
       );
 
       if (result.data['code'] == 200) {
-        // 发送成功：开始倒计时
         _showToast(context, result.data['msg'] ?? "验证码已发送", isSuccess: true);
         setState(() {
           _canGetVerifyCode = false;
           _verifyCodeText = AppLocalizations.of(context)!.translate('countdown_60s') ;
         });
 
-        // 60秒倒计时逻辑
         int countdown = 60;
         Timer.periodic(const Duration(seconds: 1), (timer) {
           if (countdown == 0) {
@@ -128,11 +140,17 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     }
   }
 
-  /// 5. 核心逻辑2：第一步「下一步」- 验证邮箱+验证码
+  /// 第一步「下一步」（不变）
   Future<void> _goToSecondStep() async {
+    // ... 原有逻辑保持不变 ...
+    final memberName = _memberNameController.text.trim();
     final email = _emailController.text.trim();
     final code = _verifyCodeController.text.trim();
-    // 表单校验
+
+    if (memberName.isEmpty) {
+      _showToast(context, "请输入账号");
+      return;
+    }
     if (email.isEmpty) {
       _showToast(context, "请输入邮箱");
       return;
@@ -144,22 +162,21 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
     setState(() => _isLoading = true);
     try {
-      // 调用验证码验证接口（需后端提供，这里假设接口路径）
       Response result = await HttpUtil.post(
-        verifyForgotCodeUrl, // 新增：在service_url.dart定义验证接口
+        verifyForgotCodeUrl,
         data: {
+          "memberName": memberName,
           "email": email,
-          "type":'3',
+          "type": '3',
           "code": code
         },
       );
 
       if (result.data['code'] == 200) {
-        // 验证通过：存储会员名 + 切换到第二步
         setState(() {
           _isFirstStep = false;
-          _memberName = result.data['msg']; // 关键修改：存储接口返回的会员账户名
-          _verifyCodeController.clear(); // 清空验证码输入框（可选）
+          _memberName = memberName;
+          _verifyCodeController.clear();
         });
       } else {
         _showToast(context, result.data['msg']);
@@ -174,24 +191,33 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     }
   }
 
-  /// 6. 核心逻辑3：第二步「确认」- 提交新密码
+  /// 第二步「确认」- 新增密码格式校验
   Future<void> _submitNewPassword() async {
     final email = _emailController.text.trim();
     final newPwd = _newPwdController.text.trim();
     final confirmPwd = _confirmPwdController.text.trim();
-    // 密码校验
+
+    // 1. 密码非空校验
     if (newPwd.isEmpty) {
       _showToast(context, AppLocalizations.of(context)!.translate('input_password_tip') );
       return;
     }
-    if (newPwd.length < 6) { // 密码长度校验（可根据需求调整）
+    // 2. 密码长度校验
+    if (newPwd.length < 6) {
       _showToast(context, "新密码长度不能少于6位");
       return;
     }
+    // 3. 新增：密码格式校验（小写、数字、特殊符号）
+    if (!_passwordRegExp.hasMatch(newPwd)) {
+      _showToast(context, "密码只能包含小写字母、数字和特殊符号");
+      return;
+    }
+    // 4. 确认密码校验
     if (confirmPwd.isEmpty) {
       _showToast(context, AppLocalizations.of(context)!.translate('input_confirm_password_tip') );
       return;
     }
+    // 5. 两次密码一致性校验
     if (newPwd != confirmPwd) {
       _showToast(context, "两次输入的密码不一致");
       return;
@@ -199,19 +225,17 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
     setState(() => _isLoading = true);
     try {
-      // 调用重置密码接口（需后端提供，这里假设接口路径）
       Response result = await HttpUtil.put(
-        resetPasswordUrl, // 新增：在service_url.dart定义重置密码接口
+        resetPasswordUrl,
         data: {
-          "memberName": _memberName, // 关键修改：提交存储的会员名
-          "email": email, // 原邮箱参数保留
-          "password": newPwd, // 关键修改：参数名改为password（匹配需求格式）
-          "passwordCheck": confirmPwd // 关键修改：参数名改为passwordCheck（匹配需求格式）
+          "memberName": _memberName,
+          "email": email,
+          "password": newPwd,
+          "passwordCheck": confirmPwd
         },
       );
 
       if (result.data['code'] == 200) {
-        // 重置成功：提示+跳转到登录页
         _showToast(context, result.data['msg'] , isSuccess: true);
         if (mounted) {
           Future.delayed(const Duration(seconds: 1), () {
@@ -234,7 +258,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     }
   }
 
-  /// 7. 通用提示弹窗（完全复用登录/注册页）
+  /// 提示弹窗（不变）
   void _showToast(BuildContext context, String message, {bool isSuccess = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -246,7 +270,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );
   }
 
-  /// 8. 通用输入行组件（复用登录/注册页，支持密码隐藏）
+  /// 通用输入行组件 - 新增密码错误提示
   Widget _buildInputRow({
     required String labelText,
     required TextEditingController controller,
@@ -255,6 +279,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     TextInputType keyboardType = TextInputType.text,
     Widget? suffixIcon,
     bool readOnly = false,
+    // 新增：错误提示文字
+    String? errorText,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -269,20 +295,38 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         const SizedBox(width: 10),
         Expanded(
           child: SizedBox(
-            height: 50,
-            child: TextField(
-              controller: controller,
-              obscureText: obscureText,
-              keyboardType: keyboardType,
-              enabled: !_isLoading,
-              readOnly: readOnly,
-              decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: const TextStyle(color: Colors.grey),
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                suffixIcon: suffixIcon,
-              ),
+            height: errorText != null ? 70 : 50, // 有错误时增加高度
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: controller,
+                  obscureText: obscureText,
+                  keyboardType: keyboardType,
+                  enabled: !_isLoading,
+                  readOnly: readOnly,
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: errorText != null ? Colors.red : Colors.grey, // 错误时显示红色边框
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    suffixIcon: suffixIcon,
+                  ),
+                ),
+                // 新增：显示错误提示
+                if (errorText != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, left: 4),
+                    child: Text(
+                      errorText,
+                      style: const TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -290,7 +334,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );
   }
 
-  /// 9. 带验证码按钮的邮箱输入行（复用注册页布局）
+  /// 带验证码按钮的邮箱输入行（不变）
   Widget _buildEmailWithVerifyCodeRow() {
     final loc = AppLocalizations.of(context)!;
     return Row(
@@ -311,7 +355,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             child: TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              enabled: !_isLoading && _canGetVerifyCode, // 倒计时时禁用邮箱输入
+              enabled: !_isLoading && _canGetVerifyCode,
               decoration: InputDecoration(
                 hintText: loc.translate('input_email_hint') ,
                 hintStyle: const TextStyle(color: Colors.grey),
@@ -352,7 +396,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         color: Colors.white,
         child: Column(
           children: [
-            // ---------------------- 1. 上半部分（完全复用登录/注册页，样式不变） ----------------------
+            // 上半部分（不变）
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -368,7 +412,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // 返回按钮
                   Align(
                     alignment: Alignment.topLeft,
                     child: Padding(
@@ -380,7 +423,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Logo和标语
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -406,7 +448,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
             const SizedBox(height: 40),
 
-            // ---------------------- 2. 表单区域（分两步切换） ----------------------
+            // 表单区域
             Expanded(
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
@@ -417,12 +459,16 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    // 第一步：邮箱 + 验证码 + 下一步（_isFirstStep=true时显示）
+                    // 第一步：账号 + 邮箱 + 验证码 + 下一步
                     if (_isFirstStep) ...[
-                      // 邮箱+发送验证码
+                      _buildInputRow(
+                        labelText:  loc.translate('account'),
+                        controller: _memberNameController,
+                        hintText: loc.translate('input_account_hints'),
+                      ),
+                      const SizedBox(height: 20),
                       _buildEmailWithVerifyCodeRow(),
                       const SizedBox(height: 20),
-                      // 验证码输入框
                       _buildInputRow(
                         labelText: loc.translate('verify_code'),
                         controller: _verifyCodeController,
@@ -430,7 +476,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         keyboardType: TextInputType.number,
                       ),
                       const SizedBox(height: 30),
-                      // 下一步按钮
                       InkWell(
                         onTap: _isLoading ? null : _goToSecondStep,
                         child: Container(
@@ -450,13 +495,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         ),
                       ),
                     ] 
-                    // 第二步：新密码 + 确认密码 + 确认（_isFirstStep=false时显示）
+                    // 第二步：新密码（带格式校验） + 确认密码 + 确认
                     else ...[
-                      // 新密码输入框（带隐藏/显示图标）
+                      // 新密码输入框（带实时错误提示）
                       _buildInputRow(
                         labelText: loc.translate('new_password'),
                         controller: _newPwdController,
-                        hintText: loc.translate('input_new_password_hint') ,
+                        hintText: loc.translate('input_new_password_hint') ?? "请输入新密码（小写字母、数字、特殊符号）",
                         obscureText: _isObscureNewPwd,
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -465,9 +510,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           ),
                           onPressed: () => setState(() => _isObscureNewPwd = !_isObscureNewPwd),
                         ),
+                        errorText: _pwdErrorText, // 显示密码格式错误
                       ),
                       const SizedBox(height: 20),
-                      // 确认密码输入框（带隐藏/显示图标）
+                      // 确认密码输入框
                       _buildInputRow(
                         labelText: loc.translate('confirm_password') ,
                         controller: _confirmPwdController,
@@ -482,7 +528,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      // 确认按钮
                       InkWell(
                         onTap: _isLoading ? null : _submitNewPassword,
                         child: Container(

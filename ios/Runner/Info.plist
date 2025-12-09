@@ -45,5 +45,28 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- URL Scheme配置，用于深度链接 -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>flutterappxm</string>
+			</array>
+		</dict>
+	</array>
+	<!-- 相册权限 -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问相册以选择图片进行搜索</string>
+	<!-- 相机权限 -->
+	<key>NSCameraUsageDescription</key>
+	<string>需要访问相机以拍摄图片进行搜索</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+	<key>NSAllowsArbitraryLoads</key>
+	<true/>
+	</dict>
 </dict>
 </plist>

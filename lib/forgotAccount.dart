@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // 导入剪贴板功能
 import 'package:dio/dio.dart';
@@ -7,7 +6,6 @@ import 'package:flutter_mall/app_localizations.dart';
 import 'package:flutter_mall/loginto.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'package:flutter_mall/utils/http_util.dart';
-import 'package:flutter_mall/utils/shared_preferences_util.dart';
 
 /// 忘记账号页面（分两步：1.邮箱验证 2.显示账号+复制）
 class ForgotAccount extends StatefulWidget {

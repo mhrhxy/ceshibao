@@ -10,9 +10,9 @@ import 'package:provider/provider.dart';
 import 'config/nav_key.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-///
-/// 应用入口页面
-///
+// 导入订单页面
+import 'Myorder.dart';
+
 // 程序的入口点
 void main() async {
   // 确保Flutter的绑定被初始化，以便在主函数中使用Flutter的特性
@@ -55,6 +55,23 @@ class MyApp extends StatelessWidget {
               useMaterial3: true,
             ),
             home: const Welcome(),
+            // 配置深度链接处理
+            onGenerateRoute: (settings) {
+              // 处理深度链接
+              if (settings.name?.startsWith('flutterappxm://') ?? false) {
+                String path = settings.name!.replaceFirst('flutterappxm://', '');
+                
+                if (path == 'orders') {
+                  // 导入Myorder页面
+                  return MaterialPageRoute(
+                    builder: (context) => const Myorder(),
+                  );
+                }
+              }
+              
+              // 默认路由处理
+              return null;
+            },
           );
         },
       ),

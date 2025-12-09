@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'settings.dart';
+import 'utils/screen_adapter.dart';
+import 'message.dart';
+import 'main_tab.dart';
 
 class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
   final String logoAsset;
@@ -10,10 +14,11 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
   final Color iconColor;
   final double elevation;
   final bool showDivider;
-
-  // 新增：自定义导航栏高度（解决图片大小限制的核心）
   final double barHeight;
   final bool showLogo;
+  // 关键修改：将 title 改为可选参数（允许为 null，去掉 required）
+  final Text? title;
+
   const FixedActionTopBar({
     super.key,
     this.logoAsset = "images/logo.png",
@@ -25,48 +30,71 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
     this.iconColor = Colors.black87,
     this.elevation = 0,
     this.showDivider = true,
-    this.barHeight = 60, // 增大导航栏高度（默认56→80）
+    this.barHeight = 60,
     this.showLogo = true,
+    this.title, // 这里去掉 required，变为可选参数
   });
 
   @override
   Widget build(BuildContext context) {
+    // 获取状态栏高度并添加到导航栏中
+    double statusBarHeight = ScreenAdapter.statusBarHeight;
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           color: backgroundColor,
-          // 使用Container包裹，避免AppBar高度限制
+          padding: EdgeInsets.only(top: statusBarHeight),
           child: SizedBox(
-            height: barHeight, // 应用自定义高度
+            height: barHeight,
             child: Row(
               children: [
-                // 左侧Logo（无高度限制）
-                if (showLogo) // 条件渲染：仅当showLogo为true时显示
+                if (showLogo)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Image.asset(
-                      logoAsset,
-                      width: 120,
-                      height: 50,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.image_not_supported,
-                          color: Colors.red,
+                    child: InkWell(
+                      onTap: () {
+                        // 点击logo返回底部导航栏页面
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MainTab(),
+                          ),
                         );
                       },
+                      child: Image.asset(
+                        logoAsset,
+                        width: 120,
+                        height: 50,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.image_not_supported,
+                            color: Colors.red,
+                          );
+                        },
+                      ),
                     ),
                   ),
-                const Spacer(), // 推到右侧
-                // 右侧图标
+                // 如果需要显示 title，可以在这里添加（可选）
+                if (title != null) title!, // 非空时显示
+                const Spacer(),
                 IconButton(
                   icon: Icon(
                     Icons.notifications_none,
                     color: iconColor,
                     size: 24,
                   ),
-                  onPressed: () => Navigator.pushNamed(context, firstRouteName),
+                  onPressed: () {
+                    // 导入Message页面并跳转到消息页面
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Message(),
+                      ),
+                    );
+                  },
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 IconButton(
@@ -75,8 +103,14 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
                     color: iconColor,
                     size: 24,
                   ),
-                  onPressed:
-                      () => Navigator.pushNamed(context, secondRouteName),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPage(),
+                      ),
+                    );
+                  },
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 const SizedBox(width: 8),
@@ -84,14 +118,13 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ),
-        // 底部分割线
-        if (showDivider) Container(height: 0.5, color: const Color(0xFFEEEEEE)),
+        if (showDivider)
+          Container(height: 0.5, color: const Color(0xFFEEEEEE)),
       ],
     );
   }
 
-  // 导航栏总高度 = 自定义高度 + 分割线高度
   @override
   Size get preferredSize =>
-      Size.fromHeight(barHeight + (showDivider ? 0.5 : 0));
+      Size.fromHeight(barHeight + ScreenAdapter.statusBarHeight + (showDivider ? 0.5 : 0));
 }

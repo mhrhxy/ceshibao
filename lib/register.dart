@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'loginto.dart';
@@ -479,12 +478,31 @@ class _RegisterState extends State<Register> {
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          toolbarHeight: 60,
+          leading: Padding(
+            padding: EdgeInsets.only(left: 4, top: 4),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black, size: 24),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              padding: EdgeInsets.zero,
+            ),
+          ),
+        ),
       body: Container(
         color: Colors.white,
         child: Column(
           children: [
-            // 顶部背景区域（原有UI完全保留）
+            // 顶部背景区域
             Container(
+              width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: const AssetImage('images/bjttb.png'),
@@ -499,20 +517,6 @@ class _RegisterState extends State<Register> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          size: 24,
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

@@ -6,6 +6,8 @@ class LanguageProvider extends ChangeNotifier {
 
   Locale get currentLocale => _currentLocale;
 
+  get languageCode => null;
+
   // 切换到韩文
   void setKorean() {
     _currentLocale = const Locale('ko');

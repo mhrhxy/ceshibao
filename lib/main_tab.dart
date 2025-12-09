@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'bottom_navigation_bar.dart'; // 引入底部导航配置
-
-/// 底部导航主页面
+import 'bottom_navigation_bar.dart';
+import 'loginto.dart';
+import 'cartadd.dart';
 class MainTab extends StatefulWidget {
   const MainTab({super.key});
 
@@ -10,39 +10,97 @@ class MainTab extends StatefulWidget {
 }
 
 class _MainTabState extends State<MainTab> {
-  int _bottomNavigationIndex = 0; // 底部导航选中索引
+  int _selectedIndex = 2; // 默认选中首页
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[_bottomNavigationIndex], // 根据索引切换页面
-      // 关键：将 context 传递给 _bottomNavigationBar 方法
-      bottomNavigationBar: _bottomNavigationBar(context), 
+      body: Stack(
+        children: [
+          // 底部导航切换的页面内容
+          pages[_selectedIndex],
+
+          // 右下角悬浮按钮（白色背景、黑色图标）
+          Positioned(
+            bottom: 20, // 距离底部20px
+            right: 20,  // 距离右侧20px
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // 最小化列高度
+              children: [
+                // 加号按钮
+                _buildFloatingButton(
+                  color: Colors.white,
+                  icon: Icons.add,
+                  onPressed: () {
+                    print('加号按钮被点击，当前页面索引：$_selectedIndex');
+                     Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Loginto()),
+                        );
+                  },
+                ),
+                const SizedBox(height: 12), // 按钮间距
+
+                // 购物车按钮（无红色消息提示）
+                _buildFloatingButton(
+                  color: Colors.white,
+                  icon: Icons.shopping_cart,
+                  onPressed: () {
+                     Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Cart()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+
+      // 底部导航栏
+      bottomNavigationBar: BottomNavigationBar(
+        items: buildBottomNavItems(context), // 使用配置好的导航项
+        currentIndex: _selectedIndex,
+        type: BottomNavigationBarType.fixed, // 支持5个导航项时需设置
+        selectedItemColor: Colors.blue,      // 选中项颜色
+        unselectedItemColor: Colors.grey,    // 未选中项颜色
+        showUnselectedLabels: true,          // 显示未选中项的文字
+        onTap: (index) {
+          // 点击底部导航项时更新选中索引
+          setState(() => _selectedIndex = index);
+        },
+      ),
     );
   }
 
-  // 修复：添加 BuildContext 参数，用于传递给 items()
-  BottomNavigationBar _bottomNavigationBar(BuildContext context) {
-    return BottomNavigationBar(
-      // 修复：调用 items() 时传入 context（获取国际化需要）
-      items: items(context), 
-      currentIndex: _bottomNavigationIndex,
-      onTap: (flag) {
-        setState(() {
-          _bottomNavigationIndex = flag; // 更新选中索引
-        });
-      },
-      selectedItemColor: Colors.blue, // 选中时颜色
-      unselectedItemColor: Colors.grey, // 未选中时颜色
-      selectedLabelStyle: const TextStyle(
-        color: Colors.blue,
-        fontSize: 12,
+  // 构建悬浮按钮（白色背景、黑色图标、圆形带阴影）
+  Widget _buildFloatingButton({
+    required Color color,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: color, // 白色背景
+        borderRadius: BorderRadius.circular(28), // 圆形
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 2), // 阴影向下偏移，增强立体感
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200), // 浅灰色边框（可选，增强区分度）
       ),
-      unselectedLabelStyle: const TextStyle(
-        color: Colors.grey,
-        fontSize: 12,
+      child: IconButton(
+        icon: Icon(icon, color: Colors.black, size: 28), // 黑色图标
+        onPressed: onPressed,
+        padding: EdgeInsets.zero, // 去除IconButton默认内边距
       ),
-      type: BottomNavigationBarType.fixed, // 固定所有导航项（避免溢出）
     );
   }
 }

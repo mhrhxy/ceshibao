@@ -6,40 +6,38 @@ import 'package:flutter_mall/home.dart';
 import 'package:flutter_mall/mine.dart';
 import 'package:flutter_mall/favorite.dart';
 
-/// 底部导航页-切换页面
-final pages = [
-  const Categories(), // 搜索
-  const Cart(),       // 比价
-  const Home(),       // 首页
-  const Favorite(),   // 收藏
-  const Mine(),       // 我的
+// 页面数组（供MainTab切换）
+final List<Widget> pages = const [
+  Categories(), // 0：搜索页
+  Cart(),       // 1：比价页
+  Home(),       // 2：首页（默认选中）
+  Favorite(),   // 3：收藏页
+  Mine(),       // 4：我的页
 ];
 
-/// 底部导航-图标和国际化文字定义
-List<BottomNavigationBarItem> items(BuildContext context) {
-  // 获取国际化实例
+// 底部导航项生成方法
+List<BottomNavigationBarItem> buildBottomNavItems(BuildContext context) {
   final loc = AppLocalizations.of(context);
-  
   return [
     BottomNavigationBarItem(
       icon: const Icon(Icons.search_sharp),
-      label: loc.translate('search') // 搜索
+      label: loc.translate('search'),
     ),
     BottomNavigationBarItem(
       icon: const Icon(Icons.turned_in_not),
-      label: loc.translate('price_comparison') // 比价
+      label: loc.translate('price_comparison'),
     ),
     BottomNavigationBarItem(
       icon: const Icon(Icons.home_outlined),
-      label: loc.translate('home') // 首页
+      label: loc.translate('home'),
     ),
     BottomNavigationBarItem(
       icon: const Icon(Icons.star_outline),
-      label: loc.translate('collect') // 收藏
+      label: loc.translate('collect'),
     ),
     BottomNavigationBarItem(
       icon: const Icon(Icons.person_outline),
-      label: loc.translate('mine') // 我的
+      label: loc.translate('mine'),
     ),
   ];
 }
