@@ -999,12 +999,12 @@ class _MyorderState extends State<Myorder> {
   }
   
   // 申请售后
-  void _applyAfterSales(String orderId) {
+  void _applyAfterSales(dynamic order) {
     // 跳转到售后申请页面
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AfterSalesApplication(orderId: orderId),
+        builder: (context) => AfterSalesApplication(order: order),
       ),
     );
   }
@@ -1328,7 +1328,7 @@ class _MyorderState extends State<Myorder> {
                                           TextButton(
                                             onPressed: () {
                                               // 申请售后的逻辑
-                                              _applyAfterSales(order.id);
+                                              _applyAfterSales(order);
                                             },
                                             style: TextButton.styleFrom(
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

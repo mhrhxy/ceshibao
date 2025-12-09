@@ -5,9 +5,9 @@ import 'package:flutter_mall/app_localizations.dart';
 import 'refund_application_page.dart';
 
 class AfterSalesApplication extends StatefulWidget {
-  final String orderId;
+  final dynamic order;
 
-  const AfterSalesApplication({super.key, required this.orderId});
+  const AfterSalesApplication({super.key, required this.order});
 
   @override
   State<AfterSalesApplication> createState() => _AfterSalesApplicationState();
@@ -171,15 +171,16 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                   onTap: () {
                     Navigator.pop(context);
                     // 跳转到退货退款页面
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RefundApplicationPage(
-                          orderId: widget.orderId,
-                          refundType: 'return',
-                        ),
-                      ),
-                    );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RefundApplicationPage(
+                                orderId: widget.order.id,
+                                refundType: 'return',
+                                order: widget.order,
+                              ),
+                            ),
+                          );
                   },
                 ),
               ),
@@ -220,15 +221,16 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                   onTap: () {
                     Navigator.pop(context);
                     // 跳转到仅退款页面
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RefundApplicationPage(
-                          orderId: widget.orderId,
-                          refundType: 'refund',
-                        ),
-                      ),
-                    );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RefundApplicationPage(
+                                orderId: widget.order.id,
+                                refundType: 'refund',
+                                order: widget.order,
+                              ),
+                            ),
+                          );
                   },
                 ),
               ),

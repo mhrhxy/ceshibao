@@ -76,7 +76,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
     try {
       // 调用发送验证码接口（忘记账号场景type，需与后端确认，这里复用type=3）
       Response result = await HttpUtil.post(
-        "$apisendemail?email=$email&type=3",
+        "$apisendemail?email=$email&type=4",
         data: {},
       );
 
@@ -142,7 +142,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
         verifyForgotCodeUrl,
         data: {
           "email": email,
-          "type": '3', // 需与后端确认忘记账号场景的type值
+          "type": '4', // 需与后端确认忘记账号场景的type值
           "code": code
         },
       );

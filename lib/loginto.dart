@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'register.dart';
+import 'main_tab.dart';
 class Loginto extends StatelessWidget {
   const Loginto({super.key});
 
@@ -178,7 +179,11 @@ class Loginto extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        //  돌리보기功能逻辑
+                        // 跳转到首页
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MainTab()),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 236, 82, 26),
