@@ -582,6 +582,7 @@ class _CartState extends State<Cart> {
         "memberId": _memberId!,
         "productId": item.productId,
         "num": newQuantity,
+        "selfSupport":_selfSupport,
         "secId": item.secId,
       };
 
