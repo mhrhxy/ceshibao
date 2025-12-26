@@ -1,5 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
+import 'package:dio/src/multipart_file.dart'; // 用于MediaType
+import 'package:flutter/foundation.dart'; // 用于判断平台类型
 import 'dingbudaohang.dart';
 import '../utils/http_util.dart';
 import '../config/service_url.dart';
@@ -55,8 +59,9 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
         }
       }
       
-      _maxRefundAmount = productAllPrice;
-      _refundAmount = _maxRefundAmount.toStringAsFixed(2);
+      // 初始设置为0，后面会在_fetchOrderProducts中更新为remainingAmount总和
+      _maxRefundAmount = 0.0;
+      _refundAmount = '0.00';
       _amountController.text = _refundAmount;
     }
     
@@ -76,12 +81,57 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
       
       if (response.statusCode == 200) {
         setState(() {
-          _orderProducts = response.data['data'];
-          // 设置最大可退款数量为第一个商品的购买数量
-          if (_orderProducts.isNotEmpty && _orderProducts[0]['quantity'] != null) {
-            _maxQuantity = _orderProducts[0]['quantity'];
-            _refundQuantity = 1;
+          // 解析数据，将orderProductInfo中的字段提取出来
+          _orderProducts = (response.data['data'] as List).map((item) {
+            // 创建一个新对象，确保remainingNum和remainingAmount在顶层
+            Map<String, dynamic> productData = {
+              'remainingNum': item['remainingNum'],
+              'remainingAmount': item['remainingAmount'],
+            };
+            
+            // 提取orderProductInfo并合并
+            var productInfo = item['orderProductInfo'] ?? {};
+            // 处理图片URL中的反引号
+            if (productInfo['imgUrl'] != null) {
+              productInfo['imgUrl'] = productInfo['imgUrl'].toString().replaceAll('`', '').trim();
+            }
+            // 合并orderProductInfo字段到顶层
+            productData.addAll(productInfo);
+            
+            return productData;
+          }).toList();
+          
+          // 为每个商品设置独立的退款数量和最大可退款数量
+          _refundQuantities = {};
+          _maxQuantities = {};
+          for (int i = 0; i < _orderProducts.length; i++) {
+            // 修复类型转换，确保正确获取remainingNum
+            int remainingNum = 0;
+            try {
+              remainingNum = int.parse(_orderProducts[i]['remainingNum'].toString());
+            } catch (e) {
+              print('解析remainingNum失败: $e');
+            }
+            _maxQuantities[i] = remainingNum;
+            _refundQuantities[i] = remainingNum > 0 ? remainingNum : 0; // 默认退全部
           }
+          
+          // 计算所有商品的remainingAmount总和作为最大可退款金额
+          _maxRefundAmount = 0.0;
+          for (var product in _orderProducts) {
+            // 修复类型转换，确保正确获取remainingAmount
+            double remainingAmount = 0.0;
+            try {
+              remainingAmount = double.parse(product['remainingAmount'].toString());
+            } catch (e) {
+              print('解析remainingAmount失败: $e');
+            }
+            _maxRefundAmount += remainingAmount;
+          }
+          
+          // 更新默认退款金额为最大可退款金额
+          _refundAmount = _maxRefundAmount.toStringAsFixed(2);
+          _amountController.text = _refundAmount;
         });
       }
     } catch (e) {
@@ -136,8 +186,13 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
   double _maxRefundAmount = 0.00; // 最大可退款金额
   
   // 数量选择相关变量
-  int _refundQuantity = 1; // 当前选择的退款数量
-  int _maxQuantity = 1; // 最大可退款数量（商品购买数量）
+  Map<int, int> _refundQuantities = {}; // 存储每个商品的退款数量，key为商品索引
+  Map<int, int> _maxQuantities = {}; // 存储每个商品的最大可退款数量，key为商品索引
+  
+  // 图片上传相关变量
+  final ImagePicker _picker = ImagePicker();
+  List<String> _uploadedImages = []; // 存储上传后的图片URL
+  bool get _isWeb => kIsWeb;
   
   // 构建规格信息显示
   Widget _buildSpecifications(dynamic product) {
@@ -206,16 +261,286 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
 
   // 申请说明相关变量
   final TextEditingController _descriptionController = TextEditingController();
-  List<String> _uploadedImages = [];
+  bool _isSubmitting = false; // 提交状态
+
+  // 提交退款申请
+  Future<void> _submitRefundApplication() async {
+    // 验证必填项
+    if (_orderProducts.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('没有可退款的商品'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (double.parse(_refundAmount) <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('退款金额必须大于0'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (_descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('请填写退款说明'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      // 获取订单信息
+      print('widget.order: ${widget.order}');
+      print('widget.order.runtimeType: ${widget.order.runtimeType}');
+      int orderId = widget.orderId != null ? int.tryParse(widget.orderId) ?? 0 : 0;
+      String orderOriginNo = '';
+      String outerPurchaseId = '';
+      String selfSupport = '1'; // 默认值
+      
+      if (widget.order != null) {
+        if (widget.order is Map) {
+          // 处理Map类型
+          orderOriginNo = widget.order['orderOriginNo']?.toString() ?? '';
+          outerPurchaseId = widget.order['outerPurchaseId']?.toString() ?? '';
+          selfSupport = widget.order['selfSupport']?.toString() ?? '1';
+        } else {
+          // 处理OrderData实例
+          try {
+            orderOriginNo = (widget.order as dynamic).orderOriginNo ?? '';
+            outerPurchaseId = (widget.order as dynamic).outerPurchaseId ?? '';
+          } catch (e) {
+            print('从OrderData获取属性失败: $e');
+          }
+        }
+      }
+      
+      // 计算总退款数量（只统计数量大于0的商品）
+      int totalRefundNum = _refundQuantities.values
+          .where((quantity) => quantity > 0)
+          .fold(0, (sum, quantity) => sum + quantity);
+      
+      // 整合退款申请数据
+      Map<String, dynamic> refundInfo = {
+        "orderId": orderId,
+        "refundPrice": double.parse(_refundAmount),
+        "refundImages": _uploadedImages.join(','), // 图片逗号分隔
+        "refundDesc": _descriptionController.text.trim(),
+        "refundType": _currentRefundType,
+        "orderOriginNo": orderOriginNo, // 原始订单编号
+        "outerPurchaseId": outerPurchaseId, // isv采购id
+        "selfSupport": selfSupport, // 是否自营（1否 2是）
+        "refundNum": totalRefundNum // 总退款数量
+      };
+
+      // 整合商品信息列表
+      List<Map<String, dynamic>> refundProductInfoList = [];
+      for (var product in _orderProducts) {
+        int index = _orderProducts.indexOf(product);
+        int refundNum = _refundQuantities[index] ?? 1;
+        
+        // 只添加退款数量大于0的商品
+        if (refundNum > 0) {
+          Map<String, dynamic> productInfo = {
+            "skuId": product['skuId'] ?? 0,
+            "orderProductId": product['orderProductId'] ?? 0,
+            "orderId": orderId,
+            "refundType": _currentRefundType,
+            "refundStatus": "1", // 申请退款
+            "selfSupport": product['selfSupport']?.toString() ?? selfSupport,
+            // 将总价estimateAmount除以原始数量得到单价，再乘以退款数量得到正确的退款价格
+            "refundPrice": () {
+              int originalQuantity = int.tryParse(product['quantity']?.toString() ?? '1') ?? 1;
+              double totalPrice = (product['estimateAmount'] != null ? double.parse(product['estimateAmount'].toString()) : 0.0);
+              double unitPrice = originalQuantity > 0 ? totalPrice / originalQuantity : 0.0;
+              return unitPrice * refundNum;
+            }(),
+            "purchaseOrderLineId": product['purchaseOrderId']?.toString() ?? '', // 采购子订单id
+            "productId": product['itemId']?.toString() ?? '', // 商品ID 对应淘宝商品ID
+            "sku": product['sku'] ?? "",
+            "refundNum": refundNum,
+            "refundImages": product['imgUrl'], 
+            "productNameCn": product['titleCn']?.toString() ?? '', // 商品名称中文
+            "productNameKr": product['title']?.toString() ?? '', // 商品名称韩文
+            "productNameEn": product['titleEn']?.toString() ?? '' // 商品名称英文
+          };
+          refundProductInfoList.add(productInfo);
+        }
+      }
+
+      // 构建完整请求体
+      Map<String, dynamic> requestBody = {
+        "refundInfo": refundInfo,
+        "refundProductInfoList": refundProductInfoList
+      };
+
+      // 调用API
+      var response = await HttpUtil.post(applyRefundUrl, data: requestBody);
+
+      // 处理响应
+      if (response.statusCode == 200) {
+        // 解析响应数据
+        Map<String, dynamic> responseData = response.data;
+        int code = responseData['code'] ?? 0;
+        String message = responseData['msg'] ?? '未知错误';
+        
+        if (code == 200) {
+          // 提交成功，显示提示并返回上一页
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('退款申请提交成功'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // 返回上一页
+          Navigator.pop(context);
+        } else {
+          // 业务处理失败
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('退款申请提交失败'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        // HTTP请求失败
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('退款申请提交失败，请重试'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('提交退款申请失败，请重试'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
+  }
 
   // 重置所有已修改内容
   void _resetAllContent() {
     _isEditingAmount = false;
-    _refundAmount = '19.06';
-    _refundQuantity = 1;
+    // 根据当前退款类型重置默认金额
+    String defaultAmount;
+    if (_currentRefundType == '2' || _currentRefundType == '4') {
+      // 部分退款类型，默认设置为最小退款金额1元
+      defaultAmount = '1.00';
+    } else {
+      // 全额退款类型，默认设置为最大可退金额
+      defaultAmount = _maxRefundAmount.toStringAsFixed(2);
+    }
+    _refundAmount = defaultAmount;
+    // 重置所有商品的退款数量，考虑remainingNum限制
+    for (int i = 0; i < _orderProducts.length; i++) {
+      int maxQuantity = _maxQuantities[i] ?? 0;
+      _refundQuantities[i] = maxQuantity > 0 ? 1 : 0;
+    }
     _amountController.clear();
     _descriptionController.clear();
     _uploadedImages.clear();
+  }
+
+  // 图片选择和上传方法
+  Future<void> _pickImage() async {
+    try {
+      // 选择图片
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80, // 压缩图片质量
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          // 这里可以先显示一个加载指示器
+        });
+
+        FormData formData;
+        if (_isWeb) {
+          // Web平台处理
+          final bytes = await pickedFile.readAsBytes();
+          final fileName = pickedFile.name;
+          final mimeType = pickedFile.mimeType ?? 'image/jpeg';
+          
+          formData = FormData.fromMap({
+            'file': MultipartFile.fromBytes(
+              bytes,
+              filename: fileName,
+              contentType: DioMediaType.parse(mimeType),
+            ),
+          });
+        } else {
+          // 移动和桌面平台处理
+          formData = FormData.fromMap({
+            'file': await MultipartFile.fromFile(pickedFile.path),
+          });
+        }
+        
+        var response = await HttpUtil.post(
+          uploadFileUrl,
+          data: formData,
+          options: Options(contentType: 'multipart/form-data'),
+        );
+
+        // 处理上传响应
+        if (response.statusCode == 200) {
+          Map<String, dynamic> responseData = response.data;
+          int code = responseData['code'] ?? 0;
+          
+          if (code == 200) {
+            // 获取图片URL
+            String imageUrl = responseData['url'] ?? '';
+            if (imageUrl.isNotEmpty) {
+              setState(() {
+                _uploadedImages.add(imageUrl);
+              });
+            }
+          } else {
+            // 上传失败
+            String message = responseData['msg'] ?? '图片上传失败';
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+        } else {
+          // HTTP请求失败
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('图片上传失败，请重试'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('图片选择或上传失败：$e'),
+        ),
+      );
+    }
   }
 
   // 显示退款类型选择弹框
@@ -402,11 +727,13 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                                         GestureDetector(
                                                           onTap: () {
                                                             setState(() {
-                                                              if (_refundQuantity > 1) {
-                                                                _refundQuantity--;
-                                                                // 这里可以根据数量计算退款金额
-                                                                // _updateRefundAmount();
-                                                              }
+                                                              int currentQuantity = _refundQuantities[index] ?? 1;
+                                                            int maxQuantity = _maxQuantities[index] ?? 1;
+                                                            if (currentQuantity > 0) {
+                                                              _refundQuantities[index] = currentQuantity - 1;
+                                                              // 这里可以根据数量计算退款金额
+                                                              // _updateRefundAmount();
+                                                            }
                                                             });
                                                           },
                                                           child: Container(
@@ -416,7 +743,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                                             child: Icon(
                                                               Icons.remove,
                                                               size: 16,
-                                                              color: _refundQuantity <= 1 ? Color(0xFFCCCCCC) : Color(0xFF333333),
+                                                              color: (_refundQuantities[index] ?? 1) <= 0 ? Color(0xFFCCCCCC) : Color(0xFF333333),
                                                             ),
                                                           ),
                                                         ),
@@ -426,7 +753,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                                           height: 30,
                                                           alignment: Alignment.center,
                                                           child: Text(
-                                                            '$_refundQuantity',
+                                                            '${_refundQuantities[index] ?? 1}',
                                                             style: TextStyle(
                                                               fontSize: 14,
                                                               color: Color(0xFF333333),
@@ -437,11 +764,13 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                                         GestureDetector(
                                                           onTap: () {
                                                             setState(() {
-                                                              if (_refundQuantity < _maxQuantity) {
-                                                                _refundQuantity++;
-                                                                // 这里可以根据数量计算退款金额
-                                                                // _updateRefundAmount();
-                                                              }
+                                                              int currentQuantity = _refundQuantities[index] ?? 1;
+                                                            int maxQuantity = _maxQuantities[index] ?? 1;
+                                                            if (currentQuantity < maxQuantity) {
+                                                              _refundQuantities[index] = currentQuantity + 1;
+                                                              // 这里可以根据数量计算退款金额
+                                                              // _updateRefundAmount();
+                                                            }
                                                             });
                                                           },
                                                           child: Container(
@@ -451,7 +780,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                                             child: Icon(
                                                               Icons.add,
                                                               size: 16,
-                                                              color: _refundQuantity >= _maxQuantity ? Color(0xFFCCCCCC) : Color(0xFF333333),
+                                                              color: (_refundQuantities[index] ?? 1) >= (_maxQuantities[index] ?? 1) ? Color(0xFFCCCCCC) : Color(0xFF333333),
                                                             ),
                                                           ),
                                                         ),
@@ -661,27 +990,69 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                             spacing: 12,
                             runSpacing: 12,
                             children: [
-                              // 添加图片按钮
-                              Container(
+                              // 已上传的图片
+                              ..._uploadedImages.map((imageUrl) => Container(
                                 width: 80,
                                 height: 80,
+                                // 移除right margin，使用Wrap的spacing控制间距
+                                clipBehavior: Clip.none, // 允许内容超出容器边界
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Color(0xFFEEEEEE)),
                                   borderRadius: BorderRadius.circular(4),
+                                  image: DecorationImage(
+                                    image: NetworkImage(imageUrl),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                child: Stack(
                                   children: [
-                                    const Icon(Icons.camera_alt, size: 24, color: Color(0xFFCCCCCC)),
-                                    const SizedBox(height: 8),
-                                    const Text(
-                                      '上传图片',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF999999),
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _uploadedImages.remove(imageUrl);
+                                          });
+                                        },
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: Colors.white, width: 2),
+                                          ),
+                                          child: Icon(Icons.close, size: 16, color: Colors.white),
+                                        ),
                                       ),
                                     ),
                                   ],
+                                ),
+                              )).toList(),
+                              // 添加图片按钮
+                              GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Color(0xFFEEEEEE)),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.camera_alt, size: 24, color: Color(0xFFCCCCCC)),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        '上传图片',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF999999),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
@@ -702,21 +1073,23 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                 width: double.infinity,
                 height: 44,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _isSubmitting ? null : _submitRefundApplication,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFFF4444),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  child: const Text(
-                    '提交申请',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: _isSubmitting
+                      ? CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                      : const Text(
+                          '提交申请',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ),

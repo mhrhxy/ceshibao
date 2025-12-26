@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'dingbudaohang.dart';
 import './config/service_url.dart';
@@ -353,6 +357,96 @@ class _AccountInfoChangePageState extends State<AccountInfoChangePage> {
     }
   }
 
+  // 选择并上传头像
+  Future<void> _pickAndUploadAvatar() async {
+    if (_memberInfo == null) return;
+
+    try {
+      final ImagePicker picker = ImagePicker();
+      // 选择图片
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70, // 图片质量
+        maxWidth: 500, // 最大宽度
+        maxHeight: 500, // 最大高度
+      );
+
+      if (image == null) return; // 用户取消选择
+
+      // 上传图片到服务器
+      final String avatarUrl = await _uploadAvatarImage(image);
+
+      // 更新本地用户信息
+      final updatedInfo = _memberInfo!.copyWith(avatar: avatarUrl);
+      await _saveMemberInfo(updatedInfo);
+
+      // 提示上传成功
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)?.translate('avatar_upload_success') ?? '头像上传成功')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${AppLocalizations.of(context)?.translate('avatar_upload_failed') ?? '头像上传失败'}：${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // 上传头像图片到服务器
+  Future<String> _uploadAvatarImage(XFile image) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // 构建FormData
+      FormData formData;
+      if (kIsWeb) {
+        // Web端使用MultipartFile.fromBytes
+        final bytes = await image.readAsBytes();
+        formData = FormData.fromMap({
+          'file': MultipartFile.fromBytes(
+            bytes,
+            filename: image.name,
+            contentType: DioMediaType('image', 'jpeg'),
+          ),
+        });
+      } else {
+        // 移动端使用MultipartFile.fromFile
+        formData = FormData.fromMap({
+          'file': MultipartFile.fromFileSync(
+            image.path,
+            filename: image.name,
+            contentType: DioMediaType('image', 'jpeg'),
+          ),
+        });
+      }
+
+      // 调用上传接口
+      final response = await HttpUtil.post(
+        uploadFileUrl,
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+        ),
+      );
+
+      if (response.data['code'] != 200) {
+        throw Exception(response.data['msg'] ?? AppLocalizations.of(context)?.translate('upload_failed') ?? '上传失败');
+      }
+
+      // 返回上传成功后的图片URL
+      final String imageUrl = response.data['url'] ?? '';
+      if (imageUrl.isEmpty) {
+        throw Exception(AppLocalizations.of(context)?.translate('upload_failed') ?? '上传失败');
+      }
+
+      return imageUrl;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -419,7 +513,7 @@ class _AccountInfoChangePageState extends State<AccountInfoChangePage> {
                             ],
                           ),
                           isEditable: true,
-                          onTap: () {},
+                          onTap: _pickAndUploadAvatar,
                         ),
                         const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
                         _buildInfoItem(

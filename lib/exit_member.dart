@@ -249,7 +249,7 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                 onPressed: () {
                   Navigator.pop(context); // 关闭提示框
                 },
-                child: const Center(child: Text('确定')), // 显式设置文字居中
+                child: Center(child: Text(AppLocalizations.of(context)?.translate('confirm') ?? '确定')), // 显式设置文字居中
               ),
             ],
           ),

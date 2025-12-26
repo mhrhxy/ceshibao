@@ -15,6 +15,7 @@ class Comment {
   final String? shopLogo; // 店铺图标
   final String productName; // 中文商品名称
   final String productNameKr; // 韩文商品名称
+  final int points; // 积分
 
   Comment({
     required this.shopName,
@@ -26,6 +27,7 @@ class Comment {
     this.shopLogo,
     required this.productName,
     required this.productNameKr,
+    required this.points,
   });
 
   // 解析规格JSON字符串，提取所有value_name并拼接
@@ -61,6 +63,7 @@ class Comment {
       shopLogo: json['shopLogo']?.toString(),
       productName: json['productName']?.toString() ?? '未知商品', // 解析中文商品名
       productNameKr: json['productNameKr']?.toString() ?? '未知상품', // 解析韩文商品名
+      points: int.tryParse(json['points']?.toString() ?? '0') ?? 0, // 解析积分
     );
   }
 }
@@ -288,15 +291,17 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
                   ),
                   const SizedBox(height: 8),
 
-                  // 2. 星星+评分 + 商品名称（原“已购”位置）+ 规格
-                  Row(
+                  // 2. 商品名称+规格（上面）+ 星星评分（下面）
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildStarWithRating(comment.star),
-                      const SizedBox(width: 12),
                       Text(
                         "${comment.productName} ${comment.parsedSpecs}", // 显示商品名称+规格
                         style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        softWrap: true, // 允许自动换行
                       ),
+                      const SizedBox(height: 4),
+                      _buildStarWithRating(comment.star),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -331,9 +336,9 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
               Positioned(
                 bottom: 0,
                 right: 0,
-                child: const Text(
-                  "1000P",
-                  style: TextStyle(
+                child: Text(
+                  "${comment.points}P",
+                  style: const TextStyle(
                     color: Colors.green,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,

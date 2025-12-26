@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mall/app_localizations.dart'; // 导入国际化工具类
@@ -6,6 +7,11 @@ import 'myreview.dart';
 import 'address.dart';
 import 'Myorder.dart';
 import 'announcement.dart';
+import 'utils/shared_preferences_util.dart';
+import 'utils/http_util.dart'; // 导入HTTP工具类
+import 'config/service_url.dart'; // 导入接口地址配置
+import 'coupon.dart'; // 导入优惠券页面
+
 class Mine extends StatefulWidget {
   const Mine({super.key});
 
@@ -14,8 +20,74 @@ class Mine extends StatefulWidget {
 }
 
 class _MineState extends State<Mine> {
-  // 模拟用户名（实际应从用户信息中动态获取）
-  final String userName = "OOO";
+  // 用户名（从本地存储获取）
+  String userName = "";
+  // 用户积分
+  int userPoints = 0;
+  // 用户优惠券数量
+  int userCoupons = 0;
+  // 加载状态
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+    _fetchUserPoints(); // 初始化时获取数据
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchUserPoints(); // 每次依赖变化时刷新数据
+  }
+
+
+  // 从本地存储加载用户信息
+  void _loadUserInfo() {
+    String? userInfoJson = SharedPreferencesUtil.getString('member_info');
+    if (userInfoJson != null) {
+      try {
+        Map<String, dynamic> userInfo = json.decode(userInfoJson);
+        setState(() {
+          userName = userInfo['nickName'] ?? userInfo['memberName'] ?? "";
+        });
+      } catch (e) {
+        print('解析用户信息失败: $e');
+      }
+    }
+  }
+
+  // 从接口获取用户积分和优惠券数量
+  Future<void> _fetchUserPoints() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      var response = await HttpUtil.get(getUserPointsUrl);
+      if (response.data != null) {
+        Map<String, dynamic> responseData = response.data is String 
+            ? json.decode(response.data) 
+            : response.data;
+        
+        if (responseData['code'] == 200 && responseData['data'] != null) {
+          setState(() {
+            // 更新积分，若为null则设为0
+            userPoints = int.tryParse(responseData['data']['points']?.toString() ?? '0') ?? 0;
+            // 更新优惠券数量，若为null则设为0
+            userCoupons = int.tryParse(responseData['data']['coupons']?.toString() ?? '0') ?? 0;
+          });
+        }
+      }
+    } catch (e) {
+      print('获取用户积分和优惠券失败: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   // 功能选项数据（支持国际化文本动态获取）
   List<Map<String, dynamic>> get functionItems => [
@@ -119,25 +191,44 @@ class _MineState extends State<Mine> {
                 ),
                 child: Row(
                   children: [
+                    // 优惠券部分
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(translate('held_coupons'), style: const TextStyle(fontSize: 18, color: Colors.white)),
-                          const SizedBox(height: 8),
-                          const Text("5", style: TextStyle(fontSize: 14, color: Colors.white)),
-                        ],
+                      child: GestureDetector(
+                        onTap: () {
+                          // 跳转到优惠券页面
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CouponPage(),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(translate('held_coupons'), style: const TextStyle(fontSize: 18, color: Colors.white)),
+                            const SizedBox(height: 8),
+                            Text("$userCoupons", style: const TextStyle(fontSize: 14, color: Colors.white)),
+                          ],
+                        ),
                       ),
                     ),
                     Container(width: 1, height: 40, color: const Color(0xFFE0B800)),
+                    // 积分部分
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(translate('held_points'), style: const TextStyle(fontSize: 18, color: Colors.white)),
-                          const SizedBox(height: 8),
-                          Text("10000${translate('points_unit')}", style: const TextStyle(fontSize: 14, color: Colors.white)),
-                        ],
+                      child: GestureDetector(
+                        onTap: () {
+                          // 积分部分点击不进行任何跳转操作
+                          // 保持点击事件处理为空，仅作为显示
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(translate('held_points'), style: const TextStyle(fontSize: 18, color: Colors.white)),
+                            const SizedBox(height: 8),
+                            Text("$userPoints${translate('points_unit')}", style: const TextStyle(fontSize: 14, color: Colors.white)),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -266,11 +357,18 @@ class _MineState extends State<Mine> {
                   builder: (context) =>  AddressBookPage(), // 跳转到新增收货地址页面
                 ),
               );
-            }else if (key == "notice") {
+            } else if (key == "notice") {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => NoticePage(), // 跳转到公告页面
+                ),
+              );
+            } else if (key == "coupon") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CouponPage(), // 跳转到优惠券页面
                 ),
               );
             }

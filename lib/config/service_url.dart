@@ -126,7 +126,7 @@ const searchOrderListUrl = "$baseUrl/order/searchOrderList?";
 // 根据订单查询订单信息
 const searchOrderProductListUrl = "$baseUrl/order/searchOrderProductList?";
 // 取消订单
-const cancelOrderUrl = "$baseUrl/order/cancelOrder?orderIds=";
+const cancelOrderUrl = "$baseUrl/order/cancelOrder";
 // 创建订单
 const createOrder= "$baseUrl/order/create";
 // 查询汇率
@@ -157,3 +157,21 @@ const selfProductListUrl = "$baseUrl/product/autom/list";
 const selfProductDetailUrl = "$baseUrl/product/autom/";
 // 退出会员
 const exitMemberUrl = "$baseUrl/member/info";
+// 申请退款
+const applyRefundUrl = "$baseUrl/order/refund/request/refund";
+// 取消申请退款
+const cancelRefundUrl = "$baseUrl/order/refund/request/cancel/refund/{refundId}";
+// 单文件上传
+const uploadFileUrl = "$baseUrl/common/upload";
+// 积分抵扣规则
+const pointsDeductionRulesUrl = "$baseUrl/product/pointSet/getPointRule";
+// 获取用户积分
+const getUserPointsUrl = "$baseUrl/member/info/selectPointsByUserId";
+// 优惠卷列表
+const couponListUrl = "$baseUrl/product/coupon/list/product";
+// 我的优惠卷列表
+const myCouponListUrl = "$baseUrl/product/coupon/list/oldCoupon/{type}";
+// 最大订单购买限制
+const maxOrderPurchaseLimitUrl = "$baseUrl/order/orderAllInfo/orderMaxPrice";
+// 退款根据父订单查询子订单
+const refundSearchChildOrderUrl = "$baseUrl/order/getOrderInfo/{orderAllId}";

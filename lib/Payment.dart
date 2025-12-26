@@ -9,8 +9,9 @@ import 'dart:developer' as developer;
 import 'Myorder.dart';
 import './utils/http_util.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:math' as math;
 
-
+// 创建订单页面
 
 class PaymentPage extends StatefulWidget {
   final List<Map<String, dynamic>>? selectedProducts;
@@ -27,8 +28,17 @@ class _PaymentPageState extends State<PaymentPage> {
   String _zipcode = ''; // 邮编
   String _address = ''; // 地址
   String _detailAddress = ''; // 详细地址
-  
-  // 表单字段
+  double _exchangeRate = 0; // 默认汇率，1韩元兑换200分之一人民币（约0.005）
+    
+    // 表单字段控制器
+    final TextEditingController _nameController = TextEditingController();
+    final TextEditingController _phoneController = TextEditingController();
+    final TextEditingController _customsCodeController = TextEditingController();
+    final TextEditingController _zipcodeController = TextEditingController();
+    final TextEditingController _detailAddressController = TextEditingController();
+    final TextEditingController _deliveryNotesController = TextEditingController();
+    
+    // 表单字段
   String _name = ''; // 姓名
   String _phone = ''; // 手机号
   String _customsCode = ''; // 个人通关号码
@@ -42,10 +52,168 @@ class _PaymentPageState extends State<PaymentPage> {
   bool _isLoadingAddress = false; // 地址加载状态
   String? _addressErrorMsg; // 地址加载错误信息
   
+  // 用户积分
+  int userPoints = 0; // 默认积分为0
+  int userCoupons = 0; // 默认优惠券数为0
+  bool _isLoadingPoints = false; // 积分加载状态
+  
+  // 积分抵扣规则
+  Map<String, dynamic>? _pointsRule;
+  bool _isLoadingPointsRule = false; // 积分规则加载状态
+  
+  // 积分抵扣相关
+  int _pointsToUse = 0; // 使用的积分数量
+  double _pointsDeductionAmount = 0.0; // 积分抵扣金额
+  
+  // 积分输入控制器
+  final TextEditingController _pointsController = TextEditingController();
+  
+  // 优惠券相关状态
+  bool _showCouponModal = false; // 控制优惠券弹窗的显示
+  List<Map<String, dynamic>> _couponList = []; // 优惠券列表
+  bool _isLoadingCoupons = false; // 优惠券加载状态
+  Map<String, dynamic>? _selectedCoupon; // 选中的优惠券
+  
+  @override
+  void dispose() {
+    // 释放控制器资源
+    _nameController.dispose();
+    _phoneController.dispose();
+    _customsCodeController.dispose();
+    _zipcodeController.dispose();
+    _detailAddressController.dispose();
+    _deliveryNotesController.dispose();
+    // _pointsController.dispose();
+    super.dispose();
+  }
+  
   @override
   void initState() {
     super.initState();
     // 打印接收到的商品数据
+    _fetchUserPoints(); // 获取用户积分
+    _fetchPointsRule(); // 获取积分抵扣规则
+    // 初始化时获取优惠券列表
+    _fetchCouponList();
+  }
+
+    // 加载汇率
+  // void _loadExchangeRate() async {
+  //   try {
+  //     final response = await HttpUtil.get(
+  //       searchRateUrl,
+  //       queryParameters: {
+  //         'currency': 1,  // 根据search.dart中的修改，这里应该是2表示韩元
+  //         'type': 1,
+  //         'benchmarkCurrency': 2  // 1表示人民币
+  //       },
+  //     );
+      
+  //     if (response.data['code'] == 200) {
+  //       final rateData = response.data['data'];
+  //       if (rateData != null) {
+  //         setState(() {
+  //           _exchangeRate = rateData.toDouble();
+  //         });
+  //         print('汇率更新成功: $_exchangeRate');
+  //       }
+  //     }
+  //   } catch (e) {
+  //     debugPrint("汇率查询失败：$e");
+  //   }
+  // }
+  
+  // 从API获取用户积分
+  Future<void> _fetchUserPoints() async {
+    setState(() {
+      _isLoadingPoints = true;
+    });
+    
+    try {
+      // 调用专门的积分接口获取积分
+      var response = await HttpUtil.get(getUserPointsUrl);
+      if (response.data != null) {
+        Map<String, dynamic> responseData = response.data is String 
+            ? json.decode(response.data) 
+            : response.data;
+        
+        if (responseData['code'] == 200 && responseData['data'] != null) {
+          setState(() {
+            // 更新积分，若为null则设为0
+            userPoints = int.tryParse(responseData['data']['points']?.toString() ?? '0') ?? 0;
+            // 优惠券数量不再从该接口获取，改为从优惠券列表接口的total字段获取
+          });
+        }
+      }
+    } catch (e) {
+      developer.log('获取用户积分和优惠券失败: $e');
+    } finally {
+      setState(() {
+        _isLoadingPoints = false;
+      });
+    }
+  }
+  
+  // 从API获取积分抵扣规则
+  Future<void> _fetchPointsRule() async {
+    setState(() {
+      _isLoadingPointsRule = true;
+    });
+    
+    try {
+      // 调用积分抵扣规则接口
+      var response = await HttpUtil.get(pointsDeductionRulesUrl);
+      if (response.data != null) {
+        Map<String, dynamic> responseData = response.data is String 
+            ? json.decode(response.data) 
+            : response.data;
+        
+        if (responseData['code'] == 200 && responseData['data'] != null) {
+          setState(() {
+            _pointsRule = responseData['data'];
+          });
+        }
+      }
+    } catch (e) {
+      developer.log('获取积分抵扣规则失败: $e');
+    } finally {
+      setState(() {
+        _isLoadingPointsRule = false;
+      });
+    }
+  }
+  
+  // 从API获取优惠券列表
+  Future<void> _fetchCouponList() async {
+    setState(() {
+      _isLoadingCoupons = true;
+    });
+    
+    try {
+      // 调用优惠券列表接口
+      var response = await HttpUtil.get(couponListUrl);
+      if (response.data != null) {
+        Map<String, dynamic> responseData = response.data is String 
+            ? json.decode(response.data) 
+            : response.data;
+        
+        if (responseData['code'] == 200) {
+          setState(() {
+            if (responseData['data'] != null) {
+              _couponList = List<Map<String, dynamic>>.from(responseData['data']);
+            }
+            // 使用新API响应中的total字段更新优惠券数量
+            userCoupons = responseData['total'] ?? 0;
+          });
+        }
+      }
+    } catch (e) {
+      developer.log('获取优惠券列表失败: $e');
+    } finally {
+      setState(() {
+        _isLoadingCoupons = false;
+      });
+    }
   }
   
   // 从API获取地址列表
@@ -100,6 +268,64 @@ class _PaymentPageState extends State<PaymentPage> {
   // 从widget获取选中的商品数据
   List<Map<String, dynamic>> get selectedProducts => widget.selectedProducts ?? [];
   
+  // 缓存处理后的商品数据
+  List<Map<String, dynamic>>? _cachedProducts;
+  
+  // 缓存商品统计信息
+  Map<String, dynamic>? _cachedProductStats;
+  
+  // 获取处理后的商品数据（带缓存）
+  List<Map<String, dynamic>> _getProductsData() {
+    // 如果缓存为空，重新计算
+    if (_cachedProducts == null) {
+      _cachedProducts = _prepareProductsData();
+    }
+    return _cachedProducts!;
+  }
+  
+  // 获取商品统计信息（带缓存）
+  Map<String, dynamic> _getProductStats() {
+    // 如果缓存为空，重新计算
+    if (_cachedProductStats == null) {
+      final List<Map<String, dynamic>> products = _getProductsData();
+      
+      // 计算商品种类数量（去重后的商品数量）
+      Set<String> uniqueProducts = Set();
+      int totalQuantity = 0;
+      double totalPrice = 0.0;
+      double totalTaobaoFee = 0.0;
+      
+      for (var product in products) {
+        // 使用商品名称和描述作为唯一标识
+        String productKey = '${product['name']}-${product['description']}';
+        uniqueProducts.add(productKey);
+        
+        // 计算总数量和总价
+        int quantity = product['quantity'] ?? 1;
+        double price = (product['price'] ?? 0).toDouble();
+        
+        totalQuantity += quantity;
+        // 先对单价四舍五入，再乘以数量，避免浮点数累加误差（与sumAmount计算逻辑一致）
+        totalPrice += (price).roundToDouble() * quantity;
+        
+        // 累加每个商品的淘宝运费
+        double productTaobaoFee = (product['taobaofee'] ?? 0.0).toDouble();
+        totalTaobaoFee += productTaobaoFee;
+      }
+      
+      // 将运费加到总价上，并对结果进行四舍五入（与sumAmount计算逻辑一致）
+      totalPrice += totalTaobaoFee;
+      totalPrice = totalPrice.roundToDouble();
+      
+      _cachedProductStats = {
+        'categoryCount': uniqueProducts.length,
+        'totalQuantity': totalQuantity,
+        'totalPrice': totalPrice
+      };
+    }
+    return _cachedProductStats!;
+  }
+  
   // 计算商品统计信息
   Map<String, dynamic> _calculateProductStats() {
     final List<Map<String, dynamic>> products = _prepareProductsData();
@@ -120,38 +346,39 @@ class _PaymentPageState extends State<PaymentPage> {
       double price = (product['price'] ?? 0).toDouble();
       
       totalQuantity += quantity;
-      totalPrice += price * quantity;
+      // 先对单价四舍五入，再乘以数量，避免浮点数累加误差（与sumAmount计算逻辑一致）
+      totalPrice += (price).roundToDouble() * quantity;
       
       // 累加每个商品的淘宝运费
       double productTaobaoFee = (product['taobaofee'] ?? 0.0).toDouble();
       totalTaobaoFee += productTaobaoFee;
     }
     
-    // 将运费加到总价上
+    // 将运费加到总价上，并对结果进行四舍五入（与sumAmount计算逻辑一致）
     totalPrice += totalTaobaoFee;
+    totalPrice = totalPrice.roundToDouble();
     
-    print('计算的商品总价: $totalPrice, 总运费: $totalTaobaoFee');
+    // 移除不必要的打印语句
+    // print('计算的商品总价: $totalPrice, 总运费: $totalTaobaoFee');
     
-    return {
-      'categoryCount': uniqueProducts.length,
-      'totalQuantity': totalQuantity,
-      'totalPrice': totalPrice
-    };
+    // 直接返回缓存的统计信息
+    return _getProductStats();
   }
   
   // 准备商品数据，将购物车数据转换为Payment页面需要的格式
   List<Map<String, dynamic>> _prepareProductsData() {
-    print('准备处理的商品数据: $selectedProducts');
-    print('原始商品数据是否为空: ${selectedProducts.isEmpty}');
+    // 移除不必要的打印语句，只在调试时使用
+    // print('准备处理的商品数据: $selectedProducts');
+    // print('原始商品数据是否为空: ${selectedProducts.isEmpty}');
 
     
     List<Map<String, dynamic>> result = [];
-    print('开始处理店铺数据，共有${selectedProducts.length}个店铺');
+    // print('开始处理店铺数据，共有${selectedProducts.length}个店铺');
     
     
     // 处理购物车数据结构
     for (var shopData in selectedProducts) {
-      String shopName = shopData['shopName'] ?? '未知店铺';
+      String shopName = shopData['shopName'];
       List<dynamic> cartList = shopData['cartList'] ?? [];
       
       for (var item in cartList) {
@@ -177,7 +404,7 @@ class _PaymentPageState extends State<PaymentPage> {
           'description': item['secName'] ?? '商品描述',
           'color': color,
           'quantity': item['num'] ?? 1,
-          'price': item['productPrice'] ?? 0,
+          'price': item['productPlusPrice'] ?? item['productPrice'] ?? 0,
           'taobaofee': item['taobaofee'] ?? 0.0, // 添加淘宝运费字段
           // 保留原始字段信息
           'cartId': item['cartId'],
@@ -267,7 +494,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${product['price']?.toString() ?? '0'}元',
+                      '₩${(double.tryParse(product['price']?.toString() ?? '0') ?? 0).round().toString()}',
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color.fromARGB(255, 3, 209, 54)),
                     ),
                     Text(
@@ -289,7 +516,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
   Widget _buildOrderItems(BuildContext context) {
     // 根据选中的商品数据构建订单商品列表
-    final List<Map<String, dynamic>> products = _prepareProductsData();
+    final List<Map<String, dynamic>> products = _getProductsData();
 
     // 按店铺分组显示商品
     final Map<String, List<Map<String, dynamic>>> productsByShop = _groupProductsByShop(products);
@@ -421,25 +648,32 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Widget _buildFormItem(BuildContext context, String fieldName, String label) {
-    String? value;
     bool readOnly = false;
+    TextEditingController? controller;
     
-    // 根据字段名设置初始值和只读状态
-    if (fieldName == 'postal_code') {
-      value = _zipcode;
-    } else if (fieldName == 'address') {
-      value = _address;
-      readOnly = true; // 地址字段只读，通过搜索邮编填充
-    } else if (fieldName == 'detail_address') {
-      value = _detailAddress;
-    } else if (fieldName == 'name') {
-      value = _name;
-    } else if (fieldName == 'phone') {
-      value = _phone;
-    } else if (fieldName == 'customs_code') {
-      value = _customsCode;
-    } else if (fieldName == 'delivery_notes') {
-      value = _deliveryNotes;
+    // 根据字段名设置控制器和只读状态
+    switch (fieldName) {
+      case 'postal_code':
+        controller = _zipcodeController;
+        break;
+      case 'address':
+        readOnly = true; // 地址字段只读，通过搜索邮编填充
+        break;
+      case 'detail_address':
+        controller = _detailAddressController;
+        break;
+      case 'name':
+        controller = _nameController;
+        break;
+      case 'phone':
+        controller = _phoneController;
+        break;
+      case 'customs_code':
+        controller = _customsCodeController;
+        break;
+      case 'delivery_notes':
+        controller = _deliveryNotesController;
+        break;
     }
     
     return Row(
@@ -468,6 +702,10 @@ class _PaymentPageState extends State<PaymentPage> {
               // 处理字段的输入变化
               if (fieldName != 'address') { // 地址字段只读，不需要处理变化
                 setState(() {
+                  // 清除缓存，表单变化不影响商品数据
+                  // _cachedProducts = null;
+                  // _cachedProductStats = null;
+                  
                   switch (fieldName) {
                     case 'postal_code':
                       _zipcode = text;
@@ -491,8 +729,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 });
               }
             },
-            // 使用初始值而不是controller，避免状态不同步
-            controller: TextEditingController(text: value),
+            controller: controller,
           ),
         ),
       ],
@@ -931,11 +1168,70 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
           
           // 地址弹窗
           _showAddressModal ? _buildAddressModal(context) : Container(),
+          // 优惠券弹窗
+          _showCouponModal ? _buildCouponModal(context) : Container(),
         ],
       ),
     );
   }
 
+  // 计算积分抵扣金额
+  void _calculatePointsDeduction() {
+    if (_pointsRule == null) {
+      setState(() {
+        _pointsDeductionAmount = 0.0;
+        _pointsToUse = 0;
+      });
+      return;
+    }
+    
+    // 获取积分抵扣系数（1积分等于多少韩元）
+    double pointMoney = double.tryParse(_pointsRule!['pointMoney']?.toString() ?? '1') ?? 1.0;
+    
+    // 计算积分能抵扣的金额（积分数量 * pointMoney）
+    double deductionAmount = _pointsToUse * pointMoney;
+    
+    // 确保抵扣金额不超过商品总价
+    Map<String, dynamic> productStats = _getProductStats();
+    double totalPrice = productStats['totalPrice'] ?? 0.0;
+    
+    // 如果抵扣金额超过总价，则只抵扣总价
+    if (deductionAmount > totalPrice) {
+      deductionAmount = totalPrice;
+      // 计算实际能使用的积分数量
+      _pointsToUse = (deductionAmount / pointMoney).ceil();
+      // 更新积分输入框
+      _pointsController.text = _pointsToUse.toString();
+    }
+    
+    setState(() {
+      _pointsDeductionAmount = deductionAmount.roundToDouble(); // 积分抵扣金额进行四舍五入
+    });
+  }
+  
+
+  
+  // 使用全额积分
+  void _useAllPoints() {
+    if (_pointsRule == null) return;
+    
+    // 获取积分抵扣系数（1积分等于多少韩元）
+    double pointMoney = double.tryParse(_pointsRule!['pointMoney']?.toString() ?? '1') ?? 1.0;
+    
+    setState(() {
+      Map<String, dynamic> productStats = _getProductStats();
+      double totalPrice = productStats['totalPrice'] ?? 0.0;
+      
+      // 计算最大可使用积分（不超过用户可用积分和能抵扣的最大积分）
+      int maxPointsForPrice = (totalPrice / pointMoney).floor();
+      _pointsToUse = math.min(userPoints, maxPointsForPrice);
+      _pointsController.text = _pointsToUse.toString();
+      // 优惠券和积分互斥使用，使用积分则清空优惠券
+      _selectedCoupon = null;
+      _calculatePointsDeduction();
+    });
+  }
+  
   Widget _buildCouponPointsSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 10, bottom: 10),
@@ -960,19 +1256,37 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(AppLocalizations.of(context)?.translate('coupon') ?? '优惠券', style:  TextStyle(fontSize: 14)),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Text(AppLocalizations.of(context)?.translate('points') ?? '积分', style:  TextStyle(fontSize: 14)),
                       const SizedBox(width: 10),
                       // 全额使用按钮
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(2),
+                      GestureDetector(
+                        onTap: () {
+                          // 检查是否满足积分使用条件
+                          bool canUsePoints = false;
+                          if (_pointsRule != null) {
+                            double pointsUsedThreshold = double.tryParse(_pointsRule!['pointUsed'] ?? '0') ?? 0.0;
+                            Map<String, dynamic> productStats = _getProductStats();
+                            double totalPrice = productStats['totalPrice'] ?? 0.0;
+                            
+                            // 检查是否满足积分使用条件
+                            canUsePoints = totalPrice >= pointsUsedThreshold;
+                          }
+                          
+                          if (canUsePoints) {
+                            _useAllPoints();
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: Text(AppLocalizations.of(context)?.translate('use_all') ?? '全额使用', style:  TextStyle(fontSize: 10, color: Colors.white)),
                         ),
-                        child: Text(AppLocalizations.of(context)?.translate('use_all') ?? '全额使用', style:  TextStyle(fontSize: 10, color: Colors.white)),
                       ),
                     ],
                   ),
@@ -983,16 +1297,28 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // 可用积分信息
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(AppLocalizations.of(context)?.translate('available_points') ?? '可用积分', style:  TextStyle(fontSize: 12)),
-                      const SizedBox(width: 5),
-                      Text(AppLocalizations.of(context)?.translate('points') ?? '个', style:  TextStyle(fontSize: 12, color: Colors.red)),
-                    ],
+                  //  可用优惠券信息
+                  GestureDetector(
+                    onTap: () {
+                      // 点击优惠券显示弹窗
+                      setState(() {
+                        _showCouponModal = true;
+                      });
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(AppLocalizations.of(context)?.translate('available_points') ?? '可用优惠券', style:  TextStyle(fontSize: 12)),
+                        const SizedBox(width: 5),
+                        _isLoadingPoints 
+                          ? const CircularProgressIndicator(strokeWidth: 1) 
+                          : Text('$userCoupons${AppLocalizations.of(context)?.translate('pointss') ?? '张'}', style:  TextStyle(fontSize: 12, color: const Color.fromARGB(255, 0, 255, 106))),
+                        const SizedBox(width: 5),
+                        const Icon(Icons.arrow_forward_ios, size: 12),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 20),
                   // 积分输入框和P单位
                   Row(
                     children: [
@@ -1001,12 +1327,51 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                         width: 80,
                         height: 28,
                         child: TextField(
+                          controller: _pointsController,
+                          enabled: () {
+                            // 检查是否满足积分使用条件
+                            if (_pointsRule == null) return false;
+                            
+                            double pointsUsedThreshold = double.tryParse(_pointsRule!['pointUsed'] ?? '0') ?? 0.0;
+                            Map<String, dynamic> productStats = _getProductStats();
+                            double totalPrice = productStats['totalPrice'] ?? 0.0;
+                            
+                            // 检查是否满足积分使用条件
+                            return totalPrice >= pointsUsedThreshold;
+                          }(),
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             isDense: true,
                           ),
                           style: const TextStyle(fontSize: 14),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            if (value.isEmpty) {
+                              _pointsToUse = 0;
+                              _calculatePointsDeduction();
+                              return;
+                            }
+                            
+                            int points = int.tryParse(value) ?? 0;
+                            // 确保积分不超过用户可用积分
+                            points = points > userPoints ? userPoints : points;
+                            // 确保积分不小于0
+                            points = points < 0 ? 0 : points;
+                            
+                            setState(() {
+                              _pointsToUse = points;
+                              _pointsController.text = points.toString();
+                              // 设置光标位置到文本末尾
+                              _pointsController.selection = TextSelection.fromPosition(TextPosition(offset: _pointsController.text.length));
+                              // 优惠券和积分互斥使用，使用积分则清空优惠券
+                              if (points > 0) {
+                                _selectedCoupon = null;
+                              }
+                            });
+                            
+                            _calculatePointsDeduction();
+                          },
                         ),
                       ),
                       const SizedBox(width: 5),
@@ -1015,7 +1380,12 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                   ),
                   const SizedBox(height: 2),
                   // 全额积分显示
-                  Text('${AppLocalizations.of(context)?.translate('total') ?? '全额'}: 10,000${AppLocalizations.of(context)?.translate('points_unit') ?? 'P'}', style:  TextStyle(fontSize: 12)),
+                  Text('${AppLocalizations.of(context)?.translate('total') ?? '全额'}: $userPoints${AppLocalizations.of(context)?.translate('points_unit') ?? 'P'}', style:  TextStyle(fontSize: 12)),
+                  const SizedBox(height: 5),
+                  // 积分抵扣金额显示
+                  // if (_pointsDeductionAmount > 0)
+                  //   Text('${AppLocalizations.of(context)?.translate('points_deduction') ?? '积分抵扣'}: -₩${_pointsDeductionAmount.round().toString()}', 
+                  //     style:  TextStyle(fontSize: 12, color: Colors.red)),
                 ],
               ),
             ],
@@ -1032,8 +1402,24 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
     final totalQuantity = stats['totalQuantity'];
     final totalPrice = stats['totalPrice'];
     
-    // 格式化价格，添加千位分隔符
-    String formattedPrice = '${totalPrice.toStringAsFixed(2).replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (Match m) => ',')}';
+    // 格式化价格，添加千位分隔符和韩元符号，四舍五入去除小数
+    String formattedPrice = '₩${totalPrice.round().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (Match m) => ',')}';
+    
+    // 计算优惠券抵扣金额
+    double couponDeductionAmount = 0.0;
+    if (_selectedCoupon != null) {
+      if (_selectedCoupon!['type'] == '1') { // 满减券
+        couponDeductionAmount = double.tryParse(_selectedCoupon!['returnAmount']?.toString() ?? '0') ?? 0.0;
+      } else if (_selectedCoupon!['type'] == '2') { // 折扣券
+        double discountRate = double.tryParse(_selectedCoupon!['returnAmount']?.toString() ?? '100') ?? 100.0;
+        discountRate = discountRate / 100.0; // 转换为折扣率（如75变为0.75）
+        couponDeductionAmount = totalPrice - (totalPrice * discountRate);
+      }
+    }
+    
+    // 计算最终支付金额
+    double finalAmount = totalPrice - couponDeductionAmount - _pointsDeductionAmount;
+    finalAmount = finalAmount < 0 ? 0 : finalAmount;
     
     return Container(
         padding: const EdgeInsets.all(15),
@@ -1050,7 +1436,19 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                   children: [
                    Text('选中商品:${categoryCount}种类 总数量: ${totalQuantity}个', style: TextStyle(fontSize: 12, color: Color(0xFF999999))),
                     const SizedBox(height: 5),
-                    Text('${AppLocalizations.of(context)?.locale.languageCode == 'zh' ? 'CNY' : 'KRW'} $formattedPrice', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.green)),
+                    Text(formattedPrice, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.green)),
+                    // 优惠券抵扣金额显示
+                    if (couponDeductionAmount > 0)
+                      Text('${AppLocalizations.of(context)?.translate('coupon_deduction') ?? '优惠券抵扣'}: -₩${couponDeductionAmount.round().toString()}', 
+                        style: const TextStyle(fontSize: 14, color: Colors.red)),
+                    // 积分抵扣金额显示
+                    if (_pointsDeductionAmount > 0)
+                      Text('${AppLocalizations.of(context)?.translate('points_deduction') ?? '积分抵扣'}: -₩${_pointsDeductionAmount.round().toString()}', 
+                        style: const TextStyle(fontSize: 14, color: Colors.red)),
+                    // 最终支付金额显示
+                    if (couponDeductionAmount > 0 || _pointsDeductionAmount > 0)
+                      Text('${AppLocalizations.of(context)?.translate('final_pay') ?? '实付金额'}: ₩${finalAmount.round().toString()}', 
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
                   ],
                 ),
                 const Spacer(),
@@ -1115,7 +1513,7 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
     
     try {
 
-      // 准备商品数据
+      // 准备商品数据（直接使用prepare方法，确保获取最新数据）
       final List<Map<String, dynamic>> products = _prepareProductsData();
       final Map<String, List<Map<String, dynamic>>> productsByShop = _groupProductsByShop(products);
       
@@ -1152,7 +1550,8 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
           double price = (product['price'] ?? 0).toDouble();
           double taobaoFee = (product['taobaofee'] ?? 0.0).toDouble();
           
-          purchaseAmount += price * quantity;
+          // 先对单个商品总价进行四舍五入，避免浮点数累加误差
+          purchaseAmount += (price).roundToDouble() * quantity;
           totalTaobaoFee += taobaoFee;
           totalQuantity += quantity;
           
@@ -1162,25 +1561,6 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
           
           // 构建订单商品信息
           orderProductInfoList.add({
-            // 优先使用原始cartId，如果没有则使用哈希码作为备选
-            'skuId': () {
-              try {
-                // 解析sec字符串为JSON对象并获取mpId
-                if (product['sec'] != null && product['sec'] is String && product['sec'].isNotEmpty) {
-                  final Map<String, dynamic> secJson = jsonDecode(product['sec']);
-                  return secJson['spmpId'] ?? '';
-                }
-                return '';
-              } catch (e) {
-                return '';
-              }
-            }(),
-            'quantity': quantity,
-            'price': price,
-            // 使用保留的原始字段信息
-            'title': product['productName'] ?? product['name'], // 优先使用原始productName
-            'titleEn': product['productNameEn'] ?? product['productName'] ?? product['name'],
-            'titleCn': product['productNameCn'] ?? product['productName'] ?? product['name'],
             'itemId': () {
               try {
                 // 解析sec字符串为JSON对象并获取mpId
@@ -1194,10 +1574,28 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                 return '';
               }
             }(),
+            'quantity': quantity,
+            'price': price.round(), // 单个商品价格（与UI显示一致，进行四舍五入）
+            // 使用保留的原始字段信息
+            'title': product['productName'] ?? product['name'], // 优先使用原始productName
+            'titleEn': product['productNameEn'] ?? product['productName'] ?? product['name'],
+            'titleCn': product['productNameCn'] ?? product['productName'] ?? product['name'],
+            'skuId': () {
+              try {
+                // 解析sec字符串为JSON对象并获取spmpId
+                if (product['sec'] != null && product['sec'] is String && product['sec'].isNotEmpty) {
+                  final Map<String, dynamic> secJson = jsonDecode(product['sec']);
+                  return secJson['spmpId'] ?? '';
+                }
+                return '';
+              } catch (e) {
+                return '';
+              }
+            }(),
             'detail': product['secName'] ?? product['description'] ?? '', // 优先使用secName
             'detailCn': product['secName'] ?? product['description'] ?? '',
             'detailEn': product['secName'] ?? product['description'] ?? '',
-            'totalPrice': price * quantity,
+            'totalPrice': (price * quantity).round(), // 单个商品总价（与UI显示一致，进行四舍五入）
             'sku': product['sec'] ?? '',
             'selfSupport': () {
               dynamic value = product['selfSupport'];
@@ -1212,65 +1610,127 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
               }
               return 1; // 其他类型时使用默认值
             }(),
-            'imgUrl': product['productUrl'] ?? product['image'] ?? '', // 优先使用原始productUrl
-            'taobaoFee': product['taobaoFee'] ?? product['taobaofee'] ?? 0, // 兼容两种运费字段
-            'productId': product['productId'] ?? '',
-            'shopId': product['shopId'] ?? '',
-            // 额外保留的信息，以备后续使用
-            'shopName': product['shopName'],
-            'num': quantity // 商品数量
+            'imgUrl': product['productUrl'] ?? product['image'] ?? '' // 优先使用原始productUrl
           });
         }
         
         // 计算商品总价格（包含所有运费）
-        double productAllPrice = purchaseAmount + totalTaobaoFee + 0.0; // 海外运费写死为0
+        double productAllPrice = (purchaseAmount + totalTaobaoFee + 0.0).roundToDouble(); // 海外运费写死为0
         
         // 计算商品总价格（包含淘宝运费，不包含海外运费）
-        double productNoSeaPrice = purchaseAmount + totalTaobaoFee;
+        double productNoSeaPrice = (purchaseAmount + totalTaobaoFee).roundToDouble();
         
-        // 累加总金额和总数量
-        totalSumAmount += purchaseAmount;
+        // 累加总金额和总数量，包含淘宝运费（使用四舍五入后的值）
+        totalSumAmount += (purchaseAmount + totalTaobaoFee).round();
         totalNum += totalQuantity;
         
         // 添加店铺订单数据
         orderInfoDTOList.add({
-          'purchaseAmount': purchaseAmount,
+          'purchaseAmount': purchaseAmount.round(), // 商品总金额（与UI显示一致，进行四舍五入）
           'zip': _zipcode,
-          'country': '中国', // 默认中国
-          'address': _detailAddress, // 使用详细地址作为地址字段
-          'receiveName': _name,
-          'mobilePhone': _phone,
-          'currency': 'KRW', // 目前金额币种
           'num': totalQuantity,
           'shopId': shopProducts.first['shopId'], // 使用实际的店铺ID，如果没有则使用哈希码
           'cartId': cartIds,
-          'message': '',//留言
-          "city":"",// 市
-          "district":"",// 街
-          "state":"",// 省
-          'personPassNo': _customsCode, // 个人通关号码
-          'requestBusiness': _deliveryNotes, // 配送事项
-          'houseId': 1, // 默认仓库ID
           'shopName': shopName,
-          'fee': totalTaobaoFee, // 淘宝运费
-          'feeSea': 0.00, // 海外运费写死为0
+          'fee': totalTaobaoFee.round(), // 淘宝运费（与UI显示一致，进行四舍五入）
           'productAllPrice': productAllPrice,
           'productNoSeaPrice': productNoSeaPrice,
           'selfSupport': selfSupport, // 根据商品设置selfSupport值
+          'requestBusiness': _deliveryNotes, // 配送事项
+          'personPassNo': _customsCode, // 个人通关号码
+          'picture': orderProductInfoList.isNotEmpty ? orderProductInfoList.first['imgUrl'] : '',
           'orderProductInfoList': orderProductInfoList
         });
       });
       
+      // 检查是否满足积分使用条件
+      bool canUsePoints = false;
+      if (_pointsRule != null && _pointsToUse > 0) {
+        double pointsUsedThreshold = double.tryParse(_pointsRule!['pointUsed'] ?? '0') ?? 0.0;
+        Map<String, dynamic> productStats = _getProductStats();
+        double totalPrice = productStats['totalPrice'] ?? 0.0;
+        
+        // 检查是否满足积分使用条件
+        canUsePoints = totalPrice >= pointsUsedThreshold;
+      }
+      
+      // 如果不满足积分使用条件，重置积分使用状态
+      if (_pointsToUse > 0 && !canUsePoints) {
+        setState(() {
+          _pointsToUse = 0;
+          _pointsController.text = '';
+          _pointsDeductionAmount = 0.0;
+        });
+      }
+      
+      // 计算最终金额（减去积分和优惠券抵扣）
+      double finalAmount = totalSumAmount;
+      double couponDeductionAmount = 0.0;
+      
+      // 减去优惠券抵扣
+      if (_selectedCoupon != null) {
+        if (_selectedCoupon!['type'] == '1') { // 满减券
+          couponDeductionAmount = double.tryParse(_selectedCoupon!['returnAmount']?.toString() ?? '0') ?? 0.0;
+        } else if (_selectedCoupon!['type'] == '2') { // 折扣券
+          double discountRate = double.tryParse(_selectedCoupon!['returnAmount']?.toString() ?? '100') ?? 100.0;
+          discountRate = discountRate / 100.0; // 转换为折扣率（如75变为0.75）
+          couponDeductionAmount = totalSumAmount - (totalSumAmount * discountRate);
+        }
+        
+        if (couponDeductionAmount > 0) {
+          finalAmount -= couponDeductionAmount;
+        }
+      }
+      
+      // 减去积分抵扣
+      if (_pointsToUse > 0 && _pointsDeductionAmount > 0) {
+        finalAmount -= _pointsDeductionAmount;
+      }
+      
+      // 确保最终金额不小于0
+      finalAmount = finalAmount < 0 ? 0 : finalAmount;
+      
+      // 四舍五入到两位小数
+      finalAmount = double.parse(finalAmount.toStringAsFixed(2));
+      
       // 构建完整的订单数据结构
       Map<String, dynamic> orderData = {
         'orderAllInfo': {
-          'couponId': null, // 选择的优惠券ID
-          'pointsId': null, // 使用的积分数
-          'sumAmount': totalSumAmount, // 购买商品总金额
-          'num': totalNum // 购买商品总数
+          'couponId': _selectedCoupon != null ? _selectedCoupon!['couponUseId'] ?? 0 : 0, // 选择的优惠券ID（使用couponUseId）
+          'pointsId': _pointsToUse, // 使用的积分数
+          'sumAmount': totalSumAmount.round(), // 购买商品总金额（与UI显示一致，进行四舍五入）
+          'num': totalNum, // 购买商品总数
+          'selfSupport': orderInfoDTOList.isNotEmpty ? orderInfoDTOList.first['selfSupport'] ?? 1 : 1, // 是否自营1否 2是
+          'fee': orderInfoDTOList.fold(0.0, (sum, item) => sum + (item['fee'] ?? 0.0)), // 淘宝运费
+          'productAllPrice': finalAmount.round(), // 商品总价格（与UI显示一致，进行四舍五入）
+          'productNoSeaPrice': orderInfoDTOList.fold(0.0, (sum, item) => sum + (item['productNoSeaPrice'] ?? 0.0)).round(), // 商品总价格（与UI显示一致，进行四舍五入）
+          'houseId': 1, // 仓库ID 默认为1
+          'message': '', // 买家留言
+          'zip': _zipcode, // 邮政编码
+          'country': '中国', // 国家，默认中国
+          'address': _detailAddress, // 详细地址
+          'city': '', // 市，目前未收集
+          'district': '', // 街，目前未收集
+          'mobilePhone': _phone, // 接收人手机号
+          'receiveName': _name, // 接收人姓名
+          'state': '', // 省，目前未收集
+          'requestBusiness': _deliveryNotes, // 配送事项
+          'personPassNo': _customsCode, // 个人通过编码
+          'currency': 'KRW', // 目前金额币种
+          'couponAmount': couponDeductionAmount, // 优惠券抵扣金额
+          'picture': orderInfoDTOList.isNotEmpty ? (orderInfoDTOList.first['orderProductInfoList'] is List && (orderInfoDTOList.first['orderProductInfoList'] as List).isNotEmpty ? (orderInfoDTOList.first['orderProductInfoList'] as List).first['imgUrl'] : '') : ''
         },
         'orderInfoDTOList': orderInfoDTOList
       };
+      
+      // 如果使用积分，需要将总金额减去积分抵扣金额
+      // if (canUsePoints && _pointsToUse > 0) {
+      //   // 处理浮点数精度问题，保留两位小数
+      //   double finalAmount = (totalSumAmount - _pointsDeductionAmount);
+      //   // 四舍五入到两位小数
+      //   finalAmount = double.parse(finalAmount.toStringAsFixed(2));
+      //   orderData['orderAllInfo']['sumAmount'] = finalAmount;
+      // }
       
       // 调用创建订单接口
       final response = await HttpUtil.post(
@@ -1357,8 +1817,10 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                         Navigator.pop(context);
                         setState(() {
                           _zipcode = model.zonecode ?? '';
+                          _zipcodeController.text = _zipcode;
                           _address = model.address ?? '';
                           _detailAddress = model.buildingName ?? '';
+                          _detailAddressController.text = _detailAddress;
                         });
                       },
                       // 配置DaumPostcodeView以支持正确的滚动行为
@@ -1507,7 +1969,7 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                                           ),
                                         ],
                                       ),
-                                      if (address['isDefault']) 
+                                      if (address['isDefault'])
                                         Container(
                                           margin: const EdgeInsets.only(top: 8),
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -1545,10 +2007,13 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                                   setState(() {
                                     // 赋值详细地址
                                     _detailAddress = originalData['addressDetail'] ?? '';
+                                    _detailAddressController.text = _detailAddress;
                                     // 赋值姓名
                                     _name = originalData['name'] ?? '';
+                                    _nameController.text = _name;
                                     // 赋值手机号
                                     _phone = originalData['tel'] ?? '';
+                                    _phoneController.text = _phone;
                                     // 关闭弹窗
                                     _showAddressModal = false;
                                   });
@@ -1573,4 +2038,268 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
       ],
     );
   }
+  
+  // 构建优惠券弹窗
+  Widget _buildCouponModal(BuildContext context) {
+    return Stack(
+      children: [
+        // 半透明背景遮罩
+        GestureDetector(
+          onTap: () {
+            // 点击背景关闭弹窗
+            setState(() {
+              _showCouponModal = false;
+            });
+          },
+          child: Container(
+            color: Colors.black.withOpacity(0.5),
+            width: double.infinity,
+            height: double.infinity,
+          ),
+        ),
+        // 弹窗内容
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.7,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 5,
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // 弹窗标题
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(AppLocalizations.of(context)?.translate('coupon') ?? '优惠券', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _showCouponModal = false;
+                          });
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                ),
+                // 优惠券列表
+                Expanded(
+                  child: _isLoadingCoupons
+                      ? const Center(child: CircularProgressIndicator())
+                      : _couponList.isEmpty
+                          ? Center(child: Text(AppLocalizations.of(context)?.translate('no_coupons_available') ?? '暂无可用优惠券'))
+                          : ListView.builder(
+                              itemCount: _couponList.length,
+                              itemBuilder: (context, index) {
+                                final coupon = _couponList[index];
+                                
+                                // 根据优惠券状态设置颜色
+                                // 根据优惠券的实际状态进行判断
+                                bool isAvailable = coupon['couponUse'] == '1'; // 1否 2是
+                                
+                                // 判断是否满足金额条件
+                                Map<String, dynamic> productStats = _getProductStats();
+                                double totalPrice = productStats['totalPrice'] ?? 0.0;
+                                double couponAmount = (coupon['amount'] ?? 0).toDouble();
+                                bool meetsAmountCondition = totalPrice >= couponAmount;
+                                
+                                // 只有当优惠券可用且满足金额条件时，才可以使用
+                                bool canUse = isAvailable && meetsAmountCondition;
+                                
+                                String statusText = isAvailable ? (meetsAmountCondition ? '立即使用' : '金额不足') : '已使用';
+                                Color mainColor = canUse ? const Color(0xFFE63B3B) : Colors.grey;
+                                Color textColor = isAvailable ? Colors.black : Colors.grey;
+                                Color timeColor = isAvailable ? const Color(0xFFE63B3B) : Colors.grey;
+                                
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.shade100,
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      // 优惠券内容
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        child: Row(
+                                          children: [
+                                            // 金额/折扣部分
+                                            Expanded(
+                                              flex: 2,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  // 根据优惠券类型显示折扣或满减金额
+                                                  if (coupon['type'] == '1') // 满减券
+                                                    Row(
+                                                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                                                      textBaseline: TextBaseline.alphabetic,
+                                                      children: [
+                                                        const Text(
+                                                          '₩', // 韩元符号
+                                                          style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '${coupon['returnAmount']}', // 显示满减金额
+                                                          style: TextStyle(
+                                                            fontSize: 36,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: mainColor,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  else if (coupon['type'] == '2') // 折扣券
+                                                    Text(
+                                                      '${((double.tryParse(coupon['returnAmount']?.toString() ?? '0') ?? 0.0) / 10).toStringAsFixed(1)}折', // 转换为折扣显示，确保有默认值
+                                                      style: TextStyle(
+                                                        fontSize: 36,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: mainColor,
+                                                      ),
+                                                    ),
+                                                  // 显示使用条件：满多少金额
+                                                  Text(
+                                                    '满${coupon['amount']}可用',
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: textColor,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            // 中间内容部分
+                                            Expanded(
+                                              flex: 3,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    '${coupon['type'] == '1' ? '满减券' : '折扣券'}',
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: textColor,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  // 显示使用时间
+                                                  Text(
+                                                    '${coupon['startTime']} - ${coupon['endTime']}',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey[500],
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            // 状态按钮
+                                            Expanded(
+                                              flex: 2,
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      if (canUse) {
+                                                        // 立即使用优惠券，同时清空积分使用
+                                                        setState(() {
+                                                          _selectedCoupon = coupon;
+                                                          _showCouponModal = false;
+                                                          // 优惠券和积分互斥使用，选择优惠券则清空积分
+                                                          _pointsToUse = 0;
+                                                          _pointsController.text = '';
+                                                          _pointsDeductionAmount = 0.0;
+                                                        });
+                                                        // 这里可以添加选择优惠券后的逻辑
+                                                        print('选中的优惠券: $coupon');
+                                                      }
+                                                    },
+                                                    child: Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                                      decoration: BoxDecoration(
+                                                        color: mainColor,
+                                                        borderRadius: BorderRadius.circular(16),
+                                                      ),
+                                                      child: Text(
+                                                        statusText,
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 13,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                        softWrap: false,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  // 格式化剩余时间
+  String _formatRemainingTime(DateTime endTime) {
+    Duration remaining = endTime.difference(DateTime.now());
+    if (remaining.isNegative) return '已过期';
+    
+    int hours = remaining.inHours;
+    int minutes = remaining.inMinutes.remainder(60);
+    int seconds = remaining.inSeconds.remainder(60);
+    
+    return '$hours:$minutes:$seconds';
+  }
 }
+
+// 添加优惠券弹窗到Widget树
+// 注意：在实际应用中，这部分应该添加到build方法的Scaffold中
+// 由于我们无法直接修改build方法，这里只是展示优惠券弹窗的实现
+// 在实际项目中，需要在build方法的return Scaffold(...)中添加以下代码：
+// if (_showCouponModal)
+//   _buildCouponModal(context),

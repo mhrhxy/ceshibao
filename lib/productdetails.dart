@@ -575,7 +575,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
           _promotionPriceCNY = _mainPromotionPriceCNY;
 
           // 解析SKU
-          List<dynamic> chineseSkuList = detailData['sku_list'] as List? ?? [];
+          List<dynamic> chineseSkuList = detailData['skList'] as List? ?? [];
           _parseChineseSku(chineseSkuList, _skuIdToMpSkuId);
 
           // 合并英文翻译
@@ -612,7 +612,6 @@ class _ProductDetailspayState extends State<ProductDetails> {
         _fetchProductComments();
       }
     } catch (e) {
-      debugPrint("商品详情接口失败：$e");
       setState(() {
         _productTitle = "商品加载失败";
         _shopName = "未知店铺";
@@ -643,9 +642,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
 
     try {
       final url = "${listByProductLimit}${_productId}";
-      debugPrint("评论接口URL：$url");
       final response = await HttpUtil.get(url);
-      debugPrint("评论接口返回：${response.data}");
 
       if (response.data['code'] == 200) {
         List<dynamic> commentList = response.data['data'] as List? ?? [];
@@ -732,7 +729,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
       // 组装购物车参数
       final addCartParams = {
         "productId": _productId,
-        "secId": selectedSku != null ? (selectedSku['mp_skuId'] ?? "0") : "0",
+        "secId": selectedSku != null ? (selectedSku['sku_id'] ?? "0") : "0",
         "productName": _krTitle ?? _productTitle ?? "",
         "shopId": _shopId ?? 0,
         "shopName": _shopName ?? "",
@@ -791,9 +788,15 @@ class _ProductDetailspayState extends State<ProductDetails> {
       ),
       builder: (context) => StatefulBuilder(
         builder: (sheetContext, sheetSetState) {
-          if (_localSelectedSpecs.isEmpty && _specGroups.isNotEmpty) {
-            _localSelectedSpecs = Map.from(_selectedSpecs);
-            _localSelectedSku = _selectedSku;
+          if (_localSelectedSpecs.isEmpty) {
+            if (_specGroups.isNotEmpty) {
+              // 多规格商品
+              _localSelectedSpecs = Map.from(_selectedSpecs);
+              _localSelectedSku = _selectedSku;
+            } else if (_skuList.isNotEmpty) {
+              // 单规格商品，直接使用第一个SKU
+              _localSelectedSku = _skuList.first;
+            }
           }
 
           void _matchLocalSku() {

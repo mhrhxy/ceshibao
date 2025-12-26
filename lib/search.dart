@@ -581,7 +581,6 @@ class _SearchResultPageState extends State<SearchResultPage> {
                         color: Colors.grey.shade50,
                         child: const Center(child: CircularProgressIndicator(strokeWidth: 1)),
                       ),
-                errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200], child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 50)),
               ),
             ),
             const SizedBox(width: 12),

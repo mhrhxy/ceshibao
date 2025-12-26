@@ -7,8 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dingbudaohang.dart';
 import 'productdetails.dart';
 import 'package:flutter_mall/app_localizations.dart';
-import 'language_provider.dart';
-import 'package:provider/provider.dart';
+
+// 购物车页面
 
 class Product {
   final String id;
@@ -28,6 +28,8 @@ class CartItem {
   final String secName;
   final double productPrice;
   final double? productPlusPrice; // 会员价字段，可为空
+  final double productPriceKRW; // 商品单价韩元
+  final double? productPlusPriceKRW; // 商品会员单价韩元
   int num;
   final String shopName;
   double taobaoFee; // 添加淘宝运费字段
@@ -46,6 +48,8 @@ class CartItem {
     required this.secName,
     required this.productPrice,
     this.productPlusPrice, // 会员价参数，可选
+    required this.productPriceKRW, // 添加商品单价韩元参数
+    this.productPlusPriceKRW, // 添加商品会员单价韩元参数
     required this.num,
     required this.shopName,
     this.taobaoFee = 0.0, // 初始化运费为0
@@ -54,11 +58,14 @@ class CartItem {
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json, int memberId) {
+    // 从cart对象中获取商品信息
+    final Map<String, dynamic> cartData = json['cart'] ?? {};
+    
     // 确保sec字段有默认值，避免null
-    final secValue = json['sec'] ?? '{}';
+    final secValue = cartData['sec'] ?? '{}';
     // 解析selfSupport字段，处理不同类型
     int selfSupport = 1; // 默认值
-    dynamic selfSupportValue = json['selfSupport'];
+    dynamic selfSupportValue = cartData['selfSupport'];
     if (selfSupportValue != null) {
       if (selfSupportValue is int) {
         selfSupport = selfSupportValue;
@@ -71,19 +78,21 @@ class CartItem {
       }
     }
     return CartItem(
-      cartId: json['cartId'] ?? 0,
-      productId: json['productId'] ?? 0,
-      secId: json['secId'] ?? 0,
+      cartId: cartData['cartId'] ?? 0,
+      productId: cartData['productId'] ?? 0,
+      secId: cartData['secId'] ?? 0,
       memberId: memberId,
-      shopId: json['shopId'] ?? 0, // 从JSON初始化shopId
-      productUrl: json['productUrl'] ?? '',
-      productName: json['productName'] ?? '未知商品',
-      secName: json['secName'] ?? '옵션:A  변경',
-      productPrice: (json['productPrice'] ?? 0).toDouble(),
-      productPlusPrice: json['productPlusPrice'] != null ? (json['productPlusPrice']).toDouble() : null, // 从JSON初始化会员价
-      num: json['num'] ?? 1,
-      shopName: json['shopName'] ?? '쇼핑몰A',
-      taobaoFee: (json['taobaoFee'] ?? 0).toDouble(), // 从JSON初始化运费
+      shopId: cartData['shopId'] ?? 0, // 从JSON初始化shopId
+      productUrl: cartData['productUrl'] ?? '',
+      productName: cartData['productName'] ?? '未知商品',
+      secName: cartData['secName'] ?? '옵션:A  변경',
+      productPrice: (cartData['productPrice'] ?? 0).toDouble(),
+      productPlusPrice: cartData['productPlusPrice'] != null ? (cartData['productPlusPrice']).toDouble() : null, // 从JSON初始化会员价
+      productPriceKRW: (json['productPriceKRW'] ?? 0).toDouble(), // 从JSON初始化商品单价韩元
+      productPlusPriceKRW: json['productPlusPriceKRW'] != null ? (json['productPlusPriceKRW']).toDouble() : null, // 从JSON初始化商品会员单价韩元
+      num: cartData['num'] ?? 1,
+      shopName: cartData['shopName'] ?? '쇼핑몰A',
+      taobaoFee: (cartData['taobaoFee'] ?? 0).toDouble(), // 从JSON初始化运费
       sec: secValue, // 从JSON初始化sec字段
       selfSupport: selfSupport, // 从JSON初始化selfSupport字段
     );
@@ -273,7 +282,6 @@ class _CartState extends State<Cart> {
         _isLoading = false;
         _errorMsg = AppLocalizations.of(context)?.translate('member_info_parse_failed') ?? "会员信息解析失败，请重新登录";
       });
-      debugPrint('member_info解析失败: $e');
       return;
     }
 
@@ -372,14 +380,13 @@ class _CartState extends State<Cart> {
         // 遍历所有商品的运费信息
         for (var item in feeData) {
           // 注意：API返回的字段名是item_id而不是itemId
-          if (item != null && item['post_fee'] != null && item['item_id'] != null) {
-            // post_fee单位是分，需要除以100转换为元
-            double postFee = double.tryParse(item['post_fee'].toString()) ?? 0.0;
-            double feeInYuan = postFee / 100.0;
-            totalPostFee += feeInYuan;
+          if (item != null && item['item_id'] != null) {
+            // 使用postFeeKRW字段作为韩元运费
+            double postFeeKRW = double.tryParse(item['postFeeKRW'].toString()) ?? 0.0;
+            totalPostFee += postFeeKRW;
             String itemIdStr = item['item_id'].toString();
-            itemFees[itemIdStr] = feeInYuan;
-            print('设置商品ID: $itemIdStr 的运费: $feeInYuan');
+            itemFees[itemIdStr] = postFeeKRW;
+            print('设置商品ID: $itemIdStr 的韩元运费: $postFeeKRW');
             
 
           } else {
@@ -639,31 +646,69 @@ class _CartState extends State<Cart> {
     );
   }
   
-  // 新增：根据语言获取对应的价格和货币符号
+  // 修改：始终显示韩元价格
   (String formattedPrice, String currencySymbol) _getPriceByLanguage(double price) {
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
-    final isKorean = languageProvider.currentLocale.languageCode == 'ko';
-    
-    if (isKorean) {
-      // 韩元显示：价格 * 汇率
-      double krwPrice = _exchangeRate != null ? price * _exchangeRate! : price;
-      String formatted = krwPrice.toStringAsFixed(2).replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (match) => '${match[1]},',
-      );
-      return (formatted, '₩'); // 使用韩元符号
-    } else {
-      // 人民币显示：价格（已经是元单位）
-      String formatted = price.toStringAsFixed(2).replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (match) => '${match[1]},',
-      );
-      return (formatted, '¥'); // 直接使用人民币符号
-    }
+    // 始终显示韩元价格，移除语言判断
+    // 直接将价格转换为整数，避免任何四舍五入
+    String formatted = price.toInt().toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (match) => '${match[1]},',
+    );
+    return (formatted, '₩'); // 使用韩元符号
   }
 
   void _updateQuantity(CartItem item, int change) {
     _updateQuantityApi(item, change);
+  }
+
+  /// 检查订单金额是否超过最大订单限额
+  void _checkMaxOrderLimit() async {
+    try {
+      // 获取本地存储的最大订单限额
+      final prefs = await SharedPreferences.getInstance();
+      String? maxLimitStr = prefs.getString('maxOrderLimit');
+      
+      if (maxLimitStr == null || maxLimitStr.isEmpty) {
+        // 如果没有存储最大限额，继续流程
+        setState(() => _showShippingInfo = true);
+        return;
+      }
+      
+      // 解析最大订单限额
+      double maxLimit = double.tryParse(maxLimitStr) ?? 0;
+      if (maxLimit <= 0) {
+        // 如果最大限额无效，继续流程
+        setState(() => _showShippingInfo = true);
+        return;
+      }
+      
+      // 计算当前订单金额
+      double totalPrice = _calculateSummary().$1;
+      
+      // 比较订单金额和最大限额
+      if (totalPrice > maxLimit) {
+        // 如果超过限额，显示提示信息
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "订单金额超过最大限额 $maxLimit",
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+      
+      // 如果未超过限额，继续流程
+      setState(() => _showShippingInfo = true);
+    } catch (e) {
+      // 异常处理
+      print('检查最大订单限额异常：$e');
+      // 异常情况下继续流程
+      setState(() => _showShippingInfo = true);
+    }
   }
 
   (double totalPrice, int totalQuantity, int totalTypes) _calculateSummary() {
@@ -676,11 +721,12 @@ class _CartState extends State<Cart> {
     for (var shop in _shops) {
       for (var item in shop.items) {
         if (item.isSelected) {
-          // 优先使用会员价，如果会员价存在且大于0，则使用会员价，否则使用普通价格
-          double priceToUse = (item.productPlusPrice != null && item.productPlusPrice! > 0) ? item.productPlusPrice! : item.productPrice;
+          // 优先使用会员韩元价，如果会员价存在且大于0，则使用会员价，否则使用普通韩元价格
+          double priceToUse = (item.productPlusPriceKRW != null && item.productPlusPriceKRW! > 0) ? item.productPlusPriceKRW! : item.productPriceKRW;
           price += priceToUse * item.num;
           quantity += item.num;
-          // 累加每个商品的单独淘宝运费
+          // 累加每个商品的单独淘宝运费（注意：运费可能仍然是人民币，需要转换为韩元？或者直接使用API返回的运费韩元值？
+          // 这里暂时保持原逻辑，因为用户没有特别说明运费的处理方式
           totalTaobaoFee += _itemTaobaoFees[item.productId.toString()] ?? 0.0;
           // 使用productId和secId的组合作为唯一标识，确保不同规格的商品被计为不同种类
           uniqueProducts.add('${item.productId}_${item.secId}');
@@ -692,7 +738,9 @@ class _CartState extends State<Cart> {
     price += totalTaobaoFee;
     
     // Set的大小即为不同商品种类的数量
-    return (price, quantity, uniqueProducts.length);
+    // 处理浮点数精度问题，直接取整避免四舍五入
+    double finalPrice = price.floorToDouble();
+    return (finalPrice, quantity, uniqueProducts.length);
   }
   
   // 收集选中的商品数据，格式化为Payment页面需要的数据结构
@@ -727,11 +775,11 @@ class _CartState extends State<Cart> {
             'secName': item.secName,
             'wangwangUrl': '',
             'productUrl': item.productUrl,
-            'totalPrice': item.productPrice * item.num,
-            'totalPlusPrice': item.productPrice * item.num,
+            'totalPrice': double.parse((item.productPriceKRW * item.num).toStringAsFixed(2)),
+            'totalPlusPrice': double.parse((item.productPlusPriceKRW! * item.num).toStringAsFixed(2)),
             'num': item.num,
-            'productPrice': item.productPrice,
-            'productPlusPrice': item.productPrice,
+            'productPrice': item.productPriceKRW,
+            'productPlusPrice': item.productPlusPriceKRW,
             'minNum': 0,
             'sec': item.sec,
             'wangwangTalkUrl': '',
@@ -916,13 +964,19 @@ class _CartState extends State<Cart> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 4),
-                                  // 使用新的方法根据语言动态显示价格
+                                  // 使用新的方法始终显示韩元价格
                                   Builder(builder: (context) {
-                                    final (normalFormattedPrice, currencySymbol) = _getPriceByLanguage(item.productPrice);
+                                    // 始终使用韩元价格字段
+                                    final double price = item.productPriceKRW;
+                                    
+                                    final (normalFormattedPrice, currencySymbol) = _getPriceByLanguage(price);
                                     
                                     // 检查是否有会员价并且会员价小于普通价格
-                                    if (item.productPlusPrice != null && item.productPlusPrice! > 0 && item.productPlusPrice! < item.productPrice) {
-                                      final (plusFormattedPrice, _) = _getPriceByLanguage(item.productPlusPrice!);
+                                    if (item.productPlusPriceKRW != null && 
+                                        item.productPlusPriceKRW! > 0 && 
+                                        item.productPlusPriceKRW! < price) {
+                                      final double plusPrice = item.productPlusPriceKRW!;
+                                      final (plusFormattedPrice, _) = _getPriceByLanguage(plusPrice);
                                       return Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
@@ -1641,7 +1695,7 @@ Widget _buildShippingFeeListDialog() {
                             elevation: 0,
                           ),
                           onPressed: totalQuantity > 0
-                              ? () => setState(() => _showShippingInfo = true)
+                              ? _checkMaxOrderLimit
                               : null,
                           child: Text(
                             AppLocalizations.of(context)?.translate('buy_now') ?? '购买',

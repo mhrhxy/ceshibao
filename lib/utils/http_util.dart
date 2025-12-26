@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mall/app_localizations.dart';
 import 'package:flutter_mall/config/constant_param.dart';
 import 'package:flutter_mall/language_provider.dart';
 import 'package:flutter_mall/loginto.dart';
@@ -185,7 +186,7 @@ class HttpUtil {
                         MaterialPageRoute(builder: (context) => const Loginto()),
                       );
                     },
-                    child: const Text('确定'),
+                    child: Text(AppLocalizations.of(dialogContext)?.translate('confirm') ?? '确定'),
                   ),
                 ],
               );
@@ -284,9 +285,13 @@ class HttpUtil {
         requestOptions.headers!.addAll(header);
       }
 
+      // 如果data是FormData类型，不进行JSON编码，直接传递
+      // 否则，将data转换为JSON格式
+      dynamic requestData = data is FormData ? data : jsonEncode(data);
+      
       Response response = await dio.post(
         path,
-        data: jsonEncode(data),
+        data: requestData,
         queryParameters: queryParameters, // 添加queryParameters参数传递
         options: requestOptions,
       );
