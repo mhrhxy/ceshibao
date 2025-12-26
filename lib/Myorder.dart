@@ -545,7 +545,6 @@ class _MyorderState extends State<Myorder> {
       }
     } catch (e, stackTrace) {
       print('加载订单列表失败: $e');
-      print('异常堆栈: $stackTrace');
     } finally {
       setState(() {
         isLoading = false;
@@ -2315,22 +2314,19 @@ class _MyorderState extends State<Myorder> {
                                                     ],
                                                   ),
                                                 // 申请售后按钮显示逻辑：
-                                                // 1. 当orderState等于8并且payStatus等于4时显示（但refundStatus不能为1）
-                                                // 2. 当refundStatus是4或者3
-                                                // 3. 并且remainingNum大于0时显示
+                                                // 1. 先判断refundStatus是否是1，如果是的话，说明在申请中，不显示申请售后按钮
+                                                // 2. 根据orderState和payStatus区分退款类型：
+                                                //    - orderState为2且payStatus为3：只允许仅退款/部分仅退款
+                                                //    - orderState为3：只能仅退款/部分仅退款
+                                                //    - orderState为4/5/6：仅退款、退货退款/仅部分退款/仅部分退货退款都能选择
+                                                // 3. remainingNum大于0时显示
                                                 // 4. 只有当子订单数量为1时，才在总订单处显示申请售后按钮
-                                                if (((order.orderState == '8' &&
-                                                            order.payStatus ==
-                                                                '4' &&
-                                                            order.refundStatus !=
-                                                                1) ||
-                                                        (order.refundStatus ==
-                                                                3 ||
-                                                            order.refundStatus ==
-                                                                4)) &&
+                                                if (order.refundStatus != 1 &&
                                                     order.remainingNum > 0 &&
-                                                    order.shopOrders.length ==
-                                                        1)
+                                                    order.shopOrders.length == 1 &&
+                                                    ((order.orderState == '2' && order.payStatus == '3') ||
+                                                     (order.orderState == '3') ||
+                                                     (order.orderState == '4' || order.orderState == '5' || order.orderState == '6')))
                                                   Column(
                                                     children: [
                                                       const SizedBox(height: 4),
@@ -2770,22 +2766,18 @@ class _MyorderState extends State<Myorder> {
                                                                               ),
                                                                             ),
                                                                           // 申请售后按钮：当有多个子订单时显示在价格下方
-                                                                          if (((shopOrder.orderState ==
-                                                                                          '8' &&
-                                                                                      shopOrder.payStatus ==
-                                                                                          '4' &&
-                                                                                      shopOrder.refundStatus !=
-                                                                                          1) ||
-                                                                                  (shopOrder.refundStatus ==
-                                                                                          3 ||
-                                                                                      shopOrder.refundStatus ==
-                                                                                          4 ||
-                                                                                      shopOrder.refundStatus ==
-                                                                                          -1)) &&
-                                                                              shopOrder.remainingNum >
-                                                                                  0 &&
-                                                                              order.shopOrders.length >
-                                                                                  1)
+                                                                          // 新规则：先判断refundStatus是否为1（申请中不显示），再根据orderStatus和payStatus区分退款类型
+                                                                          if (shopOrder.refundStatus != 1 &&
+                                                                              shopOrder.remainingNum > 0 &&
+                                                                              order.shopOrders.length > 1 &&
+                                                                              (
+                                                                                // orderStatus 2 且 payStatus 3：仅退款/部分仅退款
+                                                                                (shopOrder.orderState == '2' && shopOrder.payStatus == '3') ||
+                                                                                // orderStatus 3：仅退款/部分仅退款
+                                                                                (shopOrder.orderState == '3') ||
+                                                                                // orderStatus 4\5\6：所有退款类型
+                                                                                (shopOrder.orderState == '4' || shopOrder.orderState == '5' || shopOrder.orderState == '6')
+                                                                              ))
                                                                             Padding(
                                                                               padding: const EdgeInsets.only(
                                                                                 top:

@@ -109,6 +109,173 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
 
   // 显示底部弹出菜单
   void _showAfterSalesTypeBottomSheet() {
+    // 获取订单状态和支付状态
+    String orderState = '';
+    String payStatus = '';
+    
+    // 检查widget.order是Map还是对象
+    if (widget.order is Map) {
+      orderState = widget.order['orderState']?.toString() ?? '';
+      payStatus = widget.order['payStatus']?.toString() ?? '';
+    } else {
+      // 尝试从对象属性获取
+      try {
+        orderState = widget.order.orderState?.toString() ?? '';
+        payStatus = widget.order.payStatus?.toString() ?? '';
+      } catch (e) {
+        print('获取订单状态失败: $e');
+      }
+    }
+    
+    print('申请售后 - 订单状态: orderState=$orderState, payStatus=$payStatus');
+    
+    // 根据订单状态判断可选择的退款类型
+    // orderStatus 2 且 payStatus 3：仅退款/部分仅退款
+    // orderStatus 3：仅退款/部分仅退款
+    // orderStatus 4\5\6：所有退款类型（无需考虑payStatus）
+    bool canOnlyRefund = (orderState == '2' && payStatus == '3') || orderState == '3';
+    bool canReturnRefund = orderState == '4' || orderState == '5' || orderState == '6';
+    
+    // orderState 4/5/6 时，同时显示所有退款类型
+    if (orderState == '4' || orderState == '5' || orderState == '6') {
+      canOnlyRefund = true;
+    }
+    
+    // 构建可用的退款选项列表
+    List<Widget> refundOptions = [];
+    
+    if (canReturnRefund) {
+      // 退货退款选项 - 白色卡片样式
+      refundOptions.add(
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            leading: const Icon(
+              Icons.receipt_long_outlined,
+              color: Color(0xFFFF6B35),
+              size: 28,
+            ),
+            title: const Text(
+              '申请退货退款',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            subtitle: const Padding(
+              padding: EdgeInsets.only(top: 6),
+              child: Text(
+                '已收到货，可申请退货退款。商家收货后为您处理退款，您可放心退货',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF666666),
+                  height: 1.5,
+                ),
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right, size: 24),
+            onTap: () {
+              Navigator.pop(context);
+              // 跳转到退货退款页面
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RefundApplicationPage(
+                    orderId: widget.order.id,
+                    refundType: 'return',
+                    order: widget.order,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      
+      if (canOnlyRefund) {
+        refundOptions.add(const SizedBox(height: 16));
+      }
+    }
+    
+    if (canOnlyRefund) {
+      // 仅退款选项 - 白色卡片样式
+      refundOptions.add(
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            leading: const Icon(
+              Icons.money_off,
+              color: Color(0xFFFF6B35),
+              size: 28,
+            ),
+            title: const Text(
+              '申请退款（无需退货）',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            subtitle: const Padding(
+              padding: EdgeInsets.only(top: 6),
+              child: Text(
+                '未收到货、已拒收快递、与商家协商一致，可申请退款',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF666666),
+                  height: 1.5,
+                ),
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right, size: 24),
+            onTap: () {
+              Navigator.pop(context);
+              // 跳转到仅退款页面
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RefundApplicationPage(
+                    orderId: widget.order.id,
+                    refundType: 'refund',
+                    order: widget.order,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+    
+    // 如果没有任何可用的退款选项，添加提示信息
+    if (refundOptions.isEmpty) {
+      refundOptions.add(
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            '当前订单状态暂不支持申请售后',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF666666),
+            ),
+          ),
+        ),
+      );
+    }
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFFF4F4F4),
@@ -136,104 +303,7 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                   ),
                 ),
               ),
-              // 退货退款选项 - 白色卡片样式
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  leading: const Icon(
-                    Icons.receipt_long_outlined,
-                    color: Color(0xFFFF6B35),
-                    size: 28,
-                  ),
-                  title: const Text(
-                    '申请退货退款',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  subtitle: const Padding(
-                    padding: EdgeInsets.only(top: 6),
-                    child: Text(
-                      '已收到货，可申请退货退款。商家收货后为您处理退款，您可放心退货',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF666666),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  trailing: const Icon(Icons.chevron_right, size: 24),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // 跳转到退货退款页面
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RefundApplicationPage(
-                                orderId: widget.order.id,
-                                refundType: 'return',
-                                order: widget.order,
-                              ),
-                            ),
-                          );
-                  },
-                ),
-              ),
-              // 上下间距
-              const SizedBox(height: 16),
-              // 仅退款选项 - 白色卡片样式
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  leading: const Icon(
-                    Icons.money_off,
-                    color: Color(0xFFFF6B35),
-                    size: 28,
-                  ),
-                  title: const Text(
-                    '申请退款（无需退货）',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  subtitle: const Padding(
-                    padding: EdgeInsets.only(top: 6),
-                    child: Text(
-                      '未收到货、已拒收快递、与商家协商一致，可申请退款',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF666666),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  trailing: const Icon(Icons.chevron_right, size: 24),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // 跳转到仅退款页面
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RefundApplicationPage(
-                                orderId: widget.order.id,
-                                refundType: 'refund',
-                                order: widget.order,
-                              ),
-                            ),
-                          );
-                  },
-                ),
-              ),
+              ...refundOptions,
               const SizedBox(height: 24),
             ],
           ),
