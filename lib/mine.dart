@@ -7,6 +7,7 @@ import 'myreview.dart';
 import 'address.dart';
 import 'Myorder.dart';
 import 'announcement.dart';
+import 'cartadd.dart'; // 导入购物车页面
 import 'utils/shared_preferences_util.dart';
 import 'utils/http_util.dart'; // 导入HTTP工具类
 import 'config/service_url.dart'; // 导入接口地址配置
@@ -297,6 +298,7 @@ class _MineState extends State<Mine> {
   Widget _buildBorderedItem(String title) {
     // 获取翻译文本
     String myOrdersTitle = AppLocalizations.of(context)?.translate('my_orders') ?? '我的订单';
+    String cartAndCollectTitle = AppLocalizations.of(context)?.translate('cart_and_collect') ?? '购物车/收藏';
     
     return GestureDetector(
       onTap: () {
@@ -306,6 +308,14 @@ class _MineState extends State<Mine> {
             context,
             MaterialPageRoute(
               builder: (context) => Myorder(),
+            ),
+          );
+        } else if (title == cartAndCollectTitle) {
+          // 跳转到购物车页面
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Cart(),
             ),
           );
         }

@@ -524,6 +524,7 @@ class _MyorderState extends State<Myorder> {
                         : '1', // 使用第一个子订单的评论状态
                 shopOrders: shopOrders, // 子店铺订单列表
                 orderPlateformNo: orderAllInfo['orderPlateformNo']?.toString() ?? '',
+                picture: orderAllInfo['picture'] ?? '', // 使用orderAllInfo中的图片
               );
 
               newOrders.add(order);
@@ -2036,7 +2037,7 @@ class _MyorderState extends State<Myorder> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        // 根据子订单数量显示不同的图标
+                                        // 根据子订单数量显示不同的图标或图片
                                         Container(
                                           width: 70,
                                           height: 70,
@@ -2046,15 +2047,28 @@ class _MyorderState extends State<Myorder> {
                                               8,
                                             ),
                                           ),
-                                          child: Center(
-                                            child: Icon(
-                                              // 只有一个子订单时显示店铺图标，否则显示购物车图标
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            child: Image.network(
                                               order.shopOrders.length == 1
-                                                  ? Icons.store
-                                                  : Icons
-                                                      .shopping_cart_checkout,
-                                              size: 36,
-                                              color: Colors.blue,
+                                                  ? (order.shopOrders[0].picture.isNotEmpty
+                                                      ? order.picture
+                                                      : order.picture)
+                                                  : order.picture,
+                                              width: 70,
+                                              height: 70,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Center(
+                                                child: Icon(
+                                                  order.shopOrders.length == 1
+                                                      ? Icons.store
+                                                      : Icons.shopping_cart_checkout,
+                                                  size: 36,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -3197,6 +3211,7 @@ class OrderData {
   String observeIs; // 是否可以评价 1:可以评价 2:评价过了不能评价
   List<ShopOrderData> shopOrders; // 子店铺订单列表
   String orderPlateformNo; // 订单平台编号
+  String picture; // 订单图片
 
   OrderData({
     required this.id,
@@ -3225,6 +3240,7 @@ class OrderData {
     this.observeIs = '1', // 默认可以评价
     this.shopOrders = const [], // 默认空列表，确保向后兼容
     this.orderPlateformNo = '', // 默认平台订单编号为空
+    this.picture = '', // 默认订单图片为空
   });
 }
 

@@ -359,13 +359,23 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
             "refundType": _currentRefundType,
             "refundStatus": "1", // 申请退款
             "selfSupport": product['selfSupport']?.toString() ?? selfSupport,
-            // 将总价estimateAmount除以原始数量得到单价，再乘以退款数量得到正确的退款价格
-            "refundPrice": () {
-              int originalQuantity = int.tryParse(product['quantity']?.toString() ?? '1') ?? 1;
-              double totalPrice = (product['estimateAmount'] != null ? double.parse(product['estimateAmount'].toString()) : 0.0);
-              double unitPrice = originalQuantity > 0 ? totalPrice / originalQuantity : 0.0;
-              return unitPrice * refundNum;
-            }(),
+             // 将总价estimateAmount除以原始数量得到单价，再乘以退款数量得到正确的退款价格
+             // 自营商品(selfSupport=2)直接用price作为单价
+             "refundPrice": () {
+               // selfSupport: 1=否（非自营），2=是（自营）
+               bool isSelfSupport = product['selfSupport'] == 2;
+               if (isSelfSupport) {
+                 // 自营商品直接用price乘以退款数量
+                 double unitPrice = product['price'] != null ? double.parse(product['price'].toString()) : 0.0;
+                 return unitPrice * refundNum;
+               } else {
+                 // 非自营商品按原逻辑计算
+                 int originalQuantity = int.tryParse(product['quantity']?.toString() ?? '1') ?? 1;
+                 double totalPrice = (product['estimateAmount'] != null ? double.parse(product['estimateAmount'].toString()) : 0.0);
+                 double unitPrice = originalQuantity > 0 ? totalPrice / originalQuantity : 0.0;
+                 return unitPrice * refundNum;
+               }
+             }(),
             "purchaseOrderLineId": product['purchaseOrderId']?.toString() ?? '', // 采购子订单id
             "productId": product['itemId']?.toString() ?? '', // 商品ID 对应淘宝商品ID
             "sku": product['sku'] ?? "",
