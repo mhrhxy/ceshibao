@@ -39,7 +39,6 @@ class Comment {
       if (properties.isEmpty) return "无规格信息";
       return properties.map((prop) => prop['value_name'] ?? '').join(' / ');
     } catch (e) {
-      debugPrint("规格解析失败：$e");
       return "规格信息解析失败";
     }
   }

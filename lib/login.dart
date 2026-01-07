@@ -55,7 +55,6 @@ class _LoginState extends State<Login> {
 
   /// 新增：获取最大订单限额接口（登录成功后调用）
   Future<void> _fetchAndSaveMaxOrderLimit(String token) async {
-    try {
       // 设置请求头（携带登录成功的token）
       HttpUtil.dio.options.headers['Authorization'] = 'Bearer $token';
       
@@ -66,24 +65,7 @@ class _LoginState extends State<Login> {
         // 保存最大订单限额到本地
         String maxLimit = result.data['msg'] ?? '0';
         await SharedPreferencesUtil.saveString('maxOrderLimit', maxLimit);
-      } else {
-        // 获取最大订单限额失败（不阻断登录流程）
-        if (mounted) {
-          _showToast(
-            context, 
-            '获取最大订单限额失败：${result.data['msg']}'
-          );
-        }
-      }
-    } catch (e) {
-      // 异常处理（网络错误等，不阻断登录）
-      if (mounted) {
-        _showToast(
-          context, 
-          '获取最大订单限额异常：${e.toString()}'
-        );
-      }
-    }
+      } 
   }
 
   /// 新增：获取用户信息接口（登录成功后调用）

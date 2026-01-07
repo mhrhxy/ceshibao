@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dingbudaohang.dart';
 import 'dart:convert';
 import './utils/http_util.dart';
+import 'package:flutter_mall/app_localizations.dart';
 
 // 评论数据模型（保持不变，移除韩文商品名相关冗余）
 class Comment {
@@ -36,8 +37,8 @@ class Comment {
       if (properties.isEmpty) return "无规格信息";
       return properties.map((prop) => prop['value_name'] ?? '').join(' / ');
     } catch (e) {
-      debugPrint("规格解析失败：$e");
-      return "规格信息解析失败";
+      // debugPrint("规格解析失败：$e");
+      return "规格信息解析失败"; // 会在UI层转换为国际化文本
     }
   }
 
@@ -83,14 +84,6 @@ class _userCommentsPageState extends State<userCommentsPage> {
   @override
   void initState() {
     super.initState();
-    // 检查memberId是否有效
-    if (_targetMemberId.isEmpty) {
-      setState(() {
-        _isLoading = false;
-        _errorMsg = "用户ID缺失，无法加载评论";
-      });
-      return;
-    }
     // 加载指定用户的评论
     _fetchTargetUserComments();
   }
@@ -103,11 +96,16 @@ class _userCommentsPageState extends State<userCommentsPage> {
     });
 
     try {
+      // 检查memberId是否有效
+      if (_targetMemberId.isEmpty) {
+        throw Exception(AppLocalizations.of(context).translate("user_id_missing_comments"));
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
       if (token == null || token.isEmpty) {
-        throw Exception('请先登录');
+        throw Exception(AppLocalizations.of(context).translate("please_login"));
       }
 
       // 携带memberId请求指定用户的评论
@@ -120,13 +118,13 @@ class _userCommentsPageState extends State<userCommentsPage> {
           _comments = dataList.map((item) => Comment.fromJson(item)).toList();
         });
       } else {
-        throw Exception(response.data['msg'] ?? '获取用户评论失败');
+        throw Exception(response.data['msg'] ?? AppLocalizations.of(context).translate("get_user_comments_failed"));
       }
     } catch (e) {
       setState(() {
         _errorMsg = e.toString();
       });
-      debugPrint('用户评论接口请求失败: $e');
+      // debugPrint('用户评论接口请求失败: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -236,7 +234,7 @@ class _userCommentsPageState extends State<userCommentsPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _fetchTargetUserComments, // 重试加载当前用户评论
-              child: const Text("重试"),
+              child: Text(AppLocalizations.of(context).translate("retry")),
             ),
           ],
         ),
@@ -244,9 +242,9 @@ class _userCommentsPageState extends State<userCommentsPage> {
     }
 
     if (_comments.isEmpty) {
-      return const Center(
+      return  Center(
         child: Text(
-          "该用户暂无评论数据",
+          AppLocalizations.of(context).translate("user_no_comments"),
           style: TextStyle(color: Colors.grey, fontSize: 16),
         ),
       );
@@ -288,7 +286,7 @@ class _userCommentsPageState extends State<userCommentsPage> {
                   const SizedBox(width: 8),
                   // 店铺名称
                   Text(
-                    comment.shopName,
+                    comment.shopName == '未知店铺' ? AppLocalizations.of(context).translate('unknown_shop') : comment.shopName,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -306,7 +304,7 @@ class _userCommentsPageState extends State<userCommentsPage> {
                   const SizedBox(width: 12),
                   // 直接显示中文商品名，无语言切换
                   Text(
-                    "${comment.productName} ${comment.parsedSpecs}",
+                    "${comment.productName == '未知商品' ? AppLocalizations.of(context).translate('unknown_product') : comment.productName} ${comment.parsedSpecs == '无规格信息' ? AppLocalizations.of(context).translate('no_spec_info') : comment.parsedSpecs == '规格信息解析失败' ? AppLocalizations.of(context).translate('spec_parse_failed') : comment.parsedSpecs}",
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
@@ -315,7 +313,7 @@ class _userCommentsPageState extends State<userCommentsPage> {
 
               // 3. 评论内容
               Text(
-                comment.info,
+                comment.info == '无评论内容' ? AppLocalizations.of(context).translate('no_comment_content') : comment.info,
                 style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
               const SizedBox(height: 12),

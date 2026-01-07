@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dingbudaohang.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'userreviews.dart';
+import 'package:flutter_mall/app_localizations.dart';
 
 // 回复模型（含nickname，用于传递给目标页）
 class Reply {
@@ -239,7 +240,7 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
   // 核心：点击头像跳转用户评论页（同时传递memberId和nickname）
   void _gotoUserCommentsPage(String memberId, String nickname) {
     if (memberId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("用户ID缺失，无法跳转")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).translate("user_id_missing"))));
       return;
     }
     // 传递双参数给目标页（userCommentsPage需接收memberId和nickname）
@@ -306,7 +307,7 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
       return Center(child: Text(_errorMsg!));
     }
     if (_comments.isEmpty) {
-      return const Center(child: Text("暂无评论数据"));
+      return Center(child: Text(AppLocalizations.of(context).translate("no_comment_data")));
     }
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -464,7 +465,7 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
           // 提交回复并刷新列表
           void _onSubmitReply(String content) async {
             if (content.isEmpty) {
-              ScaffoldMessenger.of(sheetContext).showSnackBar(const SnackBar(content: Text("回复内容不能为空")));
+              ScaffoldMessenger.of(sheetContext).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).translate("reply_content_empty"))));
               return;
             }
 

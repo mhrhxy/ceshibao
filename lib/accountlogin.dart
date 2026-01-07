@@ -43,7 +43,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
 
         // 接口返回非200时视为失败
         if (response.data['code'] != 200) {
-          throw Exception(response.data['msg'] ?? '注销失败');
+          throw Exception(response.data['msg'] ?? (AppLocalizations.of(context)?.translate('logout_failed') ?? '注销失败'));
         }
       }
 

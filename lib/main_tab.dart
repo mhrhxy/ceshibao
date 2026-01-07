@@ -32,7 +32,6 @@ class _MainTabState extends State<MainTab> {
                   color: Colors.white,
                   icon: Icons.add,
                   onPressed: () {
-                    print('加号按钮被点击，当前页面索引：$_selectedIndex');
                      Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const Loginto()),

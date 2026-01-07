@@ -25,6 +25,8 @@ class CartItem {
   bool isSelected;
   final String productUrl;
   final String productName;
+  final String productNameCn;
+  final String productNameEn;
   final String secName;
   final double productPrice;
   final double? productPlusPrice; // 会员价字段，可为空
@@ -45,6 +47,8 @@ class CartItem {
     this.isSelected = false,
     required this.productUrl,
     required this.productName,
+    required this.productNameCn,
+    required this.productNameEn,
     required this.secName,
     required this.productPrice,
     this.productPlusPrice, // 会员价参数，可选
@@ -85,6 +89,8 @@ class CartItem {
       shopId: cartData['shopId'] ?? 0, // 从JSON初始化shopId
       productUrl: cartData['productUrl'] ?? '',
       productName: cartData['productName'] ?? '未知商品',
+      productNameCn: cartData['productNameCn'] ?? cartData['productName'] ?? '未知商品', // 使用商品中文名称，默认使用productName
+      productNameEn: cartData['productNameEn'] ?? cartData['productName'] ?? '未知商品', // 使用商品英文名称，默认使用productName
       secName: cartData['secName'] ?? '옵션:A  변경',
       productPrice: (cartData['productPrice'] ?? 0).toDouble(),
       productPlusPrice: cartData['productPlusPrice'] != null ? (cartData['productPlusPrice']).toDouble() : null, // 从JSON初始化会员价
@@ -333,11 +339,11 @@ class _CartState extends State<Cart> {
 
   // 获取淘宝运费的方法
   Future<void> _fetchTaobaoFee() async {
-    // 收集选中的商品
+    // 收集选中的直购商品
     List<Map<String, dynamic>> selectedItems = [];
     for (var shop in _shops) {
       for (var item in shop.items) {
-        if (item.isSelected) {
+        if (item.isSelected && item.selfSupport == 1) {
           selectedItems.add({
             "itemId": item.productId,
             "fee": 0, // 海外运费默认传0
@@ -347,7 +353,7 @@ class _CartState extends State<Cart> {
       }
     }
     
-    // 如果没有选中的商品，设置运费为0
+    // 如果没有选中的直购商品，设置运费为0
     if (selectedItems.isEmpty) {
       setState(() {
         _taobaoFee = 0.0;
@@ -418,7 +424,6 @@ class _CartState extends State<Cart> {
         // 发生错误时，运费设置为0
         _taobaoFee = 0.0;
       });
-      debugPrint('淘宝运费接口请求失败: $e');
     } finally {
       setState(() {
         _isLoadingTaobaoFee = false;
@@ -460,7 +465,6 @@ class _CartState extends State<Cart> {
       setState(() {
         _feeErrorMsg = e.toString().replaceAll('Exception: ', '');
       });
-      debugPrint('运费接口请求失败: $e');
     } finally {
       setState(() {
         _isLoadingFee = false;
@@ -539,7 +543,7 @@ class _CartState extends State<Cart> {
         throw Exception(response.data['msg'] ?? AppLocalizations.of(context)?.translate('load_more_collect_failed') ?? '加载更多收藏列表失败');
       }
     } catch (e) {
-      debugPrint('加载更多收藏列表失败: $e');
+      // debugPrint('加载更多收藏列表失败: $e');
     } finally {
       setState(() {
         _isCollectLoading = false;
@@ -692,7 +696,7 @@ class _CartState extends State<Cart> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "订单金额超过最大限额 $maxLimit",
+              AppLocalizations.of(context)?.translate('order_exceeds_max_limit') ?? '订单金额超过最大限额 $maxLimit',
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.red,
@@ -705,8 +709,6 @@ class _CartState extends State<Cart> {
       // 如果未超过限额，继续流程
       setState(() => _showShippingInfo = true);
     } catch (e) {
-      // 异常处理
-      print('检查最大订单限额异常：$e');
       // 异常情况下继续流程
       setState(() => _showShippingInfo = true);
     }
@@ -784,8 +786,8 @@ class _CartState extends State<Cart> {
             'minNum': 0,
             'sec': item.sec,
             'wangwangTalkUrl': '',
-            'productNameCn': item.productName, // 使用现有productName作为中文名
-            'productNameEn': item.productName, // 使用现有productName作为英文名
+            'productNameCn': item.productNameCn, // 使用商品的中文名称
+            'productNameEn': item.productNameEn, // 使用商品的英文名称
             'selfSupport': item.selfSupport,
             'currencyKr': null,
             'currencyUsd': null,
@@ -1305,8 +1307,8 @@ class _CartState extends State<Cart> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            "COUZIK捆绑海外代购服务\n订购的订单内所有商品入库后\n会称重所有的商品，计算国际运费。\n\n代理手续费与商品价值结算（1次）后\n国际运费结算（2次）完成后，货物才会出库。\n\n预期运费只是预期，与实际运费有差距",
+          Text(
+            AppLocalizations.of(context)?.translate('shipping_info_text') ?? "COUZIK捆绑海外代购服务\n订购的订单内所有商品入库后\n会称重所有的商品，计算国际运费。\n\n代理手续费与商品价值结算（1次）后\n国际运费结算（2次）完成后，货物才会出库。\n\n预期运费只是预期，与实际运费有差距",
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -1314,6 +1316,12 @@ class _CartState extends State<Cart> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  elevation: 0,
+                  padding: EdgeInsets.zero,
+                ),
                 onPressed: () async {
                   // 点击时加载运费数据
                   await _fetchShippingFeeList();
@@ -1325,14 +1333,20 @@ class _CartState extends State<Cart> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   color: Colors.orange,
-                  child: const Text(
-                    "配送费用金额确认",
+                  child:  Text(
+                    AppLocalizations.of(context)?.translate('confirm_shipping_fee') ?? "配送费用金额确认",
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
               const SizedBox(height: 12),
               TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  elevation: 0,
+                  padding: EdgeInsets.zero,
+                ),
                 onPressed: () {
                   setState(() {
                     _showDisclaimer = true;
@@ -1342,8 +1356,8 @@ class _CartState extends State<Cart> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   color: Colors.green,
-                  child: const Text(
-                    "确认及下页",
+                  child:  Text(
+                    AppLocalizations.of(context)?.translate('confirm_and_next') ?? "确认及下页",
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -1378,24 +1392,24 @@ Widget _buildShippingFeeListDialog() {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => _fetchShippingFeeList(),
-                child: const Text('重新加载'),
+                child: Text(AppLocalizations.of(context)?.translate('reload') ?? '重新加载'),
               ),
             ],
           )
         else if (_shippingFeeList.isEmpty)
-          const Padding(
+           Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
             child: Text(
-              '暂无重量相关运费数据',
+              AppLocalizations.of(context)?.translate('no_weight_fee_data') ?? '暂无重量相关运费数据',
               style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
           )
         else
           DataTable(
             columnSpacing: 20,
-            columns: const [
-              DataColumn(label: Text("重量")),
-              DataColumn(label: Text("运费")),
+            columns: [
+              DataColumn(label: Text(AppLocalizations.of(context)?.translate('weight') ?? "重量")),
+              DataColumn(label: Text(AppLocalizations.of(context)?.translate('fee') ?? "运费")),
             ],
             rows: _shippingFeeList.map((fee) {
               // 处理单位：1→g，2→kg
@@ -1415,6 +1429,12 @@ Widget _buildShippingFeeListDialog() {
           ),
         const SizedBox(height: 16),
         TextButton(
+          style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  elevation: 0,
+                  padding: EdgeInsets.zero,
+                ),
           onPressed: () {
             setState(() {
               _showShippingFeeList = false;
@@ -1424,8 +1444,8 @@ Widget _buildShippingFeeListDialog() {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             color: Colors.grey,
-            child: const Text(
-              "返回",
+            child:  Text(
+              AppLocalizations.of(context)?.translate('back') ?? "返回",
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -1441,17 +1461,23 @@ Widget _buildShippingFeeListDialog() {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            "包含侵权知识产权，不可通关商品、破损危险较高的商品时订单可能会部分或全部取消。\n\n管理者对未认知知识产权商品 通关中发生的扣押/销毁的责任由代理申请人承担。\n\n订购总额超过150美元时，可分多次进行或可能会根据申报金额征收关税。\n\n因报关信息不一致导致的报关滞留 COUZIK不负相关责任",
+          Text(
+            AppLocalizations.of(context)?.translate('disclaimer_text') ?? "包含侵权知识产权，不可通关商品、破损危险较高的商品时订单可能会部分或全部取消。\n\n管理者对未认知知识产权商品 通关中发生的扣押/销毁的责任由代理申请人承担。\n\n订购总额超过150美元时，可分多次进行或可能会根据申报金额征收关税。\n\n因报关信息不一致导致的报关滞留 COUZIK不负相关责任",
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           TextButton(
+            style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  elevation: 0,
+                  padding: EdgeInsets.zero,
+                ),
             onPressed: () {
               setState(() => _showDisclaimer = false);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("已同意并完成付款流程"),
+                 SnackBar(
+                  content: Text(AppLocalizations.of(context)?.translate('agreed_and_paid') ?? "已同意并完成付款流程"),
                 ),
               );
             },
@@ -1471,8 +1497,8 @@ Widget _buildShippingFeeListDialog() {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 color: Colors.green,
-                child: const Text(
-                  "同意及付款",
+                child:  Text(
+                  AppLocalizations.of(context)?.translate('agree_and_pay') ?? "同意及付款",
                   style: TextStyle(color: Colors.white),
                 ),
               ),

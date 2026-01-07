@@ -399,7 +399,7 @@ class _PaymentPageState extends State<PaymentPage> {
         
         result.add({
           'shopName': shopName,
-          'image': item['productUrl']?.replaceAll('`', '')?.trim() ?? 'https://picsum.photos/100/100',
+          'image': item['productUrl']?.replaceAll('`', '')?.trim() ?? '',
           'name': item['productNameCn'] ?? item['productName'] ?? '商品名称',
           'description': item['secName'] ?? '商品描述',
           'color': color,
@@ -819,19 +819,19 @@ class _PaymentPageState extends State<PaymentPage> {
   // }
   
 // 简化的接口请求方法（只请求一次，返回卡片数据）
-Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
-  try {
-    final response = await HttpUtil.get(cardlist);
-    if (response.statusCode == 200 && response.data['code'] == 200) {
-      List<dynamic> data = response.data['data'] ?? [];
-      return List<Map<String, dynamic>>.from(data);
-    } else {
-      throw Exception(response.data['msg'] ?? '接口返回失败');
-    }
-  } catch (e) {
-    throw Exception(e.toString());
-  }
-}
+// Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
+//   try {
+//     final response = await HttpUtil.get(cardlist);
+//     if (response.statusCode == 200 && response.data['code'] == 200) {
+//       List<dynamic> data = response.data['data'] ?? [];
+//       return List<Map<String, dynamic>>.from(data);
+//     } else {
+//       throw Exception(response.data['msg'] ?? '接口返回失败');
+//     }
+//   } catch (e) {
+//     throw Exception(e.toString());
+//   }
+// }
 
 
 // 保留你原来的 _setSelectedPaymentMethod 方法（不变）
@@ -1731,7 +1731,6 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
       //   finalAmount = double.parse(finalAmount.toStringAsFixed(2));
       //   orderData['orderAllInfo']['sumAmount'] = finalAmount;
       // }
-      
       // 调用创建订单接口
       final response = await HttpUtil.post(
         createOrder,
@@ -2219,8 +2218,7 @@ Future<List<Map<String, dynamic>>> _fetchPaymentCardsAsync() async {
                                                       fontSize: 12,
                                                       color: Colors.grey[500],
                                                     ),
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    softWrap: true,
                                                   ),
                                                 ],
                                               ),

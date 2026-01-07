@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'login.dart';
 import 'register.dart';
 import 'main_tab.dart';
+import 'language_provider.dart';
 class Loginto extends StatelessWidget {
   const Loginto({super.key});
 
@@ -56,6 +58,66 @@ class Loginto extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // 语言切换按钮
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Consumer<LanguageProvider>(
+                      builder: (context, languageProvider, child) {
+                        return Row(
+                          children: [
+                            TextButton(
+                              onPressed: () => languageProvider.setChinese(),
+                              child: Text(
+                                '中文',
+                                style: TextStyle(
+                                  color: languageProvider.currentLocale.languageCode == 'zh' 
+                                      ? Colors.blue 
+                                      : Colors.black87,
+                                  fontWeight: languageProvider.currentLocale.languageCode == 'zh' 
+                                      ? FontWeight.bold 
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            TextButton(
+                              onPressed: () => languageProvider.setEnglish(),
+                              child: Text(
+                                'English',
+                                style: TextStyle(
+                                  color: languageProvider.currentLocale.languageCode == 'en' 
+                                      ? Colors.blue 
+                                      : Colors.black87,
+                                  fontWeight: languageProvider.currentLocale.languageCode == 'en' 
+                                      ? FontWeight.bold 
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            TextButton(
+                              onPressed: () => languageProvider.setKorean(),
+                              child: Text(
+                                '한국어',
+                                style: TextStyle(
+                                  color: languageProvider.currentLocale.languageCode == 'ko' 
+                                      ? Colors.blue 
+                                      : Colors.black87,
+                                  fontWeight: languageProvider.currentLocale.languageCode == 'ko' 
+                                      ? FontWeight.bold 
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
                 // KakaoTalk登录按钮
                 ElevatedButton(
                   onPressed: () {

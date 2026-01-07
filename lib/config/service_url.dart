@@ -1,6 +1,6 @@
 
 // const baseUrl = "http://10.168.96.23:9999";
-const baseUrl = "http://192.168.0.120:8080";
+const baseUrl = "http://192.168.0.120:9999";
 // 首页
 const homeDataUrl = "$baseUrl/api/home/index";
 // 品牌列表
@@ -175,3 +175,11 @@ const myCouponListUrl = "$baseUrl/product/coupon/list/oldCoupon/{type}";
 const maxOrderPurchaseLimitUrl = "$baseUrl/order/orderAllInfo/orderMaxPrice";
 // 退款根据父订单查询子订单
 const refundSearchChildOrderUrl = "$baseUrl/order/getOrderInfo/{orderAllId}";
+// 通过子订单商品查询商品信息并且退款
+const refundSearchProductUrl = "$baseUrl/order/searchOrderInfo/{orderId}";
+//  活动列表
+const activityListUrl = "$baseUrl/product/active/listAll";
+//  搜索页活动列表
+const listactivityListUrl = "$baseUrl/product/active/listAllNoAuth";
+// 活动领取优惠卷
+const activityReceiveCouponUrl = "$baseUrl/product/coupon/couponUse/{activeId}";

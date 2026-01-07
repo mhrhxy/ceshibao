@@ -97,19 +97,19 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
     Color backgroundColor = Colors.white; // 背景色
     Color textColor = Colors.black; // 文字颜色
     Color timeColor = Colors.red; // 时间颜色
-    String statusText = '立即使用'; // 状态文字
+    String statusText = AppLocalizations.of(context)?.translate('use_now') ?? '立即使用'; // 状态文字
     bool isAvailable = widget.coupon.useType == 0;
 
     if (widget.coupon.useType == 1) { // 已使用
       mainColor = Colors.grey;
       textColor = Colors.grey;
       timeColor = Colors.grey;
-      statusText = '已使用';
+      statusText = AppLocalizations.of(context)?.translate('used') ?? '已使用';
     } else if (widget.coupon.useType == 2) { // 已过期
       mainColor = Colors.grey;
       textColor = Colors.grey;
       timeColor = Colors.grey;
-      statusText = '已过期';
+      statusText = AppLocalizations.of(context)?.translate('expired') ?? '已过期';
     }
 
     return Container(
@@ -172,7 +172,7 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
                         ),
                       // 显示使用条件：满多少金额
                       Text(
-                        '满${widget.coupon.amount}可用',
+                        '${AppLocalizations.of(context)?.translate('min_amount_to_use') ?? '满'}${widget.coupon.amount}${AppLocalizations.of(context)?.translate('available') ?? '可用'}',
                         style: TextStyle(
                           fontSize: 14,
                           color: textColor,
@@ -201,7 +201,7 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
                       // 仅在endTime不为空且剩余时间大于0时显示倒计时
                       if (_showCountdown && _remainingTime > Duration.zero)
                         Text(
-                          '仅剩${_formatRemainingTime()}',
+                          '${AppLocalizations.of(context)?.translate('only') ?? '仅剩'}${_formatRemainingTime()}',
                           style: TextStyle(
                             fontSize: 12.0,
                             fontWeight: FontWeight.bold,
@@ -256,7 +256,12 @@ class _CouponPageState extends State<CouponPage> {
   // 标签索引
   int _currentTabIndex = 0;
   // 标签标题
-  final List<String> _tabTitles = ['总优惠券', '待使用', '已使用', '已过期'];
+  List<String> get _tabTitles => [
+        AppLocalizations.of(context)?.translate('total_coupons') ?? '总优惠券',
+        AppLocalizations.of(context)?.translate('available_coupons') ?? '待使用',
+        AppLocalizations.of(context)?.translate('used_coupons') ?? '已使用',
+        AppLocalizations.of(context)?.translate('expired_coupons') ?? '已过期',
+      ];
   // 优惠券数据
   List<CouponData> _coupons = [];
   // 加载状态
@@ -485,7 +490,7 @@ class _CouponPageState extends State<CouponPage> {
                                 ),
                                 SizedBox(height: 16),
                                 Text(
-                                  '暂无优惠券',
+                                  AppLocalizations.of(context)?.translate('no_coupons') ?? '暂无优惠券',
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.grey,

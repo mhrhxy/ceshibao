@@ -11,7 +11,7 @@ class SettingsPage extends StatelessWidget {
   // 打开外部链接的方法
   Future<void> _launchCustomerSupportUrl() async {
     // 客户支持链接（替换为实际链接，支持http/https/邮件/电话等）
-    const url = 'https://www.baidu.com/'; 
+    const url = 'https://www.kakaocorp.com/'; 
     final uri = Uri.parse(url);
 
     // 检查设备是否支持打开该链接

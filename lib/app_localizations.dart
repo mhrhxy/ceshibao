@@ -19,8 +19,6 @@ class AppLocalizations {
   Map<String, String> _localizedStrings = {};
 
   Future<void> load() async {
-    debugPrint('i18n/${locale.languageCode}.json');
-
     try {
       // 重点：确保路径正确（根据你的实际文件位置调整）
       String jsonString = await rootBundle.loadString('i18n/${locale.languageCode}.json');

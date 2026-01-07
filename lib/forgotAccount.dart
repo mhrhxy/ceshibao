@@ -38,7 +38,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
   void initState() {
     super.initState();
     // 测试数据（可选删除）
-    _emailController.text = "test@example.com";
+    _emailController.text = "";
   }
 
   @override

@@ -1045,7 +1045,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
           ),
 
           // 商品基本信息
-          _buildProductInfo(productAutom),
+          // _buildProductInfo(productAutom),
 
           // 商品价格
           _buildPriceSection(productAutom),

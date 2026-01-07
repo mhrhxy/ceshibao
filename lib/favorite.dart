@@ -347,8 +347,9 @@ class _Favorite extends State<Favorite> {
     try {
       double price = double.parse(cnyPrice);
       double krwPrice = price * krwExchangeRate;
-      // 格式化韩元价格，保留0位小数
-      return krwPrice.toStringAsFixed(0);
+      // 去除个位数（向下取整到十位数）
+      double roundedPrice = (krwPrice / 10).floor() * 10;
+      return roundedPrice.toStringAsFixed(0);
     } catch (e) {
       return '0';
     }
@@ -519,3 +520,4 @@ class _Favorite extends State<Favorite> {
     );
   }
 }
+

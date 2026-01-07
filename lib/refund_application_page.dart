@@ -76,62 +76,62 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
     });
     
     try {
-      var params = {'orderIds': widget.orderId};
-      var response = await HttpUtil.get(searchOrderProductListUrl, queryParameters: params);
+      // 使用新接口，通过子订单ID查询子订单信息
+      String apiUrl = refundSearchProductUrl.replaceAll('{orderId}', widget.orderId);
+      var response = await HttpUtil.get(apiUrl);
       
       if (response.statusCode == 200) {
         setState(() {
-          // 解析数据，将orderProductInfo中的字段提取出来
-          _orderProducts = (response.data['data'] as List).map((item) {
-            // 创建一个新对象，确保remainingNum和remainingAmount在顶层
-            Map<String, dynamic> productData = {
-              'remainingNum': item['remainingNum'],
-              'remainingAmount': item['remainingAmount'],
-            };
+          var responseData = response.data;
+          if (responseData['code'] == 200) {
+            var data = responseData['data'];
             
-            // 提取orderProductInfo并合并
-            var productInfo = item['orderProductInfo'] ?? {};
-            // 处理图片URL中的反引号
-            if (productInfo['imgUrl'] != null) {
-              productInfo['imgUrl'] = productInfo['imgUrl'].toString().replaceAll('`', '').trim();
-            }
-            // 合并orderProductInfo字段到顶层
-            productData.addAll(productInfo);
+            // 获取子订单信息（包含可退款金额）
+            var orderInfo = data['orderInfo'] ?? {};
             
-            return productData;
-          }).toList();
-          
-          // 为每个商品设置独立的退款数量和最大可退款数量
-          _refundQuantities = {};
-          _maxQuantities = {};
-          for (int i = 0; i < _orderProducts.length; i++) {
-            // 修复类型转换，确保正确获取remainingNum
-            int remainingNum = 0;
-            try {
-              remainingNum = int.parse(_orderProducts[i]['remainingNum'].toString());
-            } catch (e) {
-              print('解析remainingNum失败: $e');
-            }
-            _maxQuantities[i] = remainingNum;
-            _refundQuantities[i] = remainingNum > 0 ? remainingNum : 0; // 默认退全部
-          }
-          
-          // 计算所有商品的remainingAmount总和作为最大可退款金额
-          _maxRefundAmount = 0.0;
-          for (var product in _orderProducts) {
-            // 修复类型转换，确保正确获取remainingAmount
+            // 从orderInfo获取可退款金额
             double remainingAmount = 0.0;
             try {
-              remainingAmount = double.parse(product['remainingAmount'].toString());
+              remainingAmount = double.parse(orderInfo['remainingAmount']?.toString() ?? '0');
             } catch (e) {
               print('解析remainingAmount失败: $e');
             }
-            _maxRefundAmount += remainingAmount;
+            
+            // 获取商品列表
+            var orderProductInfoList = data['orderProductInfoList'] as List? ?? [];
+            
+            // 解析商品数据
+            _orderProducts = orderProductInfoList.map((item) {
+              // 处理图片URL中的反引号
+              var productInfo = item as Map<String, dynamic>;
+              if (productInfo['imgUrl'] != null) {
+                productInfo['imgUrl'] = productInfo['imgUrl'].toString().replaceAll('`', '').trim();
+              }
+              return productInfo;
+            }).toList();
+            
+            // 为每个商品设置独立的退款数量和最大可退款数量
+            _refundQuantities = {};
+            _maxQuantities = {};
+            for (int i = 0; i < _orderProducts.length; i++) {
+              // 从商品的remainingNum获取可退款数量
+              int remainingNum = 0;
+              try {
+                remainingNum = int.parse(_orderProducts[i]['remainingNum']?.toString() ?? '0');
+              } catch (e) {
+                print('解析remainingNum失败: $e');
+              }
+              _maxQuantities[i] = remainingNum;
+              _refundQuantities[i] = remainingNum > 0 ? remainingNum : 0; // 默认退全部
+            }
+            
+            // 设置最大可退款金额（从orderInfo.remainingAmount获取）
+            _maxRefundAmount = remainingAmount;
+            
+            // 更新默认退款金额为最大可退款金额
+            _refundAmount = _maxRefundAmount.toStringAsFixed(2);
+            _amountController.text = _refundAmount;
           }
-          
-          // 更新默认退款金额为最大可退款金额
-          _refundAmount = _maxRefundAmount.toStringAsFixed(2);
-          _amountController.text = _refundAmount;
         });
       }
     } catch (e) {
@@ -876,7 +876,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                           color: Color(0xFF333333),
                                         ),
                                         decoration: const InputDecoration(
-                                          prefixText: '¥',
+                                          prefixText: '₩',
                                           border: InputBorder.none,
                                           isDense: true,
                                         ),

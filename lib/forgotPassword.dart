@@ -47,15 +47,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   void initState() {
     super.initState();
-    _memberNameController.text = "test_member";
-    _emailController.text = "test@example.com";
+    _memberNameController.text = "";
+    _emailController.text = "";
     
     // 新增：实时监听密码输入，更新错误提示
     _newPwdController.addListener(() {
       final pwd = _newPwdController.text.trim();
       setState(() {
         _pwdErrorText = pwd.isNotEmpty && !_passwordRegExp.hasMatch(pwd)
-            ? "密码只能包含小写字母、数字和特殊符号"
+            ? AppLocalizations.of(context)!.translate('pwd_format_error')
             : null;
       });
     });
@@ -101,7 +101,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       );
 
       if (result.data['code'] == 200) {
-        _showToast(context, result.data['msg'] ?? "验证码已发送", isSuccess: true);
+        _showToast(context, result.data['msg'] ?? AppLocalizations.of(context)!.translate('verify_code_sent'), isSuccess: true);
         setState(() {
           _canGetVerifyCode = false;
           _verifyCodeText = AppLocalizations.of(context)!.translate('countdown_60s') ;
@@ -132,8 +132,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       }
     } catch (e) {
       String errorMsg = e is DioError
-          ? AppLocalizations.of(context)!.translate('network_error') ?? "网络错误"
-          : "发送异常，请重试";
+          ? AppLocalizations.of(context)!.translate('network_error')
+          : AppLocalizations.of(context)!.translate('send_exception_retry');
       _showToast(context, errorMsg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -148,11 +148,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     final code = _verifyCodeController.text.trim();
 
     if (memberName.isEmpty) {
-      _showToast(context, "请输入账号");
+      _showToast(context, AppLocalizations.of(context)!.translate('input_account_tip'));
       return;
     }
     if (email.isEmpty) {
-      _showToast(context, "请输入邮箱");
+      _showToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
       return;
     }
     if (code.isEmpty) {
@@ -183,8 +183,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       }
     } catch (e) {
       String errorMsg = e is DioError
-          ? "网络错误，请检查网络"
-          : "验证异常，请重试";
+          ? AppLocalizations.of(context)!.translate('network_error_check')
+          : AppLocalizations.of(context)!.translate('verify_exception_retry');
       _showToast(context, errorMsg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -204,12 +204,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     }
     // 2. 密码长度校验
     if (newPwd.length < 6) {
-      _showToast(context, "新密码长度不能少于6位");
+      _showToast(context, AppLocalizations.of(context)!.translate('new_pwd_min_length'));
       return;
     }
     // 3. 新增：密码格式校验（小写、数字、特殊符号）
     if (!_passwordRegExp.hasMatch(newPwd)) {
-      _showToast(context, "密码只能包含小写字母、数字和特殊符号");
+      _showToast(context, AppLocalizations.of(context)!.translate('pwd_format_error'));
       return;
     }
     // 4. 确认密码校验
@@ -219,7 +219,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     }
     // 5. 两次密码一致性校验
     if (newPwd != confirmPwd) {
-      _showToast(context, "两次输入的密码不一致");
+      _showToast(context, AppLocalizations.of(context)!.translate('pwd_not_match'));
       return;
     }
 
@@ -250,8 +250,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       }
     } catch (e) {
       String errorMsg = e is DioError
-          ? "网络错误，请检查网络"
-          : "重置异常，请重试";
+          ? AppLocalizations.of(context)!.translate('network_error_check')
+          : AppLocalizations.of(context)!.translate('reset_exception_retry');
       _showToast(context, errorMsg);
     } finally {
       if (mounted) setState(() => _isLoading = false);

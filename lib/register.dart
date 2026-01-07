@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'loginto.dart';
 import 'package:flutter_mall/config/service_url.dart';
@@ -310,23 +311,125 @@ class _RegisterState extends State<Register> {
     }
   }
 
-  /// 选择生日（原有逻辑完全保留）
-  void _selectBirthday() async {
-    DateTime? pickedDate = await showDatePicker(
+  /// 选择生日（自定义CupertinoPicker实现纯数字显示）
+  void _selectBirthday() {
+    DateTime now = DateTime.now();
+    int selectedYear = now.year;
+    int selectedMonth = now.month;
+    int selectedDay = now.day;
+    
+    // 显示底部弹出的日期选择器
+    showCupertinoModalPopup(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      helpText: AppLocalizations.of(context)!.translate('select_birthday_help'),
-      cancelText: AppLocalizations.of(context)!.translate('cancel'),
-      confirmText: AppLocalizations.of(context)!.translate('confirm'),
+      builder: (BuildContext builderContext) {
+        // 生成年份列表
+        List<int> years = List.generate(now.year - 1899, (index) => 1900 + index);
+        // 生成月份列表（1-12）
+        List<int> months = List.generate(12, (index) => index + 1);
+        
+        // 生成天数列表（根据月份动态调整）
+        int getDaysInMonth(int year, int month) {
+          return DateTime(year, month + 1, 0).day;
+        }
+        List<int> days = List.generate(getDaysInMonth(selectedYear, selectedMonth), (index) => index + 1);
+        
+        return Container(
+          height: 300,
+          color: Colors.white,
+          child: Column(
+            children: [
+              // 顶部操作栏
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.grey[200]!,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // 取消按钮
+                    CupertinoButton(
+                      onPressed: () => Navigator.of(builderContext).pop(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        AppLocalizations.of(context)!.translate('cancel'),
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ),
+                    // 确认按钮
+                    CupertinoButton(
+                      onPressed: () {
+                        Navigator.of(builderContext).pop();
+                        if (mounted) {
+                          setState(() {
+                            _birthdayController.text =
+                                "${selectedYear}-${selectedMonth.toString().padLeft(2, '0')}-${selectedDay.toString().padLeft(2, '0')}";
+                          });
+                        }
+                      },
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        AppLocalizations.of(context)!.translate('confirm'),
+                        style: TextStyle(color: Colors.blue, fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // 自定义日期选择器（三个独立的CupertinoPicker）
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // 年份选择器
+                    Expanded(
+                      child: CupertinoPicker(
+                        scrollController: FixedExtentScrollController(initialItem: selectedYear - 1900),
+                        itemExtent: 36,
+                        backgroundColor: Colors.white,
+                        onSelectedItemChanged: (int index) {
+                          selectedYear = years[index];
+                        },
+                        children: years.map((year) => Center(child: Text('$year', style: TextStyle(fontSize: 16, color: Colors.black)))).toList(),
+                      ),
+                    ),
+                    // 月份选择器
+                    Expanded(
+                      child: CupertinoPicker(
+                        scrollController: FixedExtentScrollController(initialItem: selectedMonth - 1),
+                        itemExtent: 36,
+                        backgroundColor: Colors.white,
+                        onSelectedItemChanged: (int index) {
+                          selectedMonth = months[index];
+                        },
+                        children: months.map((month) => Center(child: Text('$month', style: TextStyle(fontSize: 16, color: Colors.black)))).toList(),
+                      ),
+                    ),
+                    // 天数选择器
+                    Expanded(
+                      child: CupertinoPicker(
+                        scrollController: FixedExtentScrollController(initialItem: selectedDay - 1),
+                        itemExtent: 36,
+                        backgroundColor: Colors.white,
+                        onSelectedItemChanged: (int index) {
+                          selectedDay = days[index];
+                        },
+                        children: days.map((day) => Center(child: Text('$day', style: TextStyle(fontSize: 16, color: Colors.black)))).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
-    if (pickedDate != null && mounted) {
-      setState(() {
-        _birthdayController.text =
-            "${pickedDate.month}-${pickedDate.day}";
-      });
-    }
   }
 
   /// 显示提示弹窗（原有逻辑完全保留）

@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'dingbudaohang.dart';
 import 'language_provider.dart';
 import 'top_area_widget.dart';
-
+import 'search.dart';
 // 统一图片基础地址
 const String baseImageUrl = "http://192.168.0.120:8080";
 
@@ -415,40 +415,22 @@ class _HomeState extends State<Home> {
   }
 
   // 文字搜索接口调用
-  Future<void> _fetchSearchData(String keyword) async {
-    // 获取当前语言
-    final String currentLanguage =
-        Provider.of<LanguageProvider>(
-          context,
-          listen: false,
-        ).currentLocale?.languageCode ??
-        "ko";
-
-    // 准备请求参数
-    final Map<String, dynamic> searchParams = {
-      "keyword": keyword.trim(),
-      "sort": "",
-      "pageNo": "1",
-      "pageSize": "10",
-      "filters": [],
-      "language": currentLanguage,
-    };
-
-    // 显示加载状态
-    setState(() => _isSearchLoading = true);
-
-    try {
-      await HttpUtil.post(searchByKeyword, data: searchParams);
-
-      // 接口调用成功
-      print("搜索接口调用成功，关键词：$keyword");
-    } catch (e) {
-      // 处理错误
-      print("搜索接口调用失败：$e");
-    } finally {
-      // 隐藏加载状态
-      if (mounted) setState(() => _isSearchLoading = false);
+  void _jumpToSearchResult({String? keyword}) {
+    if (keyword?.isNotEmpty ?? false) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SearchResultPage(
+            keyword: keyword,
+          ),
+        ),
+      );
     }
+  }
+
+  Future<void> _fetchSearchData(String keyword) async {
+    // 跳转到搜索结果页
+    _jumpToSearchResult(keyword: keyword);
   }
 
   // 打开图片来源选择（相册/相机）- 保留国际化
@@ -883,14 +865,19 @@ class _HomeState extends State<Home> {
                                     runSpacing: 6,
                                     children:
                                         thirdCatelogList.map((thirdCatelog) {
-                                          return Text(
-                                            thirdCatelog
-                                                .getCatelogNameByLanguage(
-                                                  languageCode,
-                                                ),
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black54,
+                                          return GestureDetector(
+                                            onTap: () {
+                                              _jumpToSearchResult(keyword: thirdCatelog.getCatelogNameByLanguage(languageCode));
+                                            },
+                                            child: Text(
+                                              thirdCatelog
+                                                  .getCatelogNameByLanguage(
+                                                    languageCode,
+                                                  ),
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black54,
+                                              ),
                                             ),
                                           );
                                         }).toList(),

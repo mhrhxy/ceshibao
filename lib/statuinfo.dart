@@ -314,10 +314,6 @@ class _AccountInfoChangePageState extends State<AccountInfoChangePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context)?.translate('select_birthday') ?? '选择出生日期',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-          ),
           child!,
         ],
       ),

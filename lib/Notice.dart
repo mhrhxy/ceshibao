@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dingbudaohang.dart'; 
 import 'utils/http_util.dart';
 import 'config/service_url.dart';
+import 'app_localizations.dart';
 
 /// 通知设置页面
 
@@ -87,7 +88,7 @@ class _Notices extends State<notice> {
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                     '通知设置',
+                      AppLocalizations.of(context)!.translate('notification_settings'),
                       style: const TextStyle(
                         color: Colors.black87,
                         fontSize: 18,
@@ -111,7 +112,7 @@ class _Notices extends State<notice> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return const Center(child: Text('加载失败，请重试'));
+                      return Center(child: Text(AppLocalizations.of(context)!.translate('load_failed')));
                     } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                       return ListView.builder(
                         padding: EdgeInsets.zero,
@@ -159,7 +160,7 @@ class _Notices extends State<notice> {
                         },
                       );
                     } else {
-                      return const Center(child: Text('暂无通知设置项'));
+                      return Center(child: Text(AppLocalizations.of(context)!.translate('no_notification_settings')));
                     }
                   },
                 ),

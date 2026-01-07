@@ -374,9 +374,9 @@ class _MyorderState extends State<Myorder> {
   // 格式化价格
   String formatPrice(double price, String currency) {
     if (currency == 'RMB' || currency == 'CNY') {
-      return '¥${price.toStringAsFixed(2)}';
+      return '¥$price';
     } else {
-      return '₩${price.toStringAsFixed(2)}';
+      return '₩$price';
     }
   }
 

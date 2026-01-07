@@ -79,13 +79,6 @@ class _AddressBookPageState extends State<AddressBookPage> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
-      if (token == null || token.isEmpty) {
-        throw Exception(AppLocalizations.of(context)?.translate('please_login') ?? '请先登录');
-      }
-
       final response = await HttpUtil.get(
         uaddresslist,
         queryParameters: {"pageNum": _currentPage, "pageSize": _pageSize},
@@ -119,7 +112,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
         _isLoadingMore = false;
         if (isLoadMore) _currentPage--;
       });
-      developer.log('地址列表接口请求失败: $e');
+      // developer.log('地址列表接口请求失败: $e');
       _showErrorSnackBar(_errorMsg!);
     }
   }
@@ -127,7 +120,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
   // 格式化地址项（保持不变）
   Map<String, dynamic> _formatAddressItem(dynamic item) {
     List<String> tags = [];
-    if (item['defaultAddress'] == "2") tags.add("默认");
+    if (item['defaultAddress'] == "2") tags.add(AppLocalizations.of(context)?.translate('default_address') ?? "默认");
     if (item['tagName'] != null && item['tagName'].toString().isNotEmpty) {
       tags.addAll((item['tagName'] as String).split(','));
     }
@@ -170,7 +163,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
   Future<void> _setAsDefault(int userAddressId) async {
     final addressItem = addressList.firstWhere(
       (item) => item['userAddressId'] == userAddressId,
-      orElse: () => throw Exception("未找到地址信息"),
+      orElse: () => throw Exception(AppLocalizations.of(context)?.translate('address_not_found') ?? "未找到地址信息"),
     );
     final originalData = addressItem['original'];
 
@@ -180,12 +173,6 @@ class _AddressBookPageState extends State<AddressBookPage> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
-      if (token == null || token.isEmpty) {
-        throw Exception('请先登录');
-      }
 
       final updateData = {
         "userAddressId": userAddressId,
@@ -219,7 +206,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
         _errorMsg = e.toString();
         _showErrorSnackBar(_errorMsg!);
       });
-      developer.log('设置默认地址接口请求失败: $e');
+      // developer.log('设置默认地址接口请求失败: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -234,13 +221,6 @@ class _AddressBookPageState extends State<AddressBookPage> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
-      if (token == null || token.isEmpty) {
-        throw Exception('请先登录');
-      }
-
       final response = await HttpUtil.del(
         removelist.replaceAll('{userAddressIds}', userAddressId.toString()),
       );
@@ -258,7 +238,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
         _errorMsg = e.toString();
         _showErrorSnackBar(_errorMsg!);
       });
-      developer.log('删除地址接口请求失败: $e');
+      // developer.log('删除地址接口请求失败: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -389,7 +369,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
                 margin: const EdgeInsets.only(right: 4),
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
-                  color: tag == "默认" ? Colors.red : Colors.blue,
+                  color: tag == AppLocalizations.of(context)?.translate('default_address') ? Colors.red : Colors.blue,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(tag, style: const TextStyle(fontSize: 12, color: Colors.white)),

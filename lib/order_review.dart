@@ -318,7 +318,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                 child: ElevatedButton(
                   onPressed: _submitReview,
                   child: Text(
-                    AppLocalizations.of(context)?.translate('submit_review') ?? '提交评价',
+                    AppLocalizations.of(context).translate('submit_review') ?? '提交评价',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.white,

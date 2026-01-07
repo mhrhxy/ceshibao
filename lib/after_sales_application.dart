@@ -37,7 +37,7 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
-                      '选择退款方式',
+                      AppLocalizations.of(context)?.translate('select_refund_method') ?? '选择退款方式',
                         style: const TextStyle(
                           color: Colors.black87,
                           fontSize: 18,
@@ -78,18 +78,18 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                     color: Color(0xFFFF6B35),
                   ),
                 ),
-                title: const Text(
-                  '退货退款 或 退款',
-                  style: TextStyle(
+                title: Text(
+                  AppLocalizations.of(context)?.translate('return_refund_or_refund') ?? '退货退款 或 退款',
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                subtitle: const Padding(
-                  padding: EdgeInsets.only(top: 4),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    '点击后可申请"退货退款"或"退款（未收到货或与商家协商一致）"',
-                    style: TextStyle(
+                    AppLocalizations.of(context)?.translate('click_to_apply_return_refund_or_refund') ?? '点击后可申请"退货退款"或"退款（未收到货或与商家协商一致）"',
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF666666),
                     ),
@@ -159,17 +159,17 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
               color: Color(0xFFFF6B35),
               size: 28,
             ),
-            title: const Text(
-              '申请退货退款',
-              style: TextStyle(
+            title: Text(
+              AppLocalizations.of(context)?.translate('apply_return_refund') ?? '申请退货退款',
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            subtitle: const Padding(
-              padding: EdgeInsets.only(top: 6),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6),
               child: Text(
-                '已收到货，可申请退货退款。商家收货后为您处理退款，您可放心退货',
+                AppLocalizations.of(context)?.translate('return_refund_description') ?? '已收到货，可申请退货退款。商家收货后为您处理退款，您可放心退货',
                 style: TextStyle(
                   fontSize: 14,
                   color: Color(0xFF666666),
@@ -216,17 +216,17 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
               color: Color(0xFFFF6B35),
               size: 28,
             ),
-            title: const Text(
-              '申请退款（无需退货）',
-              style: TextStyle(
+            title: Text(
+              AppLocalizations.of(context)?.translate('apply_refund_no_return') ?? '申请退款（无需退货）',
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            subtitle: const Padding(
-              padding: EdgeInsets.only(top: 6),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6),
               child: Text(
-                '未收到货、已拒收快递、与商家协商一致，可申请退款',
+                AppLocalizations.of(context)?.translate('refund_no_return_description') ?? '未收到货、已拒收快递、与商家协商一致，可申请退款',
                 style: TextStyle(
                   fontSize: 14,
                   color: Color(0xFF666666),
@@ -265,7 +265,7 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            '当前订单状态暂不支持申请售后',
+            AppLocalizations.of(context)?.translate('current_order_status_not_support_after_sales') ?? '当前订单状态暂不支持申请售后',
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 14,
@@ -293,10 +293,10 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
+               Padding(
                 padding: EdgeInsets.only(bottom: 24),
                 child: Text(
-                  '请选择退款类型',
+                  AppLocalizations.of(context)?.translate('please_select_refund_type') ?? '请选择退款类型',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,

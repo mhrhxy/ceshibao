@@ -240,12 +240,25 @@ class _ProductDetailspayState extends State<ProductDetails> {
       final token = prefs.getString('token');
 
       if (token == null || token.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.translate('please_login') ?? '请先登录'
-            )
-          )
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text(
+                AppLocalizations.of(context)?.translate('please_login') ?? '请先登录'
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    AppLocalizations.of(context)?.translate('ok') ?? '确定'
+                  )
+                )
+              ],
+            );
+          }
         );
         setState(() => isFavorite = wasFavorite);
         return;
@@ -397,7 +410,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
         }
       }
     }
-
+  
     _updateSkuListWithLanguage("ko");
   }
 
@@ -1242,28 +1255,28 @@ class _ProductDetailspayState extends State<ProductDetails> {
                   ),
                 ),
                 // 规格特征文本
-                if (_skuFeatureTexts.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    color: Colors.white,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: _skuFeatureTexts
-                            .map((text) => Container(
-                                  margin: const EdgeInsets.only(right: 20),
-                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey.shade300, width: 1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(text, style: const TextStyle(fontSize: 14)),
-                                ))
-                            .toList(),
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 8),
+                // if (_skuFeatureTexts.isNotEmpty)
+                //   Container(
+                //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                //     color: Colors.white,
+                //     child: SingleChildScrollView(
+                //       scrollDirection: Axis.horizontal,
+                //       child: Row(
+                //         children: _skuFeatureTexts
+                //             .map((text) => Container(
+                //                   margin: const EdgeInsets.only(right: 20),
+                //                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                //                   decoration: BoxDecoration(
+                //                     border: Border.all(color: Colors.grey.shade300, width: 1),
+                //                     borderRadius: BorderRadius.circular(4),
+                //                   ),
+                //                   child: Text(text, style: const TextStyle(fontSize: 14)),
+                //                 ))
+                //             .toList(),
+                //       ),
+                //     ),
+                //   ),
+                // const SizedBox(height: 8),
                 // 商品标题
                 Container(
                   padding: const EdgeInsets.all(16),

@@ -12,6 +12,7 @@ import 'utils/shared_preferences_util.dart';
 import 'utils/http_util.dart'; // 导入HTTP工具类
 import 'config/service_url.dart'; // 导入接口地址配置
 import 'coupon.dart'; // 导入优惠券页面
+import 'activity_page.dart'; // 导入活动页面
 
 class Mine extends StatefulWidget {
   const Mine({super.key});
@@ -378,7 +379,7 @@ class _MineState extends State<Mine> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CouponPage(), // 跳转到优惠券页面
+                  builder: (context) => ActivityPage(), // 跳转到活动页面
                 ),
               );
             }
