@@ -49,17 +49,4 @@ class ScreenAdapter {
     double scale = screenWidth / designWidth;
     return fontSize * scale;
   }
-  
-  /// 根据设备尺寸获取响应式边距
-  static EdgeInsets get padding {
-    if (isTablet) {
-      return EdgeInsets.all(20);
-    }
-    return EdgeInsets.all(10);
-  }
-  
-  /// 根据设备尺寸获取响应式边距
-  static EdgeInsets get horizontalPadding {
-    return EdgeInsets.symmetric(horizontal: width(15));
-  }
 }

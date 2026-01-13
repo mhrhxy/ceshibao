@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -264,30 +265,30 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
           const FixedActionTopBar(),
           // 标题栏：仅返回键+评论标题，无语言切换
           Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: const BoxDecoration(
+            height: 48.h,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            decoration: BoxDecoration(
               color: Colors.white,
-              border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
+              border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1.w)),
             ),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 24),
+                  icon: Icon(Icons.arrow_back, color: Colors.black87, size: 24.w),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                  constraints: BoxConstraints(),
                 ),
-                const SizedBox(width: 8),
-                const Expanded(
+                SizedBox(width: 8.w),
+                Expanded(
                   child: Text(
                     "评论",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black87),
+                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500, color: Colors.black87),
                     textAlign: TextAlign.center,
                   ),
                 ),
                 // 右侧留空保持布局平衡
-                const SizedBox(width: 24),
+                SizedBox(width: 24.w),
               ],
             ),
           ),
@@ -310,12 +311,12 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
       return Center(child: Text(AppLocalizations.of(context).translate("no_comment_data")));
     }
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: EdgeInsets.symmetric(vertical: 12.h),
       itemCount: _comments.length,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        indent: 16,
-        endIndent: 16,
+      separatorBuilder: (context, index) => Divider(
+        height: 1.h,
+        indent: 16.w,
+        endIndent: 16.w,
         color: Color(0xFFF5F5F5),
       ),
       itemBuilder: (context, index) => _buildCommentItem(_comments[index]),
@@ -325,7 +326,7 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
   // 评论项：头像点击传递「评论者ID+昵称」
   Widget _buildCommentItem(Comment comment) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -338,65 +339,65 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
                 behavior: HitTestBehavior.translucent,
                 child: ClipOval(
                   child: comment.memberAvator != null
-                      ? Image.network(comment.memberAvator!, width: 36, height: 36, fit: BoxFit.cover)
-                      : const Icon(Icons.person, size: 36, color: Colors.grey),
+                      ? Image.network(comment.memberAvator!, width: 36.w, height: 36.h, fit: BoxFit.cover)
+                      : Icon(Icons.person, size: 36.w, color: Colors.grey),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Row(
                 children: [
-                  Text(comment.userName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                  Text(comment.userName, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500)),
                   if (comment.isVip)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 4),
-                      child: Icon(Icons.verified, color: Colors.red, size: 14),
+                    Padding(
+                      padding: EdgeInsets.only(left: 4.w),
+                      child: Icon(Icons.verified, color: Colors.red, size: 14.w),
                     ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           // 评分+规格
           Row(
             children: [
               _buildStarWithRating(comment.star),
-              const SizedBox(width: 4),
-              Text("${comment.star}", style: const TextStyle(fontSize: 12, color: Colors.red)),
-              const SizedBox(width: 12),
-              Text("已购 ${comment.sec}", style: const TextStyle(fontSize: 12, color: Color(0xFF999999))),
+              SizedBox(width: 4.w),
+              Text("${comment.star}", style: TextStyle(fontSize: 12.sp, color: Colors.red)),
+              SizedBox(width: 12.w),
+              Text("已购 ${comment.sec}", style: TextStyle(fontSize: 12.sp, color: Color(0xFF999999))),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           // 评论内容
-          Text(comment.info, style: const TextStyle(fontSize: 14, color: Color(0xFF333333), height: 1.5)),
-          const SizedBox(height: 12),
+          Text(comment.info, style: TextStyle(fontSize: 14.sp, color: Color(0xFF333333), height: 1.5)),
+          SizedBox(height: 12.h),
           // 评论图片（如有）
           if (comment.pictureUrl != null && comment.pictureUrl!.isNotEmpty)
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(4.w),
               child: Image.network(
                 comment.pictureUrl!,
-                width: 200,
-                height: 150,
+                width: 200.w,
+                height: 150.h,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    width: 200,
-                    height: 150,
+                    width: 200.w,
+                    height: 150.h,
                     color: Colors.grey[200],
-                    child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                    child: Icon(Icons.image_not_supported, color: Colors.grey, size: 40.w),
                   );
                 },
               ),
             ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           // 回复按钮
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () => _showReplyDialog(context, comment),
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(40, 24)),
-              child: const Text("评论", style: TextStyle(color: Color(0xFF666666), fontSize: 12)),
+              style: TextButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: 8.w), minimumSize: Size(40.w, 24.h)),
+              child: Text("评论", style: TextStyle(color: Color(0xFF666666), fontSize: 12.sp)),
             ),
           ),
         ],
@@ -410,7 +411,7 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
       children: List.generate(5, (index) => Icon(
         index < rating ? Icons.star : Icons.star_border,
         color: Colors.red,
-        size: 16,
+        size: 16.w,
       )),
     );
   }
@@ -495,69 +496,69 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // 弹窗标题栏
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("评论 ${dialogState.replies.length}", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 20),
-                        onPressed: () => Navigator.pop(sheetContext),
-                      ),
-                    ],
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("评论 ${dialogState.replies.length}", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500)),
+                  IconButton(
+                    icon: Icon(Icons.close, size: 20.w),
+                    onPressed: () => Navigator.pop(sheetContext),
+                  ),
+                ],
+              ),
+            ),
+            Divider(height: 1.h, color: Color(0xFFF5F5F5)),
+
+            // 回复列表：传递「回复者ID+昵称」回调
+            SizedBox(
+              height: MediaQuery.of(sheetContext).size.height * 0.6,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: _buildReplyList(
+                    replies: dialogState.replies,
+                    comment: comment,
+                    onSelectTarget: _selectReplyTarget,
+                    // 传递带双参数的跳转回调
+                    onAvatarTap: (memberId, nickname) => _gotoUserCommentsPage(memberId, nickname),
                   ),
                 ),
-                const Divider(height: 1, color: Color(0xFFF5F5F5)),
+              ),
+            ),
+            Divider(height: 1.h, color: Color(0xFFF5F5F5)),
 
-                // 回复列表：传递「回复者ID+昵称」回调
-                SizedBox(
-                  height: MediaQuery.of(sheetContext).size.height * 0.6,
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: _buildReplyList(
-                        replies: dialogState.replies,
-                        comment: comment,
-                        onSelectTarget: _selectReplyTarget,
-                        // 传递带双参数的跳转回调
-                        onAvatarTap: (memberId, nickname) => _gotoUserCommentsPage(memberId, nickname),
+            // 回复输入区
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _replyController,
+                      decoration: InputDecoration(
+                        hintText: dialogState.selectedTargetReplyId == "0"
+                            ? "回复 ${comment.userName}"
+                            : "回复 @${dialogState.selectedTargetMemberNickname}",
+                        hintStyle: TextStyle(color: Color(0xFF999999), fontSize: 14.sp),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.r),
+                          borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                        isDense: true,
                       ),
                     ),
                   ),
-                ),
-                const Divider(height: 1, color: Color(0xFFF5F5F5)),
-
-                // 回复输入区
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _replyController,
-                          decoration: InputDecoration(
-                            hintText: dialogState.selectedTargetReplyId == "0"
-                                ? "回复 ${comment.userName}"
-                                : "回复 @${dialogState.selectedTargetMemberNickname}",
-                            hintStyle: const TextStyle(color: Color(0xFF999999), fontSize: 14),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(color: Color(0xFFEEEEEE)),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        icon: const Icon(Icons.send, color: Colors.blue, size: 24),
-                        onPressed: () => _onSubmitReply(_replyController.text.trim()),
-                      ),
-                    ],
+                  SizedBox(width: 12.w),
+                  IconButton(
+                    icon: Icon(Icons.send, color: Colors.blue, size: 24.w),
+                    onPressed: () => _onSubmitReply(_replyController.text.trim()),
                   ),
-                ),
+                ],
+              ),
+            ),
               ],
             ),
           );
@@ -597,7 +598,7 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
                   onAvatarTap: onAvatarTap, // 子回复同样传递双参数
                   indent: 20,
                 ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
             ],
           ),
       ],
@@ -616,7 +617,7 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
       onTap: () => onSelectTarget(reply),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -628,22 +629,22 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
                 child: reply.memberAvator != null
                     ? Image.network(
                         reply.memberAvator!,
-                        width: 30,
-                        height: 30,
+                        width: 30.w,
+                        height: 30.h,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            width: 30,
-                            height: 30,
+                            width: 30.w,
+                            height: 30.h,
                             color: Colors.grey[200],
-                            child: const Icon(Icons.person, size: 30, color: Colors.grey),
+                            child: Icon(Icons.person, size: 30.w, color: Colors.grey),
                           );
                         },
                       )
-                    : const Icon(Icons.person, size: 30, color: Colors.grey),
+                    : Icon(Icons.person, size: 30.w, color: Colors.grey),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,8 +655,8 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
                       children: [
                         TextSpan(
                           text: reply.nickname,
-                          style: const TextStyle(
-                            fontSize: 13,
+                          style: TextStyle(
+                            fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
                             color: Color(0xFF666666),
                           ),
@@ -663,43 +664,43 @@ class _ShopReviewsPageState extends State<ShopReviewsPage> {
                         if (reply.targetReplyId != "0")
                           TextSpan(
                             text: " 回复 @${reply.targetMemberNickname}",
-                            style: const TextStyle(
-                              fontSize: 13,
+                            style: TextStyle(
+                              fontSize: 13.sp,
                               color: Colors.blue,
                             ),
                           ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   // 回复内容
                   Text(
                     reply.info,
-                    style: const TextStyle(fontSize: 14, color: Color(0xFF333333)),
+                    style: TextStyle(fontSize: 14.sp, color: Color(0xFF333333)),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   // 回复时间（中文格式化）
                   Text(
                     _formatTime(reply.createTime ?? ""),
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
+                    style: TextStyle(fontSize: 12.sp, color: Color(0xFF999999)),
                   ),
                   // 回复图片（如有，错误时显示占位）
                   if (reply.pictureUrl != null && reply.pictureUrl!.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8),
+                      padding: EdgeInsets.only(top: 8.h),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(4.r),
                         child: Image.network(
                           reply.pictureUrl!,
-                          width: 100,
-                          height: 100,
+                          width: 100.w,
+                          height: 100.h,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
-                              width: 100,
-                              height: 100,
+                              width: 100.w,
+                              height: 100.h,
                               color: Colors.grey[200],
-                              child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                              child: Icon(Icons.image_not_supported, color: Colors.grey, size: 40.w),
                             );
                           },
                         ),

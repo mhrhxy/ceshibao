@@ -3,14 +3,22 @@ import 'bottom_navigation_bar.dart';
 import 'loginto.dart';
 import 'cartadd.dart';
 class MainTab extends StatefulWidget {
-  const MainTab({super.key});
+  final int initialIndex; // 初始选中的页面索引
+  
+  const MainTab({super.key, this.initialIndex = 2}); // 默认选中首页
 
   @override
   State<MainTab> createState() => _MainTabState();
 }
 
 class _MainTabState extends State<MainTab> {
-  int _selectedIndex = 2; // 默认选中首页
+  late int _selectedIndex; // 使用late初始化
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex; // 使用传入的初始索引
+  }
 
   @override
   Widget build(BuildContext context) {

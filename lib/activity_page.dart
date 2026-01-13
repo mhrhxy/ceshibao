@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/dingbudaohang.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'package:flutter_mall/utils/http_util.dart';
@@ -223,14 +224,14 @@ class _ActivityPageState extends State<ActivityPage> {
         }
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: EdgeInsets.only(bottom: 16.h),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.w),
           boxShadow: [
             BoxShadow(
               color: Colors.black12,
-              blurRadius: 3,
-              offset: const Offset(0, 2),
+              blurRadius: 3.w,
+              offset: Offset(0, 2.h),
             ),
           ],
         ),
@@ -242,52 +243,52 @@ class _ActivityPageState extends State<ActivityPage> {
                   ? activity.activeSet.activeUrl 
                   : 'https://picsum.photos/800/400?random=${activity.activeSet.activeSetId}',
               width: double.infinity,
-              height: 200,
+              height: 200.h,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(
                 width: double.infinity,
-                height: 200,
+                height: 200.h,
                 color: Colors.grey[200],
-                child: const Center(
-                  child: Icon(Icons.image_not_supported, color: Colors.grey),
+                child: Center(
+                  child: Icon(Icons.image_not_supported, color: Colors.grey, size: 40.w),
                 ),
               ),
             ),
             
             // 活动标题和描述
             Positioned(
-              left: 16,
-              top: 16,
-              right: 16,
+              left: 16.w,
+              top: 16.h,
+              right: 16.w,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     activity.activeSet.activeName,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       shadows: [
                         Shadow(
                           color: Colors.black.withOpacity(0.5),
-                          offset: const Offset(0, 1),
-                          blurRadius: 2,
+                          offset: Offset(0, 1.h),
+                          blurRadius: 2.w,
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Text(
                     '${activity.coupon.type == '1' ? AppLocalizations.of(context)?.translate('full_reduction') ?? '满减' : AppLocalizations.of(context)?.translate('discount_coupon') ?? '折扣券'}: 满${activity.coupon.amount}返${activity.coupon.returnAmount}',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       color: Colors.white,
                       shadows: [
                         Shadow(
                           color: Colors.black.withOpacity(0.5),
-                          offset: const Offset(0, 1),
-                          blurRadius: 2,
+                          offset: Offset(0, 1.h),
+                          blurRadius: 2.w,
                         ),
                       ],
                     ),
@@ -298,27 +299,27 @@ class _ActivityPageState extends State<ActivityPage> {
             
             // 右下角按钮
             Positioned(
-              right: 16,
-              bottom: 16,
+              right: 16.w,
+              bottom: 16.h,
               child: ElevatedButton(
                 onPressed: isClaimed ? null : () => _claimCoupon(activity),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   foregroundColor: Colors.white,
                   disabledForegroundColor: Colors.white, // 确保禁用状态下文字也是白色
-                  side: BorderSide(color: Colors.white, width: 1),
+                  side: BorderSide(color: Colors.white, width: 1.w),
                   disabledBackgroundColor: Colors.transparent, // 确保禁用状态下背景也是透明
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4.w),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 8.h),
                   elevation: 0,
-                  textStyle: const TextStyle(fontSize: 14),
+                  textStyle: TextStyle(fontSize: 14.sp),
                 ),
                 child: Text(
                   isClaimed ? AppLocalizations.of(context)?.translate('already_claimed') ?? '已领取' : AppLocalizations.of(context)?.translate('claim_now') ?? '立即领取',
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                   ),
                 ),
               ),
@@ -338,27 +339,29 @@ class _ActivityPageState extends State<ActivityPage> {
           // 返回栏 + 标题
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                  icon: Icon(Icons.arrow_back, color: Colors.black87, size: 24.w),
                   onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints.tightFor(width: 48.w, height: 48.h),
                 ),
                 Expanded(
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
                       AppLocalizations.of(context)?.translate('activity') ?? '活动',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black87,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 48),
+                SizedBox(width: 48.w),
               ],
             ),
           ),
@@ -367,9 +370,14 @@ class _ActivityPageState extends State<ActivityPage> {
           Expanded(
             child: Container(
               color: const Color(0xFFF5F5F5),
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.w),
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.w,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                      ),
+                    )
                   : _errorMsg.isNotEmpty
                       ? Center(
                           child: Column(
@@ -377,11 +385,18 @@ class _ActivityPageState extends State<ActivityPage> {
                             children: [
                               Text(
                                 _errorMsg,
-                                style: const TextStyle(color: Colors.red),
+                                style: TextStyle(color: Colors.red, fontSize: 14.sp),
                               ),
+                              SizedBox(height: 16.h),
                               TextButton(
                                 onPressed: _fetchActivityList,
-                                child: Text(AppLocalizations.of(context)?.translate('retry') ?? '重试'),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)?.translate('retry') ?? '重试',
+                                  style: TextStyle(fontSize: 14.sp),
+                                ),
                               ),
                             ],
                           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'settings.dart';
-import 'utils/screen_adapter.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'message.dart';
 import 'main_tab.dart';
 
@@ -37,8 +37,7 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 获取状态栏高度并添加到导航栏中
-    double statusBarHeight = ScreenAdapter.statusBarHeight;
+    double statusBarHeight = ScreenUtil().statusBarHeight;
     
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -52,7 +51,7 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 if (showLogo)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: InkWell(
                       onTap: () {
                         // 点击logo返回底部导航栏页面
@@ -65,11 +64,11 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
                       },
                       child: Image.asset(
                         logoAsset,
-                        width: 120,
-                        height: 50,
+                        width: 120.w,
+                        height: 50.h,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
+                          return Icon(
                             Icons.image_not_supported,
                             color: Colors.red,
                           );
@@ -84,7 +83,7 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
                   icon: Icon(
                     Icons.notifications_none,
                     color: iconColor,
-                    size: 24,
+                    size: 24.w,
                   ),
                   onPressed: () {
                     // 导入Message页面并跳转到消息页面
@@ -95,13 +94,13 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     );
                   },
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
                 ),
                 IconButton(
                   icon: Icon(
                     Icons.brightness_7_outlined,
                     color: iconColor,
-                    size: 24,
+                    size: 24.w,
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -111,20 +110,20 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     );
                   },
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
               ],
             ),
           ),
         ),
         if (showDivider)
-          Container(height: 0.5, color: const Color(0xFFEEEEEE)),
+          Container(height: 0.5.h, color: const Color(0xFFEEEEEE)),
       ],
     );
   }
 
   @override
   Size get preferredSize =>
-      Size.fromHeight(barHeight + ScreenAdapter.statusBarHeight + (showDivider ? 0.5 : 0));
+      Size.fromHeight(barHeight + ScreenUtil().statusBarHeight + (showDivider ? 0.5.h : 0));
 }

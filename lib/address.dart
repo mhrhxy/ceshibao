@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dingbudaohang.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mall/config/service_url.dart';
-import 'dart:developer' as developer;
 import 'addressupdate.dart';
 import 'app_localizations.dart';
 import 'utils/http_util.dart';
@@ -265,19 +264,19 @@ class _AddressBookPageState extends State<AddressBookPage> {
       body: Column(
         children: [
           Container(
-            height: 44,
+            height: 44.h,
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  icon: Icon(Icons.arrow_back, color: Colors.black, size: 20.w),
                   onPressed: () => Navigator.pop(context),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Text(
                   AppLocalizations.of(context)?.translate('address_book_management') ?? "地址簿管理",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500),
                 ),
                 const Spacer(),
                 GestureDetector(
@@ -292,7 +291,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
                   },
                   child: Text(
                     AppLocalizations.of(context)?.translate('add_new_address') ?? "新增地址",
-                    style: TextStyle(color: Colors.red, fontSize: 14),
+                    style: TextStyle(color: Colors.red, fontSize: 14.sp),
                   ),
                 ),
               ],
@@ -309,10 +308,10 @@ class _AddressBookPageState extends State<AddressBookPage> {
                           children: [
                             Text(
                               _errorMsg!,
-                              style: const TextStyle(color: Colors.grey, fontSize: 14),
+                              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h),
                             ElevatedButton(
                               onPressed: () {
                                 _currentPage = 1;
@@ -329,21 +328,21 @@ class _AddressBookPageState extends State<AddressBookPage> {
                         onRefresh: _onRefresh,
                         child: ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                           itemCount: addressList.length + (_isLoadingMore ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index == addressList.length) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                child: Center(child: Text(AppLocalizations.of(context)?.translate('loading') ?? "加载中...", style: TextStyle(color: Colors.grey, fontSize: 14))),
+                                padding: EdgeInsets.symmetric(vertical: 16.h),
+                                child: Center(child: Text(AppLocalizations.of(context)?.translate('loading') ?? "加载中...", style: TextStyle(color: Colors.grey, fontSize: 14.sp))),
                               );
                             }
                             return Container(
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              padding: const EdgeInsets.all(12),
+                              margin: EdgeInsets.symmetric(vertical: 4.h),
+                              padding: EdgeInsets.all(12.w),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(4.r),
                               ),
                               child: _buildAddressItem(index, addressList[index]),
                             );
@@ -362,31 +361,31 @@ class _AddressBookPageState extends State<AddressBookPage> {
       children: [
         Row(
           children: [
-            Text("${address['name']} ${address['phone']}", style: const TextStyle(fontSize: 14, color: Color(0xFF333333))),
-            const SizedBox(width: 8),
+            Text("${address['name']} ${address['phone']}", style: TextStyle(fontSize: 14.sp, color: Color(0xFF333333))),
+            SizedBox(width: 8.w),
             ...address['tags'].map((tag) {
               return Container(
-                margin: const EdgeInsets.only(right: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                margin: EdgeInsets.only(right: 4.w),
+                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: tag == AppLocalizations.of(context)?.translate('default_address') ? Colors.red : Colors.blue,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
-                child: Text(tag, style: const TextStyle(fontSize: 12, color: Colors.white)),
+                child: Text(tag, style: TextStyle(fontSize: 12.sp, color: Colors.white)),
               );
             }).toList(),
           ],
         ),
-        const SizedBox(height: 8),
-        Text(address['address'], style: const TextStyle(fontSize: 14, color: Color(0xFF666666))),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
+        Text(address['address'], style: TextStyle(fontSize: 14.sp, color: Color(0xFF666666))),
+        SizedBox(height: 8.h),
         Row(
           children: [
             if (address['isDefault'])
                Row(
                 children: [
                     Checkbox(value: true, onChanged: null, activeColor: Colors.red, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                    Text(AppLocalizations.of(context)?.translate('already_default') ?? "已默认", style: TextStyle(fontSize: 14, color: Color(0xFF999999))),
+                    Text(AppLocalizations.of(context)?.translate('already_default') ?? "已默认", style: TextStyle(fontSize: 14.sp, color: Color(0xFF999999))),
                   ],
               )
             else
@@ -400,14 +399,14 @@ class _AddressBookPageState extends State<AddressBookPage> {
                       activeColor: Colors.red,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    Text(AppLocalizations.of(context)?.translate('set_as_default') ?? "设为默认", style: TextStyle(fontSize: 14, color: Color(0xFF333333))),
+                    Text(AppLocalizations.of(context)?.translate('set_as_default') ?? "设为默认", style: TextStyle(fontSize: 14.sp, color: Color(0xFF333333))),
                 ],
               ),
             const Spacer(),
             _buildActionButton(AppLocalizations.of(context)?.translate('delete') ?? "删除", address['userAddressId']),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             _buildActionButton(AppLocalizations.of(context)?.translate('copy') ?? "复制", address['userAddressId']),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             _buildActionButton(AppLocalizations.of(context)?.translate('edit') ?? "修改", address['userAddressId']),
           ],
         ),
@@ -441,11 +440,11 @@ class _AddressBookPageState extends State<AddressBookPage> {
         }
       },
       style: TextButton.styleFrom(
-        minimumSize: const Size(60, 28),
+        minimumSize: Size(60.w, 28.h),
         backgroundColor: const Color(0xFFCCCCCC),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
         foregroundColor: Colors.white,
-        textStyle: const TextStyle(fontSize: 14),
+        textStyle: TextStyle(fontSize: 14.sp),
       ),
       child: Text(text),
     );

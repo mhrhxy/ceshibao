@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dingbudaohang.dart'; 
 
 /// 我的页面
@@ -24,12 +25,12 @@ class _Myorders extends State<Myorder> {
             Container(
               color: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              height: 40,
+              height: 40.h,
               child: Row(
                 children: [
                   // 返回按钮
                   IconButton(
-                    icon: const Icon(Icons.chevron_left, color: Colors.black87,size: 16,),
+                    icon: Icon(Icons.chevron_left, color: Colors.black87,size: 16.w,),
                     onPressed: () {
                       Navigator.pop(context); // 返回上一页
                     },
@@ -37,10 +38,10 @@ class _Myorders extends State<Myorder> {
                     constraints: const BoxConstraints(), // 去除默认按钮大小限制
                   ),
                   // 标题
-                  const Text(
+                   Text(
                     "我的订单",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),

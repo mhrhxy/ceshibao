@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dingbudaohang.dart';
 import 'dart:convert';
 import 'app_localizations.dart';
@@ -181,19 +182,19 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
           children: [
             // 标题和返回按钮区域
             Container(
-              height: 44,
+              height: 44.h,
               color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
+              padding: EdgeInsets.symmetric(horizontal: 6.w),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    icon: Icon(Icons.arrow_back, color: Colors.black, size: 20.w),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
                     child: Text(
                       AppLocalizations.of(context)?.translate('review_product') ?? "评论商品",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -202,7 +203,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
             // 页面内容区域
             Expanded(
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16.w),
                 child: _isLoading ?
                   const Center(child: CircularProgressIndicator()) :
                   ListView.builder(
@@ -212,30 +213,30 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                       return Card(
                         color: Colors.white,
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(16.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // 店铺信息
                               Text(
                                 widget.order.shopName ?? '',
-                                style: const TextStyle(
-                                  fontSize: 14,
+                                style:  TextStyle(
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              SizedBox(height: 12.h),
                               // 商品信息
                               Row(
                                 children: [
                                   Image.network(
                                     (product['orderProductInfo']?['imgUrl'] ?? '').replaceAll('`', ''),
-                                    width: 80,
-                                    height: 80,
+                                    width: 80.w,
+                                    height: 80.h,
                                     fit: BoxFit.cover,
                                   ),
-                                  const SizedBox(width: 12),
+                                  SizedBox(width: 12.w),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,18 +248,18 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                                           AppLocalizations.of(context)?.locale.languageCode == 'en' ?
                                           (product['orderProductInfo']?['titleEn'] ?? product['orderProductInfo']?['titleCn'] ?? product['orderProductInfo']?['title'] ?? '') :
                                           (product['orderProductInfo']?['title'] ?? product['orderProductInfo']?['titleEn'] ?? product['orderProductInfo']?['titleCn'] ?? ''),
-                                          style: const TextStyle(
-                                            fontSize: 14,
+                                          style:  TextStyle(
+                                            fontSize: 14.sp,
                                             color: Colors.black87,
                                           ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        const SizedBox(height: 4),
+                                        SizedBox(height: 4.h),
                                         Text(
                                           '${_parseSpecs(product['orderProductInfo']?['sku'])} x ${product['orderProductInfo']?['quantity'] ?? 1}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
+                                          style:  TextStyle(
+                                            fontSize: 12.sp,
                                             color: Colors.grey,
                                           ),
                                         ),
@@ -267,24 +268,24 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16.h),
                               // 评分
                               Text(
                                 AppLocalizations.of(context)?.translate('rating') ?? '评分:',
-                                style: const TextStyle(
-                                  fontSize: 14,
+                                style:  TextStyle(
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               _buildRatingStars(index),
                               const SizedBox(height: 16),
                               // 评价输入
                               Text(
                                 AppLocalizations.of(context)?.translate('review') ?? '评价:',
-                                style: const TextStyle(
-                                  fontSize: 14,
+                                style:  TextStyle(
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
@@ -295,7 +296,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                                 maxLines: 5,
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(4),
+                                    borderRadius: BorderRadius.circular(4.w),
                                   ),
                                   hintText: AppLocalizations.of(context)?.translate('write_your_review') ?? '请输入您的评价',
                                 ),
@@ -310,24 +311,24 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
             ),
             // 提交评价按钮
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.w),
               color: Colors.white,
               child: SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 48.h,
                 child: ElevatedButton(
                   onPressed: _submitReview,
                   child: Text(
                     AppLocalizations.of(context).translate('submit_review') ?? '提交评价',
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style:  TextStyle(
+                      fontSize: 16.sp,
                       color: Colors.white,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(4.w),
                     ),
                   ),
                 ),

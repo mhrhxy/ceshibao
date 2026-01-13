@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -135,19 +136,19 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
         ...List.generate(5, (index) {
           final starPosition = index + 1;
           if (rating >= starPosition) {
-            return const Icon(Icons.star, color: Colors.red, size: 16);
+            return Icon(Icons.star, color: Colors.red, size: 16.w);
           } else if (rating > (starPosition - 1) && rating % 1 >= 0.5) {
-            return const Icon(Icons.star_half, color: Colors.red, size: 16);
+            return Icon(Icons.star_half, color: Colors.red, size: 16.w);
           } else {
-            return const Icon(Icons.star_border, color: Colors.red, size: 16);
+            return Icon(Icons.star_border, color: Colors.red, size: 16.w);
           }
         }),
-        const SizedBox(width: 6),
+        SizedBox(width: 6.w),
         Text(
           rating.toStringAsFixed(1),
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.red,
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -164,26 +165,26 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
         children: [
           // 标题栏（新增语言切换下拉框）
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1)),
+              border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1.w)),
               color: Colors.white,
             ),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                  icon: Icon(Icons.arrow_back, color: Colors.black87),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  iconSize: 22,
+                  iconSize: 22.w,
                 ),
-                const SizedBox(width: 12),
-                const Expanded(
+                SizedBox(width: 12.w),
+                Expanded(
                   child: Text(
                     "我的评论",
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
                     ),
@@ -205,9 +206,10 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF4D4F)),
+          strokeWidth: 2.w,
         ),
       );
     }
@@ -219,13 +221,19 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
           children: [
             Text(
               _errorMsg!,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             ElevatedButton(
               onPressed: _fetchComments,
-              child: const Text("重试"),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              ),
+              child: Text(
+                "重试",
+                style: TextStyle(fontSize: 14.sp),
+              ),
             ),
           ],
         ),
@@ -233,27 +241,27 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
     }
 
     if (_comments.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           "暂无评论数据",
-          style: TextStyle(color: Colors.grey, fontSize: 16),
+          style: TextStyle(color: Colors.grey, fontSize: 16.sp),
         ),
       );
     }
 
     // 评论列表（将“已购”替换为商品名称）
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       itemCount: _comments.length,
       separatorBuilder: (context, index) => Container(
-        height: 1,
+        height: 1.w,
         color: Colors.grey[100],
-        margin: const EdgeInsets.symmetric(horizontal: 16),
+        margin: EdgeInsets.symmetric(horizontal: 16.w),
       ),
       itemBuilder: (context, index) {
         final comment = _comments[index];
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           color: Colors.white,
           child: Stack(
             children: [
@@ -269,26 +277,26 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
                         child: comment.shopLogo != null
                             ? Image.network(
                                 comment.shopLogo!.startsWith('http') ? comment.shopLogo! : 'https:${comment.shopLogo!}',
-                                width: 32,
-                                height: 32,
+                                width: 32.w,
+                                height: 32.h,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => _defaultShopIcon(),
                               )
                             : _defaultShopIcon(),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       // 店铺名称
                       Text(
                         comment.shopName,
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: TextStyle(
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                           color: Colors.black87,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
 
                   // 2. 商品名称+规格（上面）+ 星星评分（下面）
                   Column(
@@ -296,35 +304,35 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
                     children: [
                       Text(
                         "${comment.productName} ${comment.parsedSpecs}", // 显示商品名称+规格
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                         softWrap: true, // 允许自动换行
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       _buildStarWithRating(comment.star),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
 
                   // 3. 评论内容
                   Text(
                     comment.info,
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
 
                   // 4. 商品图片（如有）
                   if (comment.productPicture != null && comment.productPicture!.isNotEmpty)
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(4.w),
                       child: Image.network(
                         comment.productPicture!.startsWith('http') ? comment.productPicture! : 'https:${comment.productPicture!}',
-                        width: 200,
-                        height: 150,
+                        width: 200.w,
+                        height: 150.h,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (_, __, ___) => Icon(
                           Icons.image_not_supported,
                           color: Colors.grey,
-                          size: 100,
+                          size: 100.w,
                         ),
                       ),
                     ),
@@ -337,9 +345,9 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
                 right: 0,
                 child: Text(
                   "${comment.points}P",
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.green,
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -354,13 +362,13 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
   // 默认店铺图标
   Widget _defaultShopIcon() {
     return Container(
-      width: 32,
-      height: 32,
-      decoration: const BoxDecoration(
+      width: 32.w,
+      height: 32.h,
+      decoration: BoxDecoration(
         color: Color(0xFFF5F5F5),
         shape: BoxShape.circle,
       ),
-      child: const Icon(Icons.store, size: 18, color: Colors.grey),
+      child: Icon(Icons.store, size: 18.w, color: Colors.grey),
     );
   }
 }

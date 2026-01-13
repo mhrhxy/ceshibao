@@ -38,8 +38,8 @@ class CouponData {
   String name;
   int platform;
   int count;
-  int amount;
-  int returnAmount; // 新增字段：满减金额或折扣百分比
+  double amount;
+  double returnAmount; // 新增字段：满减金额或折扣百分比
   int perLimit;
   int minPoint;
   String startTime;
@@ -75,8 +75,8 @@ class CouponData {
         name: json["name"] ?? '',
         platform: json["platform"] is String ? int.tryParse(json["platform"]) ?? 0 : json["platform"] ?? 0,
         count: json["count"] is String ? int.tryParse(json["count"]) ?? 0 : json["count"] ?? 0,
-        amount: json["amount"] is String ? int.tryParse(json["amount"]) ?? 0 : json["amount"] ?? 0,
-        returnAmount: json["returnAmount"] is String ? int.tryParse(json["returnAmount"]) ?? 0 : json["returnAmount"] ?? 0, // 从JSON解析
+        amount: json["amount"] is String ? double.tryParse(json["amount"]) ?? 0 : json["amount"] ?? 0,
+        returnAmount: json["returnAmount"] is String ? double.tryParse(json["returnAmount"]) ?? 0 : json["returnAmount"] ?? 0, // 从JSON解析
         perLimit: json["perLimit"] is String ? int.tryParse(json["perLimit"]) ?? 0 : json["perLimit"] ?? 0,
         minPoint: json["minPoint"] is String ? int.tryParse(json["minPoint"]) ?? 0 : json["minPoint"] ?? 0,
         startTime: json["startTime"] ?? '',
@@ -121,18 +121,18 @@ class CouponData {
     
     // 修复amount类型转换
     dynamic amountValue = json['amount'];
-    int amount = 0;
+    double amount = 0;
     if (amountValue is String) {
-      amount = int.tryParse(amountValue) ?? 0;
+      amount = double.tryParse(amountValue) ?? 0;
     } else {
       amount = amountValue ?? 0;
     }
     
     // 修复returnAmount类型转换
     dynamic returnAmountValue = json['returnAmount'];
-    int returnAmount = 0;
+    double returnAmount = 0;
     if (returnAmountValue is String) {
-      returnAmount = int.tryParse(returnAmountValue) ?? 0;
+      returnAmount = double.tryParse(returnAmountValue) ?? 0;
     } else {
       returnAmount = returnAmountValue ?? 0;
     }
@@ -155,7 +155,7 @@ class CouponData {
       amount: amount, // 满多少金额
       returnAmount: returnAmount, // 满减金额或折扣百分比
       perLimit: 1, // 默认为1，可根据实际业务调整
-      minPoint: amount, // 满多少
+      minPoint: amount.toInt(), // 满多少
       startTime: json['startTime'] ?? '',
       endTime: json['endTime'] ?? '',
       useType: 0, // 默认为未使用，可根据实际业务调整
@@ -179,27 +179,27 @@ class CouponData {
     
     // 修复amount类型转换
     dynamic amountValue = json['amount'];
-    int amount = 0;
+    double amount = 0;
     if (amountValue is String) {
-      amount = int.tryParse(amountValue) ?? 0;
+      amount = double.tryParse(amountValue) ?? 0;
     } else {
       amount = amountValue ?? 0;
     }
     
     // 修复returnAmount类型转换
     dynamic returnAmountValue = json['returnAmount'];
-    int returnAmount = 0;
+    double returnAmount = 0;
     if (returnAmountValue is String) {
-      returnAmount = int.tryParse(returnAmountValue) ?? 0;
+      returnAmount = double.tryParse(returnAmountValue) ?? 0;
     } else {
       returnAmount = returnAmountValue ?? 0;
     }
     
     if (type == 1) { // 满减券
-      return '满$amount减$returnAmount元优惠券';
+      return '满${amount.toInt()}减${returnAmount.toInt()}元优惠券';
     } else { // 折扣券
       double discount = returnAmount / 10; // 转换为折扣，例如90 → 9折
-      return '满$amount打${discount}折优惠券';
+      return '满${amount.toInt()}打${discount}折优惠券';
     }
   }
 }

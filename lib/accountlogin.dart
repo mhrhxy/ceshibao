@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dingbudaohang.dart';
@@ -94,7 +95,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
           // 返回栏（完全不变）
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Row(
               children: [
                 IconButton(
@@ -106,15 +107,15 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                     alignment: Alignment.center,
                     child: Text(
                       AppLocalizations.of(context)?.translate('account_login') ?? '账户及登录',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black87,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
+                  ), 
                 ),
-                const SizedBox(width: 48),
+                SizedBox(width: 48.w),
               ],
             ),
           ),
@@ -122,7 +123,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
           Expanded(
             child: Container(
               color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
               child: ListView(
                 children: [
                   // 1. 账户信息确认/变更（不变）
@@ -138,7 +139,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                       );
                     },
                   ),
-                  const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                  Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
 
                   // 2. 第三方登录（不变）
                   _buildAccountItem(
@@ -146,7 +147,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                     icon: Icons.people_outline,
                     onTap: () {},
                   ),
-                  const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                  Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
 
                   // 3. 密码更改（不变）
                   _buildAccountItem(
@@ -161,7 +162,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                       );
                     },
                   ),
-                  const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                  Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
 
                   // 4. 注销（仅修改此项）
                   _buildAccountItem(
@@ -171,7 +172,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                     icon: Icons.exit_to_app_outlined,
                     onTap: _isLoggingOut ? null : _handleLogout, // 加载中禁用
                   ),
-                  const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                  Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
 
                   // 5. 退出会员（不变）
                   _buildAccountItem(
@@ -207,20 +208,20 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.black87,
-              fontSize: 16,
+              fontSize: 16.sp,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Icon(
             icon,
             color: Colors.grey[400],
-            size: 18,
+            size: 18.sp,
           ),
         ],
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       onTap: onTap,
     );
   }

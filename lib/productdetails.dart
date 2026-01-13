@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
 import 'dingbudaohang.dart';
 import './config/service_url.dart';
@@ -682,7 +683,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
   }
 
   // 加入购物车接口调用方法
-  Future<bool> _addToCart(dynamic selectedSku) async {
+  Future<bool> _addToCart(dynamic selectedSku, {int quantity = 1}) async {
     // 校验关键参数
     if ((_productId == null || _productId!.isEmpty) || (_mpId == null || _mpId!.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -751,7 +752,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
         "productUrl": _imageUrls.isNotEmpty ? _imageUrls[0] : "",
         "totalPrice": selectedSku != null ? ((selectedSku['price'] as num? ?? 0).toDouble() / 100.0) : _originalPriceCNY,
         "totalPlusPrice": selectedSku != null ? ((selectedSku['promotion_price'] as num? ?? (selectedSku['price'] as num? ?? 0)).toDouble() / 100.0) : (_promotionPriceCNY ?? _originalPriceCNY),
-        "num": 1,
+        "num": quantity,
         "productPrice": selectedSku != null ? ((selectedSku['price'] as num? ?? 0).toDouble() / 100.0) : _originalPriceCNY,
         "productPlusPrice": selectedSku != null ? ((selectedSku['promotion_price'] as num? ?? (selectedSku['price'] as num? ?? 0)).toDouble() / 100.0) : (_promotionPriceCNY ?? _originalPriceCNY),
         "minNum": _minNum,
@@ -792,6 +793,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
   void _showBottomSheet({bool isBuyNow = false}) {
     Map<String, String> _localSelectedSpecs = {};
     dynamic _localSelectedSku;
+    int _quantity = 1; // 默认数量为1
 
     showModalBottomSheet(
       context: context,
@@ -842,7 +844,10 @@ class _ProductDetailspayState extends State<ProductDetails> {
               }
 
               if (isMatch) {
-                sheetSetState(() => _localSelectedSku = sku);
+                sheetSetState(() {
+                  _localSelectedSku = sku;
+                  _quantity = 1; // 选择不同规格时重置数量为默认值
+                });
                 break;
               }
             }
@@ -868,12 +873,12 @@ class _ProductDetailspayState extends State<ProductDetails> {
                   children: [
                     Image.network(
                       _imageUrls.isNotEmpty ? _imageUrls[0] : "https://picsum.photos/id/237/100/100",
-                      width: 100,
-                      height: 100,
+                      width: 100.w,
+                      height: 100.h,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => const Icon(Icons.error, color: Colors.red),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -881,44 +886,118 @@ class _ProductDetailspayState extends State<ProductDetails> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text(
-                                displayPromotionPriceCNY != null && displayPromotionPriceCNY != displayPriceCNY
-                                  ? "¥${displayPromotionPriceCNY.toStringAsFixed(2)}"
-                                  : "¥${displayPriceCNY.toStringAsFixed(2)}",
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                              Flexible(
+                                child: Text(
+                                  displayPromotionPriceCNY != null && displayPromotionPriceCNY != displayPriceCNY
+                                    ? "¥${displayPromotionPriceCNY.toStringAsFixed(2)}"
+                                    : "¥${displayPriceCNY.toStringAsFixed(2)}",
+                                  style:  TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               if (displayPromotionPriceCNY != null && displayPromotionPriceCNY != displayPriceCNY) ...[
-                                const SizedBox(width: 16),
-                                Text(
-                                  "¥${displayPriceCNY.toStringAsFixed(2)}",
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 16,
-                                    decoration: TextDecoration.lineThrough,
+                                SizedBox(width: 16.w),
+                                Flexible(
+                                  child: Text(
+                                    "¥${displayPriceCNY.toStringAsFixed(2)}",
+                                    style:  TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 16.sp,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8.h),
                           Text(
                             _productTitle,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 14.sp),
                           ),
                           if (_localSelectedSku != null) ...[
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4.h),
                             Text(
                               "${AppLocalizations.of(context)?.translate('stock') ?? '库存'}: ${_localSelectedSku['quantity'] ?? 0}件",
-                              style: const TextStyle(
+                              style:  TextStyle(
                                 color: Colors.grey,
-                                fontSize: 12,
+                                fontSize: 12.sp,
                               ),
+                            ),
+                            SizedBox(height: 4.h),
+                            Row(
+                              children: [
+                                Text(
+                                  "${AppLocalizations.of(context)?.translate('quantity') ?? '数量'}: ",
+                                  style: TextStyle(color: Colors.grey, fontSize: 12.sp),
+                                ),
+                                // 减号按钮
+                                GestureDetector(
+                                  onTap: () {
+                                    if (_quantity > 1) {
+                                      sheetSetState(() => _quantity--);
+                                    }
+                                  },
+                                  child: Container(
+                                    width: 24.w,
+                                    height: 24.h,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey, width: 1.w),
+                                      borderRadius: BorderRadius.circular(3.r),
+                                    ),
+                                    child: Text(
+                                      '-',
+                                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                // 数量显示
+                                Container(
+                                  width: 40.w,
+                                  height: 24.h,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      top: BorderSide(color: Colors.grey, width: 1.w),
+                                      bottom: BorderSide(color: Colors.grey, width: 1.w),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '$_quantity',
+                                    style: TextStyle(fontSize: 12.sp),
+                                  ),
+                                ),
+                                // 加号按钮
+                                GestureDetector(
+                                  onTap: () {
+                                    int maxQuantity = _localSelectedSku != null ? (_localSelectedSku['quantity'] ?? 1) : 1;
+                                    if (_quantity < maxQuantity) {
+                                      sheetSetState(() => _quantity++);
+                                    }
+                                  },
+                                  child: Container(
+                                    width: 24.w,
+                                    height: 24.h,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey, width: 1.w),
+                                      borderRadius: BorderRadius.circular(3.r),
+                                    ),
+                                    child: Text(
+                                      '+',
+                                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ],
@@ -930,7 +1009,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                     ),
                   ],
                 ),
-                const Divider(height: 24),
+                Divider(height: 24.h),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: EdgeInsets.zero,
@@ -947,12 +1026,12 @@ class _ProductDetailspayState extends State<ProductDetails> {
                               children: [
                                 Text(
                                   propName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
+                                  style:  TextStyle(
+                                    fontSize: 16.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                SizedBox(height: 12.h),
                                 LayoutBuilder(
                                   builder: (context, constraints) {
                                     int maxButtonsPerRow = 3;
@@ -982,7 +1061,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                                 decoration: BoxDecoration(
                                                   border: Border.all(
                                                     color: isSelected ? Colors.red : Colors.grey,
-                                                    width: 1,
+                                                    width: 1.w,
                                                   ),
                                                   borderRadius: BorderRadius.circular(4),
                                                 ),
@@ -991,7 +1070,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                                   value,
                                                   style: TextStyle(
                                                     color: isSelected ? Colors.red : Colors.black,
-                                                    fontSize: 14,
+                                                    fontSize: 14.sp,
                                                   ),
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
@@ -1003,15 +1082,16 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                     );
                                   },
                                 ),
-                                const SizedBox(height: 20),
+                                SizedBox(height: 20.h),
                               ],
                             );
                           }).toList(),
                         ] else ...[
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            padding: EdgeInsets.symmetric(vertical: 20.h),
                             child: Text(
                               AppLocalizations.of(context)?.translate('no_spec_data') ?? "暂无规格数据",
+                              style: TextStyle(fontSize: 14.sp),
                             ),
                           ),
                         ],
@@ -1021,18 +1101,18 @@ class _ProductDetailspayState extends State<ProductDetails> {
                 ),
                 Container(
                   width: double.infinity,
-                  height: 50,
+                  height: 50.h,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                     ),
                     onPressed: () async {
                       if (!isBuyNow) {
                         // 加入购物车逻辑
-                        bool addSuccess = await _addToCart(_localSelectedSku);
+                        bool addSuccess = await _addToCart(_localSelectedSku, quantity: _quantity);
                         if (addSuccess) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -1085,8 +1165,8 @@ class _ProductDetailspayState extends State<ProductDetails> {
                     },
                     child: Text(
                       isBuyNow ? AppLocalizations.of(context)?.translate('buy_now_btn') ?? "直接购买" : AppLocalizations.of(context)?.translate('add_to_cart_btn') ?? "加入购物车",
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16.sp,
                         color: Colors.white,
                       ),
                     ),
@@ -1107,7 +1187,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
         return Icon(
           index < stars ? Icons.star : Icons.star_border,
           color: Colors.yellow,
-          size: 16,
+          size: 16.r,
         );
       }),
     );
@@ -1130,76 +1210,76 @@ class _ProductDetailspayState extends State<ProductDetails> {
                     _imageUrls.isEmpty
                         ? Container(
                             width: double.infinity,
-                            height: 400,
+                            height: 400.h,
                             color: Colors.grey[100],
                             child: const Center(child: CircularProgressIndicator()),
                           )
                         : SizedBox(
-                            height: 400,
+                            height: 400.h,
                             child: PageView.builder(
                               itemCount: _imageUrls.length,
                               onPageChanged: (index) => setState(() => _currentImageIndex = index),
                               itemBuilder: (context, index) => Image.network(
                                 _imageUrls[index],
                                 width: double.infinity,
-                                height: 400,
+                                height: 400.h,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => Container(
                                   color: Colors.grey[200],
-                                  child: const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                                  child:  Icon(Icons.image_not_supported, size: 50.r, color: Colors.grey),
                                 ),
                               ),
                             ),
                           ),
                     if (_imageUrls.length > 1)
                       Positioned(
-                        bottom: 16,
+                        bottom: 16.h,
                         left: 0,
                         right: 0,
                         child: Container(
                           alignment: Alignment.center,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Text(
                               '${_currentImageIndex + 1}/${_imageUrls.length}',
-                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                              style: TextStyle(color: Colors.white, fontSize: 14.sp),
                             ),
                           ),
                         ),
                       ),
                     Positioned(
-                      top: 16,
-                      left: 16,
+                      top: 16.h,
+                      left: 16.w,
                       child: Container(
-                        width: 40,
-                        height: 40,
+                        width: 40.w,
+                        height: 40.h,
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                          icon: Icon(Icons.arrow_back, color: Colors.white, size: 20.r),
                           onPressed: () => Navigator.pop(context),
                           padding: EdgeInsets.zero,
                         ),
                       ),
                     ),
                     Positioned(
-                      top: 16,
-                      right: 16,
+                      top: 16.h,
+                      right: 16.w,
                       child: Container(
-                        width: 40,
-                        height: 40,
+                        width: 40.w,
+                        height: 40.h,
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.share, color: Colors.white, size: 20),
+                          icon: Icon(Icons.share, color: Colors.white, size: 20.r),
                           onPressed: () {},
                           padding: EdgeInsets.zero,
                         ),
@@ -1209,7 +1289,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                 ),
                 // 平台信息栏
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
                   color: const Color(0xFFF5F5F5),
                   child: Row(
                     children: [
@@ -1218,16 +1298,16 @@ class _ProductDetailspayState extends State<ProductDetails> {
                         style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
                       ),
                       Text(AppLocalizations.of(context)?.translate('view_on') ?? "上查看", style: const TextStyle(color: Colors.grey)),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                         decoration: BoxDecoration(
                           color: Colors.blue,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(4.r),
                         ),
                         child: Text(
                           AppLocalizations.of(context)?.translate('seller_product_view') ?? "查看卖家·商品",
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                          style: TextStyle(color: Colors.white, fontSize: 12.sp),
                         ),
                       ),
                       const Spacer(),
@@ -1249,7 +1329,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                           }
                         },
                         underline: const SizedBox(),
-                        style: const TextStyle(fontSize: 14, color: Colors.black),
+                        style: TextStyle(fontSize: 14.sp, color: Colors.black),
                       ),
                     ],
                   ),
@@ -1257,78 +1337,78 @@ class _ProductDetailspayState extends State<ProductDetails> {
                 // 规格特征文本
                 // if (_skuFeatureTexts.isNotEmpty)
                 //   Container(
-                //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                //     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
                 //     color: Colors.white,
                 //     child: SingleChildScrollView(
                 //       scrollDirection: Axis.horizontal,
                 //       child: Row(
                 //         children: _skuFeatureTexts
                 //             .map((text) => Container(
-                //                   margin: const EdgeInsets.only(right: 20),
-                //                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                //                   margin: EdgeInsets.only(right: 20.w),
+                //                   padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
                 //                   decoration: BoxDecoration(
-                //                     border: Border.all(color: Colors.grey.shade300, width: 1),
-                //                     borderRadius: BorderRadius.circular(4),
+                //                     border: Border.all(color: Colors.grey.shade300, width: 1.w),
+                //                     borderRadius: BorderRadius.circular(4.r),
                 //                   ),
-                //                   child: Text(text, style: const TextStyle(fontSize: 14)),
+                //                   child: Text(text, style: TextStyle(fontSize: 14.sp)),
                 //                 ))
                 //             .toList(),
                 //       ),
                 //     ),
                 //   ),
-                // const SizedBox(height: 8),
+                // SizedBox(height: 8.h),
                 // 商品标题
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16.w),
                   color: Colors.white,
                   child: Text(
                     _productTitle,
-                    style: const TextStyle(fontSize: 16, height: 1.3),
+                    style: TextStyle(fontSize: 16.sp, height: 1.3),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 // 价格展示
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16.w),
                   color: Colors.white,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         _mainPromotionPriceKRW != null && _mainPromotionPriceKRW != _mainOriginalPriceKRW
-                            ? "KRW ${_mainPromotionPriceKRW?.toStringAsFixed(0)}"
-                            : "KRW ${_mainOriginalPriceKRW.toStringAsFixed(0)}",
-                        style: const TextStyle(
-                          fontSize: 18,
+                            ? "KRW ${((_mainPromotionPriceKRW! / 10).floor() * 10).toString()}"
+                            : "KRW ${((_mainOriginalPriceKRW / 10).floor() * 10).toString()}",
+                        style: TextStyle(
+                          fontSize: 18.sp,
                           color: Colors.black,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       if (_mainPromotionPriceKRW != null && _mainPromotionPriceKRW != _mainOriginalPriceKRW) ...[
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Text(
-                          "KRW ${_mainOriginalPriceKRW.toStringAsFixed(0)}",
-                          style: const TextStyle(
-                            fontSize: 14,
+                          "KRW ${((_mainOriginalPriceKRW / 10).floor() * 10).toString()}",
+                          style: TextStyle(
+                            fontSize: 14.sp,
                             color: Colors.grey,
                             decoration: TextDecoration.lineThrough,
                           ),
                         ),
                       ],
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Text(
                         _mainPromotionPriceCNY != null && _mainPromotionPriceCNY != _mainOriginalPriceCNY
                             ? "¥${_mainPromotionPriceCNY?.toStringAsFixed(2)}"
                             : "¥${_mainOriginalPriceCNY.toStringAsFixed(2)}",
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        style: TextStyle(fontSize: 14.sp, color: Colors.grey),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 // 评价区域
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16.w),
                   color: Colors.white,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1344,17 +1424,17 @@ class _ProductDetailspayState extends State<ProductDetails> {
                         },
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: EdgeInsets.only(bottom: 8.h),
                           child: Text(
                             AppLocalizations.of(context)?.translate('Reviews') ?? "评价",
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       // 评论列表
                       _isCommentsLoading
                           ? const Center(child: CircularProgressIndicator())
@@ -1375,7 +1455,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                   : Column(
                                       children: _realComments
                                           .map((comment) => Container(
-                                                margin: const EdgeInsets.only(bottom: 16),
+                                                margin: EdgeInsets.only(bottom: 16.h),
                                                 child: Row(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
@@ -1407,16 +1487,16 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                                         child: comment.memberAvator != null
                                                             ? Image.network(
                                                                 _fixImageUrl(comment.memberAvator!),
-                                                                width: 18,
-                                                                height: 18,
+                                                                width: 18.w,
+                                                                height: 18.h,
                                                                 fit: BoxFit.cover,
                                                                 errorBuilder: (_, __, ___) =>
-                                                                    const Icon(Icons.person, size: 18, color: Colors.grey),
+                                                                    Icon(Icons.person, size: 18.r, color: Colors.grey),
                                                               )
-                                                            : const Icon(Icons.person, size: 18, color: Colors.grey),
+                                                            : Icon(Icons.person, size: 18.r, color: Colors.grey),
                                                       ),
                                                     ),
-                                                    const SizedBox(width: 8),
+                                                    SizedBox(width: 8.w),
                                                     Expanded(
                                                       child: Column(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1426,97 +1506,97 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                                               // 显示 nickname
                                                               Text(
                                                                 comment.nickname,
-                                                                style: const TextStyle(fontSize: 14),
+                                                                style: TextStyle(fontSize: 14.sp),
                                                               ),
                                                               // VIP标识
                                                               if (comment.goodObserve == "2") ...[
-                                                                const SizedBox(width: 4),
+                                                                SizedBox(width: 4.w),
                                                                 Container(
-                                                                  padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                                                                  padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
                                                                   color: Colors.orange,
-                                                                  child: const Text(
+                                                                  child: Text(
                                                                     "V",
-                                                                    style: TextStyle(color: Colors.white, fontSize: 10),
+                                                                    style: TextStyle(color: Colors.white, fontSize: 10.sp),
                                                                   ),
                                                                 ),
                                                               ],
-                                                              const SizedBox(width: 8),
+                                                              SizedBox(width: 8.w),
                                                               Text(
                                                                 comment.parsedSec,
-                                                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                                                style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                                                               ),
                                                             ],
                                                           ),
-                                                          const SizedBox(height: 8),
+                                                          SizedBox(height: 8.h),
                                                           _buildStarRating(comment.star),
-                                                          const SizedBox(height: 4),
+                                                          SizedBox(height: 4.h),
                                                           Text(
                                                             comment.info,
-                                                            style: const TextStyle(fontSize: 14),
+                                                            style: TextStyle(fontSize: 14.sp),
                                                           ),
                                                         ],
                                                       ),
                                                     ),
-                                                    const SizedBox(width: 8),
+                                                    SizedBox(width: 8.w),
                                                     // 评论图片
                                                     if (comment.pictureUrl != null && comment.pictureUrl!.isNotEmpty)
                                                       Image.network(
                                                         _fixImageUrl(comment.pictureUrl!),
-                                                        width: 100,
-                                                        height: 100,
+                                                        width: 100.w,
+                                                        height: 100.h,
                                                         fit: BoxFit.cover,
-                                                        errorBuilder: (_, __, ___) => const Icon(Icons.error, color: Colors.red),
+                                                        errorBuilder: (_, __, ___) => Icon(Icons.error, color: Colors.red, size: 20.r),
                                                       ),
                                                   ],
                                                 ),
                                               ))
                                           .toList(),
                                     ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20.h),
                       // 店铺信息
                       Row(
                         children: [
                           ClipOval(
                             child: Image.network(
                               "https://picsum.photos/id/64/60/60",
-                              width: 50,
-                              height: 50,
+                              width: 50.w,
+                              height: 50.h,
                               fit: BoxFit.cover,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12.w),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   _shopName,
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: 4.h),
                                 Row(
                                   children: [
-                                    const Icon(Icons.star, color: Colors.yellow, size: 16),
-                                    const Icon(Icons.star, color: Colors.yellow, size: 16),
-                                    const Icon(Icons.star, color: Colors.yellow, size: 16),
-                                    const Icon(Icons.star, color: Colors.yellow, size: 16),
-                                    const Icon(Icons.star, color: Colors.yellow, size: 16),
-                                    const SizedBox(width: 4),
-                                    const Text("5.0", style: TextStyle(fontSize: 14)),
-                                    const SizedBox(width: 8),
+                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
+                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
+                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
+                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
+                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
+                                    SizedBox(width: 4.w),
+                                    Text("5.0", style: TextStyle(fontSize: 14.sp)),
+                                    SizedBox(width: 8.w),
                                     Text(
                                       AppLocalizations.of(context)?.translate('1700_fans') ?? "1700粉丝",
-                                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                      style: TextStyle(fontSize: 14.sp, color: Colors.grey),
                                     ),
                                   ],
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.chat_bubble_outline, color: Colors.grey),
+                          Icon(Icons.chat_bubble_outline, color: Colors.grey, size: 24.r),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -1524,12 +1604,12 @@ class _ProductDetailspayState extends State<ProductDetails> {
                             children: [
                               Text(
                                 "${AppLocalizations.of(context)?.translate('product_quality') ?? '宝贝质量'}5.0",
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 14.sp),
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4.h),
                               Text(
                                 AppLocalizations.of(context)?.translate('100vip_positive_rate') ?? "100VIP 好评率100%",
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -1537,29 +1617,29 @@ class _ProductDetailspayState extends State<ProductDetails> {
                             children: [
                               Text(
                                 "${AppLocalizations.of(context)?.translate('service_guarantee') ?? '服务保障'}5.0",
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 14.sp),
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4.h),
                               Text(
                                 AppLocalizations.of(context)?.translate('100vip_positive_rate') ?? "100VIP 好评率100%",
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                               ),
                             ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24.h),
                       // 商品详情
                       Text(
                         AppLocalizations.of(context)?.translate('ProductDetails') ?? "宝贝详情",
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                       _description.isEmpty
-                          ? const Center(
+                          ? Center(
                               child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20),
-                                child: CircularProgressIndicator(),
+                                padding: EdgeInsets.symmetric(vertical: 20.h),
+                                child: const CircularProgressIndicator(),
                               ),
                             )
                           : Html(
@@ -1573,58 +1653,58 @@ class _ProductDetailspayState extends State<ProductDetails> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 80),
+                SizedBox(height: 80.h),
               ],
             ),
           ),
           // 底部操作栏
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             color: Colors.white,
             child: Row(
               children: [
                 IconButton(
                   icon: Icon(
                     Icons.favorite,
-                    size: 28,
+                    size: 28.r,
                     color: isFavorite ? Colors.red : Colors.grey,
                   ),
                   onPressed: _toggleFavorite,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Expanded(
                   child: SizedBox(
-                    height: 48,
+                    height: 48.h,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
                       onPressed: () => _showBottomSheet(isBuyNow: false),
                       child: Text(
                         AppLocalizations.of(context)?.translate('add_to_cart_kr') ?? "加入购物车",
-                        style: const TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(fontSize: 16.sp, color: Colors.white),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Expanded(
                   child: SizedBox(
-                    height: 48,
+                    height: 48.h,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
                       onPressed: () => _showBottomSheet(isBuyNow: true),
                       child: Text(
                         AppLocalizations.of(context)?.translate('buy_request_kr') ?? "请求购买",
-                        style: const TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(fontSize: 16.sp, color: Colors.white),
                       ),
                     ),
                   ),

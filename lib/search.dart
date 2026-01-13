@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dingbudaohang.dart';
@@ -36,7 +37,10 @@ class Product {
 
   // 静态方法，通过State中的汇率计算价格
   static String calculateKRWPrice(double cnyPrice, double exchangeRate) {
-    return (cnyPrice * exchangeRate).toStringAsFixed(0);
+    double krwPrice = cnyPrice * exchangeRate;
+    // 舍去个位数：例如6034 → 6030，14354 → 14350
+    int roundedPrice = (krwPrice / 10).floor() * 10;
+    return roundedPrice.toString();
   }
   
   factory Product.fromJson(Map<String, dynamic> json, {double exchangeRate = 200.0}) {
@@ -257,18 +261,18 @@ class _SearchResultPageState extends State<SearchResultPage> {
   void _showImageSourceActionSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: 16.h),
               child: Text(
                 AppLocalizations.of(context)!.translate("select_image_source"),
-                style: const TextStyle(fontSize: 16)
+                style: TextStyle(fontSize: 16.sp)
               ),
             ),
             ListTile(
@@ -423,113 +427,78 @@ class _SearchResultPageState extends State<SearchResultPage> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.all(6),
+        margin: EdgeInsets.all(6.r),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 2)],
+          borderRadius: BorderRadius.circular(8.r),
+          boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1.w, blurRadius: 2.w)],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // 确保容器高度适应内容
           children: [
             Container(
               width: double.infinity,
-              height: 140,
+              height: 130.h,
               clipBehavior: Clip.antiAlias,
-              decoration: const BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(8))),
+              decoration: BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(8.r))),
               child: Image.network(
                 product.image,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.error)),
+                errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.error, size: 24.w)),
                 loadingBuilder: (_, child, progress) => progress == null
                     ? child
-                    : const Center(child: CircularProgressIndicator(strokeWidth: 1)),
+                    : Center(child: CircularProgressIndicator(strokeWidth: 1.w)),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(6),
+              padding: EdgeInsets.all(6.r),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min, // 确保容器高度适应内容
                 children: [
+                  // 商品名称
                   Text(
                     product.name,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3.h),
+                  
+                  // 价格和店铺信息水平布局
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // 价格信息
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             product.priceKRW,
-                            style: const TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 11.sp, color: Colors.black, fontWeight: FontWeight.bold),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             product.priceCNY,
-                            style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                            style: TextStyle(fontSize: 9.sp, color: Colors.grey[600]),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 8,
-                            backgroundImage: product.sellerAvatar.isNotEmpty
-                                ? NetworkImage(product.sellerAvatar)
-                                : null,
-                          ),
-                          const SizedBox(width: 2),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: 70,
-                                child: Text(
-                                  product.seller,
-                                  style: const TextStyle(fontSize: 10),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(height: 1),
-                              Row(
-                                children: List.generate(5, (i) => Icon(
-                                  Icons.star,
-                                  color: i < product.rating.floor() ? Colors.orange : Colors.grey[300],
-                                  size: 8,
-                                )),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 2),
-                          Container(
-                            width: 15,
-                            height: 15,
-                            decoration: BoxDecoration(
-                              color: Colors.orange,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                '淘',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      
+                      // 店铺名称
+                      SizedBox(
+                        width: 70.w,
+                        child: Text(
+                          product.seller,
+                          style: TextStyle(fontSize: 10.sp, color: Colors.black87, fontWeight: FontWeight.w500),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                        ),
                       ),
                     ],
                   ),
@@ -555,22 +524,22 @@ class _SearchResultPageState extends State<SearchResultPage> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        padding: const EdgeInsets.all(12),
+        margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+        padding: EdgeInsets.all(12.r),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1, blurRadius: 2)],
+          borderRadius: BorderRadius.circular(8.r),
+          boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 1.w, blurRadius: 2.w)],
         ),
         child: Row(
           children: [
             Container(
-              width: 100,
-              height: 100,
+              width: 100.w,
+              height: 100.h,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade100, width: 1),
+                borderRadius: BorderRadius.circular(6.r),
+                border: Border.all(color: Colors.grey.shade100, width: 1.w),
               ),
               child: Image.network(
                 product.image,
@@ -578,72 +547,43 @@ class _SearchResultPageState extends State<SearchResultPage> {
                 loadingBuilder: (_, child, progress) => progress == null
                     ? child
                     : Container(
-                        color: Colors.grey.shade50,
-                        child: const Center(child: CircularProgressIndicator(strokeWidth: 1)),
+                        color:Colors.grey.shade50,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 1.w)),
                       ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundImage: product.sellerAvatar.isNotEmpty
-                            ? NetworkImage(product.sellerAvatar)
-                            : null,
-                        backgroundColor: Colors.grey.shade100,
-                      ),
-                      const SizedBox(width: 6),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 150,
-                            child: Text(
-                              product.seller,
-                              style: const TextStyle(fontSize: 13, color: Colors.black87),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: List.generate(5, (i) => Icon(
-                              Icons.star,
-                              color: i < product.rating.floor() ? Colors.orange : Colors.grey[300],
-                              size: 14,
-                            )),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 4),
-                    ],
+                  Text(
+                    product.seller,
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w500),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   Text(
                     product.name,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.black87),
+                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500, color: Colors.black87),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         product.priceKRW,
-                        style: const TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 16.sp, color: Colors.black, fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         product.priceCNY,
-                        style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                        style: TextStyle(fontSize: 13.sp, color: Colors.grey[500]),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -676,20 +616,20 @@ class _SearchResultPageState extends State<SearchResultPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       alignment: Alignment.centerLeft,
       child: Text(
         filterText,
-        style: const TextStyle(color: Colors.red, fontSize: 14),
+        style: TextStyle(color: Colors.red, fontSize: 14.sp),
       ),
     );
   }
 
   Widget _buildLoadMoreIndicator() {
     return _isLoadingMore
-        ? const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        ? Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.h),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2.w)),
           )
         : const SizedBox.shrink();
   }
@@ -706,44 +646,44 @@ class _SearchResultPageState extends State<SearchResultPage> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                        icon: Icon(Icons.arrow_back, color: Colors.black87, size: 24.w),
                         onPressed: () => Navigator.pop(context),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       Expanded(
                         child: Container(
-                          height: 40,
+                          height: 40.h,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Row(
                             children: [
                               Container(
-                                width: 24,
-                                height: 24,
-                                margin: const EdgeInsets.only(left: 12),
+                                width: 24.w,
+                                height: 24.h,
+                                margin: EdgeInsets.only(left: 12.w),
                                 decoration: BoxDecoration(
                                   color: Colors.orange,
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(6.r),
                                 ),
-                                child: const Center(
+                                child: Center(
                                   child: Text(
                                     '淘',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 16,
+                                      fontSize: 16.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8.w),
                               Expanded(
                                 child: TextField(
                                   controller: _searchController,
@@ -751,7 +691,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
                                     hintText: AppLocalizations.of(context)!.translate("input_search_hint"),
                                     border: InputBorder.none,
                                     isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                                    contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                                   ),
                                   onSubmitted: (value) {
                                     if (value.trim().isNotEmpty) {
@@ -762,11 +702,11 @@ class _SearchResultPageState extends State<SearchResultPage> {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.camera_alt, color: Colors.grey),
+                                icon: Icon(Icons.camera_alt, color: Colors.grey, size: 24.w),
                                 onPressed: _isImageSearchLoading ? null : _showImageSourceActionSheet,
                               ),
                               IconButton(
-                                icon: const Icon(Icons.search, color: Colors.grey),
+                                icon: Icon(Icons.search, color: Colors.grey, size: 24.w),
                                 onPressed: _isSearchLoading
                                     ? null
                                     : () {
@@ -781,11 +721,12 @@ class _SearchResultPageState extends State<SearchResultPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       IconButton(
                         icon: Icon(
                           _isListView ? Icons.grid_view : Icons.list,
                           color: Colors.black87,
+                          size: 24.w,
                         ),
                         onPressed: () => setState(() => _isListView = !_isListView),
                       ),
@@ -794,7 +735,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
                 ),
                 if (!_isImageSearch)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                     child: Row(
                       children: [
                         GestureDetector(
@@ -815,17 +756,12 @@ class _SearchResultPageState extends State<SearchResultPage> {
                             AppLocalizations.of(context)!.translate("sort_sales"),
                             style: TextStyle(
                               color: _currentSort.startsWith("SALE_QTY") ? Colors.red : Colors.black87,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: _currentSort.startsWith("SALE_QTY") ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 20),
-                        Text(
-                          AppLocalizations.of(context)!.translate("sort_rating"),
-                          style: const TextStyle(color: Colors.black87, fontSize: 14),
-                        ),
-                        const SizedBox(width: 20),
+                        SizedBox(width: 20.w),
                         GestureDetector(
                           onTap: () {
                             setState(() {
@@ -844,7 +780,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
                             AppLocalizations.of(context)!.translate("sort_price"),
                             style: TextStyle(
                               color: _currentSort.startsWith("PRICE") ? Colors.red : Colors.black87,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: _currentSort.startsWith("PRICE") ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
@@ -861,12 +797,12 @@ class _SearchResultPageState extends State<SearchResultPage> {
               backgroundColor: Colors.white,
               child: _products.isEmpty
                   ? _isSearchLoading || _isImageSearchLoading
-                      ? const Center(child: CircularProgressIndicator())
+                      ? Center(child: CircularProgressIndicator(strokeWidth: 2.w))
                       : Center(child: Text(AppLocalizations.of(context)!.translate("no_product_data")))
                   : _isListView
                       ? ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(vertical: 0),
+                          padding: EdgeInsets.symmetric(vertical: 0),
                           itemCount: 1 + _products.length + 1,
                           itemBuilder: (_, index) {
                             if (index == 0) return _buildFilterTag();
@@ -878,19 +814,19 @@ class _SearchResultPageState extends State<SearchResultPage> {
                         )
                       : ListView(
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(vertical: 0),
+                          padding: EdgeInsets.symmetric(vertical: 0),
                           children: [
                             _buildFilterTag(),
                             GridView.builder(
                               physics: const NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                                 childAspectRatio: 0.8,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8.w,
+                                mainAxisSpacing: 8.h,
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                               itemCount: _products.length,
                               itemBuilder: (_, index) => _buildGridItem(_products[index]),
                             ),

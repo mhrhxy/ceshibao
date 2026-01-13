@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dingbudaohang.dart';
 import './config/service_url.dart';
 import './utils/http_util.dart';
@@ -75,11 +76,11 @@ class _MyAnnouncementDetailState extends State<MyAnnouncementDetail> {
           children: [
             Container(
               color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                    icon: Icon(Icons.arrow_back, color: Colors.black87, size: 20.w),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
@@ -87,41 +88,41 @@ class _MyAnnouncementDetailState extends State<MyAnnouncementDetail> {
                       alignment: Alignment.center,
                       child: Text(
                         AppLocalizations.of(context)?.translate("announcement_detail") ?? '公告详情',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.black87,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48),
+                  SizedBox(width: 48.w),
                 ],
               ),
             ),
             // 页面内容区域
             Expanded(
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator())
                   : announcementDetail.isNotEmpty
                       ? Container(
                           color: Colors.white,
-                          margin: const EdgeInsets.all(16),
-                          padding: const EdgeInsets.all(16),
+                          margin: EdgeInsets.all(16.w),
+                          padding: EdgeInsets.all(16.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // 公告标题
                               Text(
                                 announcementDetail['noticeTitle'] ?? '',
-                                style: const TextStyle(
-                                  fontSize: 18,
+                                style: TextStyle(
+                                  fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
                                 textAlign: TextAlign.left,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16.h),
                               // 公告类型和日期
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -129,27 +130,27 @@ class _MyAnnouncementDetailState extends State<MyAnnouncementDetail> {
                                   Text(
                                     announcementDetail['noticeType'] == '2' ? (AppLocalizations.of(context)?.translate("important") ?? '重要') : (AppLocalizations.of(context)?.translate("normal") ?? '普通'),
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       color: announcementDetail['noticeType'] == '2' ? Colors.red : Colors.grey[600],
                                     ),
                                   ),
                                   Text(
                                     announcementDetail['createTime'] ?? '',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       color: Colors.grey[600],
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(height: 24.h),
                               // 公告内容 - 使用Html组件渲染HTML内容
                               Expanded(
                                 child: Html(
                                   data: announcementDetail['noticeContent'] ?? '',
                                   style: {
                                     'body': Style(
-                                      fontSize: FontSize(16),
+                                      fontSize: FontSize(16.sp),
                                       color: Colors.black87,
                                       lineHeight: LineHeight(1.6),
                                     ),

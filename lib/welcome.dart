@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'main_tab.dart';
-
 ///
 /// 欢迎页面(启动页)
 ///
@@ -41,8 +40,8 @@ class _WelcomeState extends State<Welcome> {
         alignment: Alignment.center,
         child: Image.asset(
           "images/shopping_cart.png",
-          width: 200,
-          height: 105,
+          width: 200.w,
+          height: 105.h,
           fit: BoxFit.contain,
         ));
   }

@@ -9,7 +9,7 @@ import 'package:flutter_mall/language_provider.dart';
 import 'package:flutter_mall/loginto.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../config/service_url.dart';
 import '../config/nav_key.dart';
 
 /// http工具类（修复post方法参数必填问题）
@@ -19,7 +19,7 @@ class HttpUtil {
   static Dio get dio {
     if (_dio == null) {
       BaseOptions options = BaseOptions(
-        baseUrl: "http://192.168.0.120:8080/",
+        baseUrl: baseUrl,
         connectTimeout: const Duration(milliseconds: 5000),
         receiveTimeout: const Duration(milliseconds: 5000),
       );

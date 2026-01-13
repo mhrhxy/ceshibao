@@ -1,5 +1,6 @@
 // 支付方式页面
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'config/service_url.dart';
 import 'utils/http_util.dart';
 import 'package:dio/dio.dart'; // 导入Response类
@@ -120,11 +121,11 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
             // 顶部导航栏（保持原有白色背景，与内容区衔接）
             Container(
               color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                    icon: Icon(Icons.arrow_back, color: Colors.black87, size: 24.w),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
@@ -132,15 +133,15 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
                       alignment: Alignment.center,
                       child: Text(
                         localizations.translate('payment_method_settings'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.black87,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48),
+                  SizedBox(width: 48.w),
                 ],
               ),
             ),
@@ -230,13 +231,13 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
     required ValueChanged<bool> onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18), // 上下内边距加大，更美观
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h), // 上下内边距加大，更美观
       // 底部灰色分割线（区分各项，不破坏白色背景整体感）
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
             color: Colors.grey[200]!, // 浅灰色分割线
-            width: 1,
+            width: 1.w,
           ),
         ),
       ),
@@ -245,8 +246,8 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: 16.sp,
               color: Colors.black87,
               fontWeight: FontWeight.w400,
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'utils/http_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dingbudaohang.dart';
@@ -140,8 +141,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 5,
-                    blurRadius: 10,
+                    spreadRadius: 5.w,
+                    blurRadius: 10.w,
                   ),
                 ],
               ),
@@ -163,8 +164,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                 context,
                               )?.translate('search_postcode') ??
                               '邮编搜索',
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style:  TextStyle(
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -345,7 +346,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
               : Column(
                 children: [
                   Container(
-                    height: 44,
+                    height: 44.h,
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
@@ -357,7 +358,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                           ),
                           onPressed: () => Navigator.pop(context),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8.w),
                         Text(
                           widget.userAddressId == null
                               ? (AppLocalizations.of(
@@ -368,8 +369,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                     context,
                                   )?.translate('update_address') ??
                                   '修改地址'),
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style:  TextStyle(
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -404,11 +405,11 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                           )?.translate('consignee') ??
                                           '收货人',
                                       style: TextStyle(
-                                        fontSize: 14,
+                                        fontSize: 14.sp,
                                         color: Color(0xFF333333),
                                       ),
                                     ),
-                                    const SizedBox(width: 16),
+                                    SizedBox(width: 16.w),
                                     Expanded(
                                       child: TextField(
                                         controller: _nameController,
@@ -428,12 +429,12 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                           ),
                                           contentPadding: EdgeInsets.zero,
                                         ),
-                                        style: const TextStyle(fontSize: 14),
+                                        style: TextStyle(fontSize: 14.sp),
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 16),
+                                SizedBox(height: 16.h),
                                 Row(
                                   children: [
                                     Text(
@@ -442,7 +443,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                           )?.translate('phone') ??
                                           '手机号',
                                       style: TextStyle(
-                                        fontSize: 14,
+                                        fontSize: 14.sp,
                                         color: Color(0xFF333333),
                                       ),
                                     ),
@@ -469,7 +470,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                           contentPadding: EdgeInsets.zero,
                                         ),
                                         keyboardType: TextInputType.phone,
-                                        style: const TextStyle(fontSize: 14),
+                                        style: TextStyle(fontSize: 14.sp),
                                       ),
                                     ),
                                   ],
@@ -498,7 +499,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                           )?.translate('address') ??
                                           '地址',
                                       style: TextStyle(
-                                        fontSize: 14,
+                                        fontSize: 14.sp,
                                         color: Color(0xFF333333),
                                       ),
                                     ),
@@ -521,7 +522,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                             color: Color(0xFF999999),
                                           ),
                                         ),
-                                        style: const TextStyle(fontSize: 14),
+                                        style: TextStyle(fontSize: 14.sp),
                                         readOnly: true,
                                       ),
                                     ),
@@ -548,7 +549,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                               context,
                                             )?.translate('search_postcode') ??
                                             '搜索邮编',
-                                        style: TextStyle(fontSize: 12),
+                                        style: TextStyle(fontSize: 12.sp),
                                       ),
                                     ),
                                   ],
@@ -577,7 +578,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                           ) ??
                                           '设置为默认地址',
                                       style: TextStyle(
-                                        fontSize: 14,
+                                        fontSize: 14.sp,
                                         color: Color(0xFF333333),
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -603,16 +604,16 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                       ) ??
                                       '注：下单时优先使用该地址',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                     color: Color(0xFF999999),
                                   ),
                                 ),
-                                const Divider(
-                                  height: 1,
+                                 Divider(
+                                  height: 1.w,
                                   color: Color(0xFFEEEEEE),
                                   indent: 16,
                                 ),
-                                const SizedBox(height: 12),
+                                SizedBox(height: 12.h),
                                 Row(
                                   children: [
                                     Text(
@@ -656,7 +657,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                                         _selectedTag == tag
                                                             ? Colors.red
                                                             : Colors.black,
-                                                    fontSize: 13,
+                                                    fontSize: 13.sp,
                                                   ),
                                                 ),
                                               ),
@@ -688,7 +689,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                                     )?.translate('custom') ??
                                                     '自定义',
                                                 style: TextStyle(
-                                                  fontSize: 13,
+                                                  fontSize: 13.sp,
                                                   color: Colors.black,
                                                 ),
                                               ),
@@ -702,7 +703,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                 if (_isCustomTagEditing)
                                   Column(
                                     children: [
-                                      const SizedBox(height: 12),
+                                      SizedBox(height: 12.h),
                                       Row(
                                         children: [
                                           Expanded(
@@ -732,8 +733,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                                     ),
                                               ),
                                               maxLength: 4,
-                                              style: const TextStyle(
-                                                fontSize: 13,
+                                              style:  TextStyle(
+                                                fontSize: 13.sp,
                                               ),
                                               onSubmitted:
                                                   (_) => _submitCustomTag(),
@@ -776,8 +777,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                   context,
                                 )?.translate('confirm_update') ??
                                 '确认修改'),
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style:  TextStyle(
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

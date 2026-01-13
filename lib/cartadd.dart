@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'Payment.dart';
 import 'utils/http_util.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dingbudaohang.dart';
 import 'productdetails.dart';
+import 'self_product_details.dart';
 import 'package:flutter_mall/app_localizations.dart';
 
 // 购物车页面
@@ -131,6 +133,7 @@ class CollectItem {
   final double? productPrice;
   final String shopName;
   final String productUrl;
+  final int selfSupport; // 是否自营：1=非自营，2=自营
 
   CollectItem({
     required this.collectId,
@@ -139,6 +142,7 @@ class CollectItem {
     this.productPrice,
     required this.shopName,
     required this.productUrl,
+    this.selfSupport = 1, // 默认非自营
   });
 
   factory CollectItem.fromJson(Map<String, dynamic> json) {
@@ -150,6 +154,7 @@ class CollectItem {
           json['productPrice'] != null ? (json['productPrice'] as num).toDouble() : null,
       shopName: json['shopName'] ?? '未知店铺',
       productUrl: json['productUrl'] ?? '',
+      selfSupport: int.tryParse(json['selfSupport']?.toString() ?? '1') ?? 1, // 处理API返回的字符串类型
     );
   }
 }
@@ -845,7 +850,7 @@ class _CartState extends State<Cart> {
 
   Widget _buildDeleteAction(CartItem item, Shop shop) {
     return SizedBox(
-      width: 120,
+      width: 120.w,
       child: GestureDetector(
         onTap: () => _deleteCartItem(shop, item),
         child: Container(
@@ -853,13 +858,13 @@ class _CartState extends State<Cart> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.delete, color: Colors.white, size: 24),
-              const SizedBox(height: 4),
+              Icon(Icons.delete, color: Colors.white, size: 24.r),
+              SizedBox(height: 4.h),
               Text(
                 AppLocalizations.of(context)?.translate('delete') ?? '删除',
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -874,7 +879,7 @@ class _CartState extends State<Cart> {
     final String imageUrl = item.productUrl.startsWith('http')
         ? item.productUrl
         : 'https:${item.productUrl}';
-    final double maxOffset = 120;
+    final double maxOffset = 120.w;
 
     return Stack(
       children: [
@@ -901,11 +906,11 @@ class _CartState extends State<Cart> {
           child: Transform.translate(
             offset: Offset(_itemOffset[item.cartId]!, 0),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: const BoxDecoration(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border(
-                  top: BorderSide(color: Color(0xFFEEEEEE), width: 1),
+                  top: BorderSide(color: Color(0xFFEEEEEE), width: 1.w),
                 ),
               ),
               child: Row(
@@ -916,35 +921,36 @@ class _CartState extends State<Cart> {
                     activeColor: Colors.blue,
                     shape: const CircleBorder(),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4.r),
                     child: Image.network(
                       imageUrl,
-                      width: 80,
-                      height: 80,
+                      width: 80.w,
+                      height: 80.h,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        width: 80,
-                        height: 80,
+                        width: 80.w,
+                        height: 80.h,
                         color: const Color(0xFFF5F5F5),
-                        child: const Icon(
+                        child: Icon(
                           Icons.image_not_supported,
                           color: Colors.grey,
+                          size: 24.r,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           item.productName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.black87,
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             height: 1.3,
                           ),
                           maxLines: 2,
@@ -959,14 +965,14 @@ class _CartState extends State<Cart> {
                                 children: [
                                   Text(
                                     item.secName,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Color(0xFF999999),
-                                      fontSize: 12,
+                                      fontSize: 12.sp,
                                     ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: 4.h),
                                   // 使用新的方法始终显示韩元价格
                                   Builder(builder: (context) {
                                     // 始终使用韩元价格字段
@@ -985,17 +991,17 @@ class _CartState extends State<Cart> {
                                         children: [
                                           Text(
                                             "$currencySymbol $plusFormattedPrice",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: Colors.red,
-                                              fontSize: 16,
+                                              fontSize: 16.sp,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           Text(
                                             "$currencySymbol $normalFormattedPrice",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: Colors.grey,
-                                              fontSize: 12,
+                                              fontSize: 12.sp,
                                               decoration: TextDecoration.lineThrough,
                                             ),
                                           ),
@@ -1005,9 +1011,9 @@ class _CartState extends State<Cart> {
                                       // 只显示普通价格
                                       return Text(
                                         "$currencySymbol $normalFormattedPrice",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.black87,
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       );
@@ -1019,46 +1025,46 @@ class _CartState extends State<Cart> {
                             Row(
                               children: [
                                 Container(
-                                  width: 30,
-                                  height: 30,
+                                  width: 30.w,
+                                  height: 30.h,
                                   decoration: BoxDecoration(
                                     border: Border.all(color: Colors.grey),
-                                    borderRadius: BorderRadius.circular(15),
+                                    borderRadius: BorderRadius.circular(15.r),
                                   ),
                                   child: IconButton(
                                     padding: EdgeInsets.zero,
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.remove,
                                       color: Colors.black87,
-                                      size: 16,
+                                      size: 16.r,
                                     ),
                                     onPressed: () => _updateQuantity(item, -1),
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: EdgeInsets.symmetric(horizontal: 8.w),
                                   child: Text(
                                     "${item.num}",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.black87,
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
                                 Container(
-                                  width: 30,
-                                  height: 30,
+                                  width: 30.w,
+                                  height: 30.h,
                                   decoration: BoxDecoration(
                                     border: Border.all(color: Colors.grey),
-                                    borderRadius: BorderRadius.circular(15),
+                                    borderRadius: BorderRadius.circular(15.r),
                                   ),
                                   child: IconButton(
                                     padding: EdgeInsets.zero,
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.add,
                                       color: Colors.black87,
-                                      size: 16,
+                                      size: 16.r,
                                     ),
                                     onPressed: () => _updateQuantity(item, 1),
                                   ),
@@ -1083,7 +1089,16 @@ class _CartState extends State<Cart> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductDetails(id: item.productId.toString()),
+        builder: (context) {
+          // 根据selfSupport字段判断是否为自营商品
+          if (item.selfSupport == 2) {
+            // 自营商品跳转到自营商品详情页面
+            return SelfProductDetails(id: item.productId.toString());
+          } else {
+            // 非自营商品跳转到普通商品详情页面
+            return ProductDetails(id: item.productId.toString());
+          }
+        },
       ),
     );
   }
@@ -1093,65 +1108,66 @@ class _CartState extends State<Cart> {
       onTap: () => _navigateToProductDetail(item),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: EdgeInsets.only(bottom: 8.h),
         color: Colors.white,
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4.r),
                     child: Image.network(
                       item.productUrl,
-                      width: 80,
-                      height: 80,
+                      width: 80.w,
+                      height: 80.h,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        width: 80,
-                        height: 80,
+                        width: 80.w,
+                        height: 80.h,
                         color: const Color(0xFFF5F5F5),
-                        child: const Icon(
+                        child: Icon(
                           Icons.image_not_supported,
                           color: Colors.grey,
+                          size: 24.r,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           item.productNameCn,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.black87,
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             height: 1.3,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Text(
                           item.productPrice != null
                               ? "${AppLocalizations.of(context)?.translate('cny') ?? '¥'}${item.productPrice!.toStringAsFixed(2)}"
                               : AppLocalizations.of(context)?.translate('no_price') ?? "暂无价格",
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.red,
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Text(
                           item.shopName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Color(0xFF999999),
-                            fontSize: 12,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ],
@@ -1160,10 +1176,10 @@ class _CartState extends State<Cart> {
                 ],
               ),
             ),
-            const Divider(
-              height: 1,
-              indent: 16,
-              endIndent: 16,
+            Divider(
+              height: 1.h,
+              indent: 16.w,
+              endIndent: 16.w,
               color: Color(0xFFEEEEEE),
             ),
           ],
@@ -1205,17 +1221,17 @@ class _CartState extends State<Cart> {
       }
 
       return ListView.builder(
-        padding: const EdgeInsets.only(top: 8),
+        padding: EdgeInsets.only(top: 8.h),
         itemCount: _shops.length,
         itemBuilder: (context, shopIndex) {
           final shop = _shops[shopIndex];
           return Container(
-            margin: const EdgeInsets.only(bottom: 8),
+            margin: EdgeInsets.only(bottom: 8.h),
             color: Colors.white,
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                   child: Row(
                     children: [
                       Checkbox(
@@ -1226,9 +1242,9 @@ class _CartState extends State<Cart> {
                       ),
                       Text(
                         shop.shopName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.black87,
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -1268,7 +1284,7 @@ class _CartState extends State<Cart> {
                 onPressed: () => _loadCollectList(),
                 child: Text(
                   AppLocalizations.of(context)?.translate('retry') ?? '重试',
-                  style: const TextStyle(color: Colors.blue),
+                  style: TextStyle(color: Colors.blue),
                 ),
               ),
             ],
@@ -1279,19 +1295,19 @@ class _CartState extends State<Cart> {
         return Center(
           child: Text(
             AppLocalizations.of(context)?.translate('favorites_empty') ?? '收藏列表为空',
-            style: const TextStyle(color: Colors.grey, fontSize: 16),
+            style: TextStyle(color: Colors.grey, fontSize: 16.sp),
           ),
         );
       }
       return ListView.builder(
         controller: _collectScrollController,
-        padding: const EdgeInsets.only(top: 8),
+        padding: EdgeInsets.only(top: 8.h),
         itemCount: _collectItems.length + (_hasMoreCollect ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == _collectItems.length) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2.w)),
             );
           }
           final item = _collectItems[index];
@@ -1311,7 +1327,7 @@ class _CartState extends State<Cart> {
             AppLocalizations.of(context)?.translate('shipping_info_text') ?? "COUZIK捆绑海外代购服务\n订购的订单内所有商品入库后\n会称重所有的商品，计算国际运费。\n\n代理手续费与商品价值结算（1次）后\n国际运费结算（2次）完成后，货物才会出库。\n\n预期运费只是预期，与实际运费有差距",
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Column(// 按钮上下排列
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1331,15 +1347,15 @@ class _CartState extends State<Cart> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   color: Colors.orange,
                   child:  Text(
                     AppLocalizations.of(context)?.translate('confirm_shipping_fee') ?? "配送费用金额确认",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 14.sp),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               TextButton(
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
@@ -1354,11 +1370,11 @@ class _CartState extends State<Cart> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   color: Colors.green,
                   child:  Text(
                     AppLocalizations.of(context)?.translate('confirm_and_next') ?? "确认及下页",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 14.sp),
                   ),
                 ),
               ),
@@ -1376,9 +1392,9 @@ Widget _buildShippingFeeListDialog() {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (_isLoadingFee)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 24.h),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2.w)),
           )
         else if (_feeErrorMsg != null)
           Column(
@@ -1386,10 +1402,10 @@ Widget _buildShippingFeeListDialog() {
             children: [
               Text(
                 _feeErrorMsg!,
-                style: const TextStyle(color: Colors.red, fontSize: 14),
+                style: TextStyle(color: Colors.red, fontSize: 14.sp),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               TextButton(
                 onPressed: () => _fetchShippingFeeList(),
                 child: Text(AppLocalizations.of(context)?.translate('reload') ?? '重新加载'),
@@ -1398,15 +1414,15 @@ Widget _buildShippingFeeListDialog() {
           )
         else if (_shippingFeeList.isEmpty)
            Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
+            padding: EdgeInsets.symmetric(vertical: 24.h),
             child: Text(
               AppLocalizations.of(context)?.translate('no_weight_fee_data') ?? '暂无重量相关运费数据',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
             ),
           )
         else
           DataTable(
-            columnSpacing: 20,
+            columnSpacing: 20.w,
             columns: [
               DataColumn(label: Text(AppLocalizations.of(context)?.translate('weight') ?? "重量")),
               DataColumn(label: Text(AppLocalizations.of(context)?.translate('fee') ?? "运费")),
@@ -1427,7 +1443,7 @@ Widget _buildShippingFeeListDialog() {
               ]);
             }).toList(),
           ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         TextButton(
           style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
@@ -1442,11 +1458,11 @@ Widget _buildShippingFeeListDialog() {
             });
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             color: Colors.grey,
             child:  Text(
               AppLocalizations.of(context)?.translate('back') ?? "返回",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white, fontSize: 14.sp),
             ),
           ),
         ),
@@ -1465,7 +1481,7 @@ Widget _buildShippingFeeListDialog() {
             AppLocalizations.of(context)?.translate('disclaimer_text') ?? "包含侵权知识产权，不可通关商品、破损危险较高的商品时订单可能会部分或全部取消。\n\n管理者对未认知知识产权商品 通关中发生的扣押/销毁的责任由代理申请人承担。\n\n订购总额超过150美元时，可分多次进行或可能会根据申报金额征收关税。\n\n因报关信息不一致导致的报关滞留 COUZIK不负相关责任",
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           TextButton(
             style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
@@ -1495,11 +1511,11 @@ Widget _buildShippingFeeListDialog() {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 color: Colors.green,
                 child:  Text(
                   AppLocalizations.of(context)?.translate('agree_and_pay') ?? "同意及付款",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.white, fontSize: 14.sp),
                 ),
               ),
             ),
@@ -1523,19 +1539,19 @@ Widget _buildShippingFeeListDialog() {
               // 标题栏布局（保留原有国际化）
               Container(
                 color: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 12.h),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+                      icon: Icon(Icons.arrow_back, color: Colors.black87, size: 20.r),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                     ),
                     Text(
                       AppLocalizations.of(context)?.translate('my_cart') ?? '我的购物车',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black87,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -1550,17 +1566,17 @@ Widget _buildShippingFeeListDialog() {
                             _fetchCartList();
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                             decoration: BoxDecoration(
                               color: _selfSupport == 1 ? Colors.blue.shade100 : Colors.grey.shade200,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(12),
-                                bottomLeft: Radius.circular(12),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(12.r),
+                                bottomLeft: Radius.circular(12.r),
                               ),
                             ),
                             child: Text(
                               AppLocalizations.of(context)?.translate('direct_buy_product') ?? '直购商品',
-                              style: TextStyle(color: _selfSupport == 1 ? Colors.blue : Colors.grey, fontSize: 14),
+                              style: TextStyle(color: _selfSupport == 1 ? Colors.blue : Colors.grey, fontSize: 14.sp),
                             ),
                           ),
                         ),
@@ -1572,17 +1588,17 @@ Widget _buildShippingFeeListDialog() {
                             _fetchCartList();
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                             decoration: BoxDecoration(
                               color: _selfSupport == 2 ? Colors.blue.shade100 : Colors.grey.shade200,
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(12),
-                                bottomRight: Radius.circular(12),
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(12.r),
+                                bottomRight: Radius.circular(12.r),
                               ),
                             ),
                             child: Text(
                               AppLocalizations.of(context)?.translate('recommended_product') ?? '推荐商品',
-                              style: TextStyle(color: _selfSupport == 2 ? Colors.blue : Colors.grey, fontSize: 14),
+                              style: TextStyle(color: _selfSupport == 2 ? Colors.blue : Colors.grey, fontSize: 14.sp),
                             ),
                           ),
                         ),
@@ -1600,13 +1616,13 @@ Widget _buildShippingFeeListDialog() {
                       child: GestureDetector(
                         onTap: () => setState(() => _currentTab = 0),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
                                 color: _currentTab == 0 ? Colors.blue : Colors.transparent,
-                                width: 2,
+                                width: 2.w,
                               ),
                             ),
                           ),
@@ -1615,14 +1631,14 @@ Widget _buildShippingFeeListDialog() {
                               Icon(
                                 Icons.shopping_cart,
                                 color: _currentTab == 0 ? Colors.blue : Colors.grey,
-                                size: 20,
+                                size: 20.r,
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4.h),
                               Text(
                                 AppLocalizations.of(context)?.translate('shopping_cart') ?? '购物车',
                                 style: TextStyle(
                                   color: _currentTab == 0 ? Colors.blue : Colors.grey,
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -1638,13 +1654,13 @@ Widget _buildShippingFeeListDialog() {
                           if (_collectItems.isEmpty) _loadCollectList();
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
                                 color: _currentTab == 1 ? Colors.blue : Colors.transparent,
-                                width: 2,
+                                width: 2.w,
                               ),
                             ),
                           ),
@@ -1653,14 +1669,14 @@ Widget _buildShippingFeeListDialog() {
                               Icon(
                                 Icons.favorite_border,
                                 color: _currentTab == 1 ? Colors.blue : Colors.grey,
-                                size: 20,
+                                size: 20.r,
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4.h),
                               Text(
                                 AppLocalizations.of(context)?.translate('favorites') ?? '收藏夹',
                                 style: TextStyle(
                                   color: _currentTab == 1 ? Colors.blue : Colors.grey,
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -1676,7 +1692,7 @@ Widget _buildShippingFeeListDialog() {
               // 底部结算栏（保留原有国际化）
               if (_currentTab == 0 && !_isLoading && _errorMsg == null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   color: Colors.white,
                   child: Row(
                     children: [
@@ -1688,16 +1704,16 @@ Widget _buildShippingFeeListDialog() {
                                     ?.replaceAll('\${totalTypes}', totalTypes.toString())
                                     .replaceAll('\${totalQuantity}', totalQuantity.toString()) ??
                                 "选中的商品:${totalTypes}种类 总数量:${totalQuantity}个",
-                            style: const TextStyle(color: Color(0xFF666666), fontSize: 12),
+                            style: TextStyle(color: Color(0xFF666666), fontSize: 12.sp),
                           ),
                           // 使用新的方法根据语言动态显示总价
                           Builder(builder: (context) {
                             final (formattedPrice, currencySymbol) = _getPriceByLanguage(totalPrice);
                             return Text(
                               "$currencySymbol $formattedPrice",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Color.fromARGB(221, 4, 206, 18),
-                                fontSize: 16,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.w500,
                               ),
                             );
@@ -1711,13 +1727,13 @@ Widget _buildShippingFeeListDialog() {
                       ),
                       const Spacer(),
                       SizedBox(
-                        width: 140,
-                        height: 48,
+                        width: 140.w,
+                        height: 48.h,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(8.r),
                             ),
                             elevation: 0,
                           ),
@@ -1726,9 +1742,9 @@ Widget _buildShippingFeeListDialog() {
                               : null,
                           child: Text(
                             AppLocalizations.of(context)?.translate('buy_now') ?? '购买',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

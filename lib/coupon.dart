@@ -1,6 +1,7 @@
 // 导入计时器相关的库
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/foundation.dart'; // 导入foundation包以使用kDebugMode
 import 'dingbudaohang.dart'; // 添加import关键字
 import 'app_localizations.dart';
@@ -80,14 +81,21 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
   // 格式化剩余时间为HH:MM:SS
   String _formatRemainingTime() {
     if (_remainingTime.inSeconds <= 0) {
-      return '00:00:00';
+      return '00时00分00秒';
     }
     
-    int hours = _remainingTime.inHours;
+    int days = _remainingTime.inDays;
+    int hours = _remainingTime.inHours.remainder(24);
     int minutes = _remainingTime.inMinutes.remainder(60);
     int seconds = _remainingTime.inSeconds.remainder(60);
     
-    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    if (days > 0) {
+      // 如果有天数，显示X天HH时MM分SS秒格式
+      return '${days}天${hours.toString().padLeft(2, '0')}时${minutes.toString().padLeft(2, '0')}分${seconds.toString().padLeft(2, '0')}秒';
+    } else {
+      // 如果没有天数，显示HH时MM分SS秒格式
+      return '${hours.toString().padLeft(2, '0')}时${minutes.toString().padLeft(2, '0')}分${seconds.toString().padLeft(2, '0')}秒';
+    }
   }
   
   @override
@@ -113,16 +121,16 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
+            spreadRadius: 1.w,
+            blurRadius: 3.w,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -130,7 +138,7 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
         children: [
           // 优惠券内容
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Row(
               children: [
                 // 金额/折扣部分
@@ -144,38 +152,47 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            const Text(
+                            Text(
                               '₩', // 韩元符号
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              '${widget.coupon.returnAmount}', // 显示满减金额
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: mainColor,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '${widget.coupon.returnAmount.toInt()}', // 显示满减金额，去除小数
+                                style: TextStyle(
+                                  fontSize: 24.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: mainColor,
+                                ),
                               ),
                             ),
                           ],
                         )
                       else // 折扣券
-                        Text(
-                          '${widget.coupon.returnAmount / 10}折', // 转换为折扣显示，例如90 → 9折
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: mainColor,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            '${widget.coupon.returnAmount.toInt() / 10}折', // 转换为折扣显示，去除小数，例如90 → 9折
+                            style: TextStyle(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.bold,
+                              color: mainColor,
+                            ),
                           ),
                         ),
                       // 显示使用条件：满多少金额
-                      Text(
-                        '${AppLocalizations.of(context)?.translate('min_amount_to_use') ?? '满'}${widget.coupon.amount}${AppLocalizations.of(context)?.translate('available') ?? '可用'}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: textColor,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '${AppLocalizations.of(context)?.translate('min_amount_to_use') ?? '满'}${widget.coupon.amount.toInt()}${AppLocalizations.of(context)?.translate('available') ?? '可用'}',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: textColor,
+                          ),
                         ),
                       ),
                     ],
@@ -190,20 +207,20 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
                       Text(
                         widget.coupon.name,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           color: textColor,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       // 仅在endTime不为空且剩余时间大于0时显示倒计时
                       if (_showCountdown && _remainingTime > Duration.zero)
                         Text(
                           '${AppLocalizations.of(context)?.translate('only') ?? '仅剩'}${_formatRemainingTime()}',
                           style: TextStyle(
-                            fontSize: 12.0,
+                            fontSize: 12.0.sp,
                             fontWeight: FontWeight.bold,
                             color: timeColor,
                           ),
@@ -218,16 +235,16 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6), // 调整按钮内边距
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h), // 调整按钮内边距
                         decoration: BoxDecoration(
                           color: mainColor,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(16.r),
                         ),
                         child: Text(
                           statusText,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 13, // 调整文字大小
+                            fontSize: 13.sp, // 调整文字大小
                             fontWeight: FontWeight.bold,
                           ),
                           softWrap: false, // 禁止文字换行
@@ -406,19 +423,19 @@ class _CouponPageState extends State<CouponPage> {
         children: [
           // 自定义导航栏
           Container(
-            height: 44,
+            height: 44.h,
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  icon: Icon(Icons.arrow_back, color: Colors.black, size: 20.w),
                   onPressed: () => Navigator.pop(context),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Text(
                   AppLocalizations.of(context)?.translate('held_coupons') ?? "我的优惠券",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500),
                 ),
                 const Spacer(),
               ],
@@ -427,9 +444,9 @@ class _CouponPageState extends State<CouponPage> {
 
           // 标签栏
           Container(
-            height: 48,
+            height: 48.h,
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
               children: List.generate(_tabTitles.length, (index) {
                 return Expanded(
@@ -447,7 +464,7 @@ class _CouponPageState extends State<CouponPage> {
                         Text(
                           _tabTitles[index],
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             color: _currentTabIndex == index ? Colors.red : Colors.black,
                             fontWeight: _currentTabIndex == index ? FontWeight.bold : FontWeight.normal,
                           ),
@@ -455,12 +472,12 @@ class _CouponPageState extends State<CouponPage> {
                         // 底部指示器
                         if (_currentTabIndex == index)
                           Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            width: 20,
-                            height: 3,
+                            margin: EdgeInsets.only(top: 8.h),
+                            width: 20.w,
+                            height: 3.h,
                             decoration: BoxDecoration(
                               color: Colors.red,
-                              borderRadius: BorderRadius.circular(2),
+                              borderRadius: BorderRadius.circular(2.r),
                             ),
                           ),
                       ],
@@ -485,14 +502,14 @@ class _CouponPageState extends State<CouponPage> {
                               children: [
                                 Icon(
                                   Icons.local_offer_outlined,
-                                  size: 64,
+                                  size: 64.r,
                                   color: Colors.grey,
                                 ),
-                                SizedBox(height: 16),
+                                SizedBox(height: 16.h),
                                 Text(
                                   AppLocalizations.of(context)?.translate('no_coupons') ?? '暂无优惠券',
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 16.sp,
                                     color: Colors.grey,
                                   ),
                                 ),

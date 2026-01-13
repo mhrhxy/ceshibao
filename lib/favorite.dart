@@ -5,7 +5,7 @@ import './utils/http_util.dart';
 import 'productdetails.dart';
 import 'self_product_details.dart';
 import 'app_localizations.dart';
-import './utils/screen_adapter.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // 自营商品列表
 
@@ -289,20 +289,20 @@ class _Favorite extends State<Favorite> {
     if (!isLoading || isRefreshing) return Container();
     
     return Container(
-      padding: EdgeInsets.symmetric(vertical: ScreenAdapter.height(10)),
+      padding: EdgeInsets.symmetric(vertical: 10.h),
       alignment: Alignment.center,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: ScreenAdapter.width(20),
-            height: ScreenAdapter.width(20),
+            width: 20.w,
+            height: 20.w,
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
-          SizedBox(width: ScreenAdapter.width(10)),
+          SizedBox(width: 10.w),
           Text(
             AppLocalizations.of(context)?.translate('loading') ?? '加载中...',
-            style: TextStyle(fontSize: ScreenAdapter.fontSize(14)),
+            style: TextStyle(fontSize: 14.sp),
           ),
         ],
       ),
@@ -316,25 +316,25 @@ class _Favorite extends State<Favorite> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.favorite_border, 
-              size: ScreenAdapter.width(60), 
+              size: 60.w, 
               color: Colors.grey),
-          SizedBox(height: ScreenAdapter.height(10)),
+          SizedBox(height: 10.h),
           Text(
             AppLocalizations.of(context)?.translate('no_collect_items') ?? '暂无收藏商品',
-            style: TextStyle(fontSize: ScreenAdapter.fontSize(16)),
+            style: TextStyle(fontSize: 16.sp),
           ),
-          SizedBox(height: ScreenAdapter.height(20)),
+          SizedBox(height: 20.h),
           ElevatedButton(
             onPressed: () => onRefresh(),
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(
-                horizontal: ScreenAdapter.width(20),
-                vertical: ScreenAdapter.height(10),
+                horizontal: 20.w,
+                vertical: 10.h,
               ),
             ),
             child: Text(
               AppLocalizations.of(context)?.translate('reload') ?? '重新加载',
-              style: TextStyle(fontSize: ScreenAdapter.fontSize(14)),
+              style: TextStyle(fontSize: 14.sp),
             ),
           ),
         ],
@@ -357,8 +357,7 @@ class _Favorite extends State<Favorite> {
   
   /// 渲染商品项
   Widget _buildProductItem(CollectItem item) {
-    // 计算图片尺寸，适配不同屏幕
-    double imageSize = ScreenAdapter.width(100);
+    double imageSize = 100.w;
     
     // 处理价格显示逻辑：如果会员价大于0，优先显示会员价，否则显示原价
     String displayPrice = item.price;
@@ -395,9 +394,9 @@ class _Favorite extends State<Favorite> {
       },
       child: Container(
         margin: EdgeInsets.only(
-          left: ScreenAdapter.width(10), 
-          right: ScreenAdapter.width(10), 
-          bottom: ScreenAdapter.width(10)
+          left: 10.w, 
+          right: 10.w, 
+          bottom: 10.w
         ),
         color: Colors.white,
         child: Row(
@@ -407,7 +406,7 @@ class _Favorite extends State<Favorite> {
             Container(
               width: imageSize,
               height: imageSize,
-              margin: EdgeInsets.all(ScreenAdapter.width(10)),
+              margin: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey.shade200),
               ),
@@ -425,8 +424,8 @@ class _Favorite extends State<Favorite> {
             // 右侧信息展示区
             Expanded(
               child: Container(
-                padding: EdgeInsets.all(ScreenAdapter.width(10)),
-                height: imageSize + ScreenAdapter.width(20), // 与图片高度保持一致
+                padding: EdgeInsets.all(10.w),
+                height: imageSize + 20.w, // 与图片高度保持一致
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -435,7 +434,7 @@ class _Favorite extends State<Favorite> {
                     Text(
                       item.productNameCn,
                       style: TextStyle(
-                        fontSize: ScreenAdapter.fontSize(14),
+                        fontSize: 14.sp,
                         color: Colors.black87,
                       ),
                       maxLines: 2,
@@ -450,28 +449,28 @@ class _Favorite extends State<Favorite> {
                         Text(
                           '₩${calculateKrwPrice(displayPrice)}',
                           style: TextStyle(
-                            fontSize: ScreenAdapter.fontSize(12),
+                            fontSize: 12.sp,
                             color: Colors.grey,
                           ),
                         ),
-                        SizedBox(height: ScreenAdapter.height(2)),
+                        SizedBox(height: 2.h),
                         // 人民币价格
                         Row(
                           children: [
                             Text(
                               '¥$displayPrice',
                               style: TextStyle(
-                                fontSize: ScreenAdapter.fontSize(16),
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.red,
                               ),
                             ),
                             if (isMemberPrice) ...[
-                              SizedBox(width: ScreenAdapter.width(5)),
+                              SizedBox(width: 5.w),
                               Text(
                                 '¥${item.price}',
                                 style: TextStyle(
-                                  fontSize: ScreenAdapter.fontSize(12),
+                                  fontSize: 12.sp,
                                   color: Colors.grey,
                                   decoration: TextDecoration.lineThrough,
                                 ),

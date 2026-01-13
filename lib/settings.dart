@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart'; // 导入url_launcher
 import 'dingbudaohang.dart';
@@ -36,27 +37,27 @@ class SettingsPage extends StatelessWidget {
           // 返回栏（与之前保持一致）
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                  icon: Icon(Icons.arrow_back, color: Colors.black87, size: 20.w),
                   onPressed: () => Navigator.pop(context),
                 ),
                 Expanded(
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      AppLocalizations.of(context).translate('settings'),
-                      style: const TextStyle(
+                      AppLocalizations.of(context)?.translate('settings') ?? '设置',
+                      style: TextStyle(
                         color: Colors.black87,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 48),
+                SizedBox(width: 48.w),
               ],
             ),
           ),
@@ -65,7 +66,7 @@ class SettingsPage extends StatelessWidget {
           Expanded(
             child: Container(
               color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
               child: ListView(
                 children: [
                   // 1. 账户及登录（跳转页面，与之前一致）
@@ -80,7 +81,7 @@ class SettingsPage extends StatelessWidget {
                       );
                     },
                   ),
-                  const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                  Divider(height: 1.h, indent: 0.w, color: Color(0xFFEEEEEE)),
 
                   // 2. 通知设置
                   _buildSettingItem(
@@ -94,7 +95,7 @@ class SettingsPage extends StatelessWidget {
                       );
                     },
                   ),
-                  const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                  Divider(height: 1.h, indent: 0.w, color: Color(0xFFEEEEEE)),
 
                   // 3. 支付方式管理
                   _buildSettingItem(
@@ -108,7 +109,7 @@ class SettingsPage extends StatelessWidget {
                       );
                     },
                   ),
-                  const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                  Divider(height: 1.h, indent: 0.w, color: Color(0xFFEEEEEE)),
 
                   // 4. 客户支持（点击跳转链接）
                   _buildSettingItem(
@@ -124,7 +125,7 @@ class SettingsPage extends StatelessWidget {
                       });
                     },
                   ),
-                  const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                  Divider(height: 1.h, indent: 0.w, color: Color(0xFFEEEEEE)),
                 ],
               ),
             ),
@@ -146,20 +147,20 @@ class SettingsPage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.black87,
-              fontSize: 16,
+              fontSize: 16.sp,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Icon(
             suffixIcon,
             color: Colors.grey[400],
-            size: 18,
+            size: 18.w,
           ),
         ],
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       onTap: onTap,
     );
   }

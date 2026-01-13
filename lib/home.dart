@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
@@ -54,7 +55,15 @@ class CarouselData {
   final String redirectUrl;
   final int sort;
 
-  String get fullPictureUrl => "$baseImageUrl${pictureUrl.trim()}";
+  String get fullPictureUrl {
+    String url = pictureUrl.trim();
+    // 如果已经是完整的URL（以http://或https://开头），则直接返回
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // 否则拼接baseImageUrl
+    return "$baseImageUrl$url";
+  }
 
   CarouselData({
     required this.carouselId,
@@ -102,10 +111,18 @@ class CatelogData {
   final int sort;
   final List<CatelogData> children;
 
-  String? get fullPictureUrl =>
-      catelogPictureUrl?.isNotEmpty ?? false
-          ? "$baseImageUrl${catelogPictureUrl!.trim()}"
-          : null;
+  String? get fullPictureUrl {
+    if (catelogPictureUrl?.isNotEmpty ?? false) {
+      String url = catelogPictureUrl!.trim();
+      // 如果已经是完整的URL（以http://或https://开头），则直接返回
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      // 否则拼接baseImageUrl
+      return "$baseImageUrl$url";
+    }
+    return null;
+  }
 
   CatelogData({
     required this.catelogId,
@@ -154,10 +171,18 @@ class ObserveData {
   final int star;
   final String productPicture;
 
-  String get fullProductPicture =>
-      productPicture.isNotEmpty
-          ? "$baseImageUrl${productPicture.trim()}"
-          : "https://picsum.photos/200/200?random=default";
+  String get fullProductPicture {
+    if (productPicture.isNotEmpty) {
+      String url = productPicture.trim();
+      // 如果已经是完整的URL（以http://或https://开头），则直接返回
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      // 否则拼接baseImageUrl
+      return "$baseImageUrl$url";
+    }
+    return "https://picsum.photos/200/200?random=default";
+  }
 
   ObserveData({
     required this.productName,
@@ -446,10 +471,10 @@ class _HomeState extends State<Home> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   child: Text(
                     AppLocalizations.of(context)?.translate('select_image_source') ?? "选择图片来源",
-                    style: const TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16.sp),
                   ),
                 ),
                 // 相册选择
@@ -621,7 +646,7 @@ class _HomeState extends State<Home> {
 
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -632,37 +657,37 @@ class _HomeState extends State<Home> {
                   Icons.star,
                   color:
                       index < starCount ? Colors.orange : Colors.grey.shade300,
-                  size: 16,
+                  size: 16.sp,
                 );
               }),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: 2.h),
             Text(
               showProductName,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 3),
+            SizedBox(height: 3.h),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 65,
-                  height: 95,
-                  margin: const EdgeInsets.only(right: 6),
+                  width: 65.w,
+                  height: 95.h,
+                  margin: EdgeInsets.only(right: 6.w),
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Image.network(
                     comment.fullProductPicture,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
+                      return Icon(
                         Icons.image_not_supported,
                         color: Colors.grey,
-                        size: 65,
+                        size: 65.w,
                       );
                     },
                   ),
@@ -674,45 +699,22 @@ class _HomeState extends State<Home> {
                     children: [
                       Text(
                         comment.sec,
-                        style: const TextStyle(
-                          fontSize: 13,
+                        style: TextStyle(
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2.h),
                       Text(
                         comment.info,
-                        style: const TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: 12.sp),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         softWrap: true,
                       ),
-                      const SizedBox(height: 50),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.block,
-                            color: Colors.grey,
-                            size: 14,
-                          ),
-                          label: const Text(
-                            '屏蔽',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 2,
-                            ),
-                            minimumSize: const Size(0, 0),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ),
-                      ),
+                      SizedBox(height: 50.h),
                     ],
                   ),
                 ),
@@ -771,19 +773,19 @@ class _HomeState extends State<Home> {
 
     return Container(
       width: double.infinity,
-      height: 200,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+      height: 200.h,
+      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 10.w),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
+          bottom: BorderSide(color: Colors.grey.shade200, width: 1.w),
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
+            spreadRadius: 1.w,
+            blurRadius: 3.w,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -792,11 +794,11 @@ class _HomeState extends State<Home> {
           behavior: NoScrollbarBehavior(),
           child:
               _isSubCatelogLoading
-                  ? const Center(
+                  ? Center(
                     child: CircularProgressIndicator(
-                      color: Colors.orange,
-                      strokeWidth: 2,
-                    ),
+                        color: Colors.orange,
+                        strokeWidth: 2.w,
+                      ),
                   )
                   : _subCatelogErrorMsg.isNotEmpty
                   ? Center(
@@ -805,7 +807,7 @@ class _HomeState extends State<Home> {
                       children: [
                         Text(
                           _subCatelogErrorMsg,
-                          style: const TextStyle(color: Colors.redAccent),
+                          style: TextStyle(color: Colors.redAccent, fontSize: 14.sp),
                         ),
                         TextButton(
                           onPressed:
@@ -816,17 +818,17 @@ class _HomeState extends State<Home> {
                           child: Text(
                             AppLocalizations.of(context)?.translate('retry') ??
                                 "重试",
-                            style: const TextStyle(color: Colors.orange),
+                            style: TextStyle(color: Colors.orange, fontSize: 14.sp),
                           ),
                         ),
                       ],
                     ),
                   )
                   : _subCatelogList.isEmpty
-                  ? const Center(
+                  ? Center(
                     child: Text(
                       "暂无子分类数据",
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                     ),
                   )
                   : ListView.builder(
@@ -839,8 +841,8 @@ class _HomeState extends State<Home> {
                           secondCatelog.children;
 
                       return Container(
-                        width: 150,
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        width: 150.w,
+                        margin: EdgeInsets.symmetric(horizontal: 8.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -848,21 +850,21 @@ class _HomeState extends State<Home> {
                               secondCatelog.getCatelogNameByLanguage(
                                 languageCode,
                               ),
-                              style: const TextStyle(
-                                fontSize: 16,
+                              style: TextStyle(
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8.h),
                             Expanded(
                               child: ScrollConfiguration(
                                 behavior: NoScrollbarBehavior(),
                                 child: SingleChildScrollView(
                                   child: Wrap(
                                     direction: Axis.vertical,
-                                    spacing: 6,
-                                    runSpacing: 6,
+                                    spacing: 6.h,
+                                    runSpacing: 6.h,
                                     children:
                                         thirdCatelogList.map((thirdCatelog) {
                                           return GestureDetector(
@@ -874,8 +876,8 @@ class _HomeState extends State<Home> {
                                                   .getCatelogNameByLanguage(
                                                     languageCode,
                                                   ),
-                                              style: const TextStyle(
-                                                fontSize: 14,
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
                                                 color: Colors.black54,
                                               ),
                                             ),
@@ -900,7 +902,7 @@ class _HomeState extends State<Home> {
     final catelogRows = _catelogRows;
     if (rowIndex >= catelogRows.length ||
         colIndex >= catelogRows[rowIndex].length) {
-      return const SizedBox();
+      return SizedBox();
     }
     final CatelogData catelog = catelogRows[rowIndex][colIndex];
     final isSelected =
@@ -927,48 +929,48 @@ class _HomeState extends State<Home> {
       },
       behavior: HitTestBehavior.opaque,
       child: Container(
-        height: 46,
+        height: 46.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue.shade50 : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: isSelected ? Border.all(color: Colors.blue, width: 2) : null,
+          borderRadius: BorderRadius.circular(20.r),
+          border: isSelected ? Border.all(color: Colors.blue, width: 2.w) : null,
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 1),
+              spreadRadius: 1.w,
+              blurRadius: 3.w,
+              offset: Offset(0, 1.h),
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (catelog.fullPictureUrl != null)
               Image.network(
                 catelog.fullPictureUrl!,
-                width: 24,
-                height: 24,
+                width: 24.w,
+                height: 24.h,
                 fit: BoxFit.cover,
                 errorBuilder:
-                    (context, error, stackTrace) => const Icon(
+                    (context, error, stackTrace) => Icon(
                       Icons.category,
                       color: Colors.grey,
-                      size: 26,
+                      size: 26.w,
                     ),
               )
             else
-              const Icon(Icons.category, color: Colors.grey, size: 26),
-            const SizedBox(width: 6),
+              Icon(Icons.category, color: Colors.grey, size: 26.w),
+            SizedBox(width: 6.w),
             Expanded(
               child: Text(
                 catelog.getCatelogNameByLanguage(languageCode),
                  maxLines: 1,
                  overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.normal,
                   color: isSelected ? Colors.blue : Colors.black87,
                 ),
@@ -1005,37 +1007,37 @@ class _HomeState extends State<Home> {
                 // 搜索框（包含文字搜索和图片搜索）
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
                     ),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Row(
                         children: [
                           Container(
-                            width: 24,
-                            height: 24,
-                            margin: const EdgeInsets.only(left: 12),
+                            width: 24.w,
+                            height: 24.h,
+                            margin: EdgeInsets.only(left: 12.w),
                             decoration: BoxDecoration(
                               color: Colors.orange,
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(6.r),
                             ),
                             alignment: Alignment.center,
-                            child: const Text(
+                            child: Text(
                               '淘',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12.w),
                           // 文字搜索输入框
                           Expanded(
                             child: TextField(
@@ -1048,8 +1050,8 @@ class _HomeState extends State<Home> {
                                     "请输入搜索关键词",
                                 border: InputBorder.none,
                                 isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 12,
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 12.h,
                                 ),
                               ),
                               // 回车键触发搜索
@@ -1060,9 +1062,9 @@ class _HomeState extends State<Home> {
                           IconButton(
                             icon:
                                 _isImageSearchLoading
-                                    ? const CircularProgressIndicator(
+                                    ?  CircularProgressIndicator(
                                       color: Colors.grey,
-                                      strokeWidth: 2,
+                                      strokeWidth: 2.w,
                                     )
                                     : const Icon(
                                       Icons.camera_alt,
@@ -1075,7 +1077,7 @@ class _HomeState extends State<Home> {
                           ),
                           // 搜索按钮（文字搜索）
                           IconButton(
-                            icon: const Icon(Icons.search, color: Colors.grey),
+                            icon: Icon(Icons.search, color: Colors.grey, size: 24.w),
                             onPressed: () {
                               final keyword = _searchController.text;
                               if (keyword.trim().isNotEmpty) {
@@ -1083,7 +1085,7 @@ class _HomeState extends State<Home> {
                               }
                             },
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: 4.w),
                         ],
                       ),
                     ),
@@ -1093,19 +1095,19 @@ class _HomeState extends State<Home> {
                 // 轮播图
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 16.h,
                     ),
                     child: _horizontalScrollInterceptor(
                       child: Container(
-                        height: 200,
+                        height: 200.h,
                         child:
                             _isCarouselLoading
-                                ? const Center(
+                                ? Center(
                                   child: CircularProgressIndicator(
                                     color: Colors.orange,
-                                    strokeWidth: 2,
+                                    strokeWidth: 2.w,
                                   ),
                                 )
                                 : _carouselErrorMsg.isNotEmpty
@@ -1115,8 +1117,9 @@ class _HomeState extends State<Home> {
                                     children: [
                                       Text(
                                         _carouselErrorMsg,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.redAccent,
+                                          fontSize: 14.sp,
                                         ),
                                       ),
                                       TextButton(
@@ -1126,8 +1129,9 @@ class _HomeState extends State<Home> {
                                                 context,
                                               )?.translate('retry') ??
                                               "重试",
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.orange,
+                                            fontSize: 14.sp,
                                           ),
                                         ),
                                       ),
@@ -1135,7 +1139,7 @@ class _HomeState extends State<Home> {
                                   ),
                                 )
                                 : _carouselList.isEmpty
-                                ? const SizedBox()
+                                ? SizedBox()
                                 : Swiper(
                                   itemCount: _carouselList.length,
                                   autoplay: true,
@@ -1150,9 +1154,10 @@ class _HomeState extends State<Home> {
                                           (context, error, stackTrace) =>
                                               Container(
                                                 color: Colors.grey[100],
-                                                child: const Icon(
+                                                child: Icon(
                                                   Icons.image_not_supported,
                                                   color: Colors.grey,
+                                                  size: 48.w,
                                                 ),
                                               ),
                                     );
@@ -1165,27 +1170,27 @@ class _HomeState extends State<Home> {
 
                 // 商品分类
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 8.w,
+                    vertical: 4.h,
                   ),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, rowIndex) {
                         if (_isCatelogLoading) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20.h),
                             child: Center(
                               child: CircularProgressIndicator(
                                 color: Colors.orange,
-                                strokeWidth: 2,
+                                strokeWidth: 2.w,
                               ),
                             ),
                           );
                         }
                         if (_catelogErrorMsg.isNotEmpty) {
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            padding: EdgeInsets.symmetric(vertical: 20.h),
                             child: Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1203,8 +1208,9 @@ class _HomeState extends State<Home> {
                                             context,
                                           )?.translate('retry') ??
                                           "重试",
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.orange,
+                                        fontSize: 14.sp,
                                       ),
                                     ),
                                   ),
@@ -1224,9 +1230,9 @@ class _HomeState extends State<Home> {
                               children: List.generate(4, (colIndex) {
                                 return Expanded(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 4,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 6.w,
+                                      vertical: 4.h,
                                     ),
                                     child: _buildCatelogItem(
                                       rowIndex,
@@ -1239,8 +1245,8 @@ class _HomeState extends State<Home> {
                             if (_selectedCatelogIndex != null &&
                                 _selectedCatelogIndex![0] == rowIndex)
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 8.h,
                                 ),
                                 child: _buildCatelogPopup(),
                               ),
@@ -1260,40 +1266,40 @@ class _HomeState extends State<Home> {
                 // 评论区
                 SliverToBoxAdapter(
                   child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
                     ),
-                    padding: const EdgeInsets.all(10),
+                    padding: EdgeInsets.all(10.w),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 3,
-                          offset: const Offset(0, 1),
+                          spreadRadius: 1.w,
+                          blurRadius: 3.w,
+                          offset: Offset(0, 1.h),
                         ),
                       ],
                     ),
-                    height: 200,
+                    height: 200.h,
                     child:
                         _isCommentLoading
-                            ? const Center(
+                            ?  Center(
                               child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 30),
+                                padding: EdgeInsets.symmetric(vertical: 30.h),
                                 child: CircularProgressIndicator(
                                   color: Colors.orange,
-                                  strokeWidth: 2,
+                                  strokeWidth: 2.w,
                                 ),
                               ),
                             )
                             : _commentErrorMsg.isNotEmpty
                             ? Center(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 30,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 30.h,
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -1306,9 +1312,9 @@ class _HomeState extends State<Home> {
                                     ),
                                     TextButton(
                                       onPressed: () => _fetchCommentData(),
-                                      child: const Text(
+                                      child: Text(
                                         "重试",
-                                        style: TextStyle(color: Colors.orange),
+                                        style: TextStyle(color: Colors.orange, fontSize: 14.sp),
                                       ),
                                     ),
                                   ],
@@ -1318,7 +1324,7 @@ class _HomeState extends State<Home> {
                             : _observeList.isEmpty
                             ? const SizedBox()
                             : SizedBox(
-                              height: 220,
+                              height: 220.h,
                               child: PageView.builder(
                                 controller: _commentPageController,
                                 physics: const ClampingScrollPhysics(),
@@ -1339,8 +1345,8 @@ class _HomeState extends State<Home> {
                                     children: [
                                       _buildCommentItem(pageComments[0]),
                                       if (pageComments.length > 1) ...[
-                                        const VerticalDivider(
-                                          width: 8,
+                                        VerticalDivider(
+                                          width: 8.w,
                                           color: Color.fromARGB(
                                             255,
                                             255,

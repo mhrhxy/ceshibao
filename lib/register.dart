@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'loginto.dart';
 import 'package:flutter_mall/config/service_url.dart';
@@ -36,9 +37,9 @@ class _RegisterState extends State<Register> {
   bool _isFirstInit = true;
 
   // 布局参数（原有数值完全保留）
-  final double _labelWidth = 60;
-  final double _inputHorizontalMargin = 40;
-  final double _logoRightPadding = 30;
+  final double _labelWidth = 60.w;
+  final double _inputHorizontalMargin = 40.w;
+  final double _logoRightPadding = 30.w;
 
   @override
   void initState() {
@@ -101,9 +102,8 @@ class _RegisterState extends State<Register> {
     setState(() => _isRegisterLoading = true);
 
     try {
-      String fullApiUrl = "email/send?email=$email&type=2";
-
-      Response result = await HttpUtil.post(fullApiUrl);
+      // 使用service_url.dart中定义的常量，确保使用正确的baseUrl
+      Response result = await HttpUtil.post(apisendemail, queryParameters: {"email": email, "type": "2"});
 
       // 4. 接口结果处理（同登录页的LoginModel解析逻辑，简化为直接处理返回数据）
       if (result.data['code'] == 200) {
@@ -334,18 +334,18 @@ class _RegisterState extends State<Register> {
         List<int> days = List.generate(getDaysInMonth(selectedYear, selectedMonth), (index) => index + 1);
         
         return Container(
-          height: 300,
+          height: 300.h,
           color: Colors.white,
           child: Column(
             children: [
               // 顶部操作栏
               Container(
-                height: 50,
+                height: 50.h,
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
                       color: Colors.grey[200]!,
-                      width: 1,
+                      width: 1.w,
                     ),
                   ),
                 ),
@@ -355,10 +355,10 @@ class _RegisterState extends State<Register> {
                     // 取消按钮
                     CupertinoButton(
                       onPressed: () => Navigator.of(builderContext).pop(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
                       child: Text(
                         AppLocalizations.of(context)!.translate('cancel'),
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                        style: TextStyle(color: Colors.grey, fontSize: 16.sp),
                       ),
                     ),
                     // 确认按钮
@@ -372,10 +372,10 @@ class _RegisterState extends State<Register> {
                           });
                         }
                       },
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
                       child: Text(
                         AppLocalizations.of(context)!.translate('confirm'),
-                        style: TextStyle(color: Colors.blue, fontSize: 16),
+                        style: TextStyle(color: Colors.blue, fontSize: 16.sp),
                       ),
                     ),
                   ],
@@ -390,36 +390,36 @@ class _RegisterState extends State<Register> {
                     Expanded(
                       child: CupertinoPicker(
                         scrollController: FixedExtentScrollController(initialItem: selectedYear - 1900),
-                        itemExtent: 36,
+                        itemExtent: 36.h,
                         backgroundColor: Colors.white,
                         onSelectedItemChanged: (int index) {
                           selectedYear = years[index];
                         },
-                        children: years.map((year) => Center(child: Text('$year', style: TextStyle(fontSize: 16, color: Colors.black)))).toList(),
+                        children: years.map((year) => Center(child: Text('$year', style: TextStyle(fontSize: 16.sp, color: Colors.black)))).toList(),
                       ),
                     ),
                     // 月份选择器
                     Expanded(
                       child: CupertinoPicker(
                         scrollController: FixedExtentScrollController(initialItem: selectedMonth - 1),
-                        itemExtent: 36,
+                        itemExtent: 36.h,
                         backgroundColor: Colors.white,
                         onSelectedItemChanged: (int index) {
                           selectedMonth = months[index];
                         },
-                        children: months.map((month) => Center(child: Text('$month', style: TextStyle(fontSize: 16, color: Colors.black)))).toList(),
+                        children: months.map((month) => Center(child: Text('$month', style: TextStyle(fontSize: 16.sp, color: Colors.black)))).toList(),
                       ),
                     ),
                     // 天数选择器
                     Expanded(
                       child: CupertinoPicker(
                         scrollController: FixedExtentScrollController(initialItem: selectedDay - 1),
-                        itemExtent: 36,
+                        itemExtent: 36.h,
                         backgroundColor: Colors.white,
                         onSelectedItemChanged: (int index) {
                           selectedDay = days[index];
                         },
-                        children: days.map((day) => Center(child: Text('$day', style: TextStyle(fontSize: 16, color: Colors.black)))).toList(),
+                        children: days.map((day) => Center(child: Text('$day', style: TextStyle(fontSize: 16.sp, color: Colors.black)))).toList(),
                       ),
                     ),
                   ],
@@ -466,13 +466,13 @@ class _RegisterState extends State<Register> {
           width: _labelWidth,
           child: Text(
             labelText,
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: TextStyle(fontSize: 16.sp, color: Colors.black87),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           child: SizedBox(
-            height: 50,
+            height: 50.h,
             child: TextField(
               controller: controller,
               obscureText: obscureText,
@@ -481,11 +481,11 @@ class _RegisterState extends State<Register> {
               readOnly: readOnly,
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 12.h,
                 ),
                 suffixIcon: suffixIcon,
               ),
@@ -507,35 +507,35 @@ class _RegisterState extends State<Register> {
           width: _labelWidth,
           child: Text(
             loc.translate('email'),
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: TextStyle(fontSize: 16.sp, color: Colors.black87),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           flex: 2,
           child: SizedBox(
-            height: 50,
+            height: 50.h,
             child: TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               enabled: !_isRegisterLoading,
               decoration: InputDecoration(
                 hintText: loc.translate('input_email_hint'),
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 12.h,
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           flex: 1,
           child: SizedBox(
-            height: 30,
+            height: 30.h,
             child: ElevatedButton(
               onPressed:
                   _canGetVerifyCode && !_isRegisterLoading
@@ -547,15 +547,15 @@ class _RegisterState extends State<Register> {
                         ? const Color.fromARGB(255, 255, 255, 255)
                         : const Color.fromARGB(255, 0, 0, 0),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
                 padding: EdgeInsets.zero,
               ),
               child: Text(
                 _verifyCodeText,
-                style: const TextStyle(
-                  color: Color.fromARGB(255, 0, 0, 0),
-                  fontSize: 12,
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 0, 0, 0),
+                  fontSize: 12.sp,
                 ),
               ),
             ),
@@ -585,11 +585,11 @@ class _RegisterState extends State<Register> {
       appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: 60,
+          toolbarHeight: 60.h,
           leading: Padding(
-            padding: EdgeInsets.only(left: 4, top: 4),
+            padding: EdgeInsets.only(left: 4.w, top: 4.h),
             child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black, size: 24),
+              icon: Icon(Icons.arrow_back, color: Colors.black, size: 24.r),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -613,27 +613,27 @@ class _RegisterState extends State<Register> {
                 ),
               ),
               padding: EdgeInsets.only(
-                top: 50,
+                top: 50.h,
                 right: _logoRightPadding,
-                bottom: 30,
+                bottom: 30.h,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Image.asset(
                         'images/logo.png',
-                        width: 300,
-                        height: 100,
+                        width: 300.w,
+                        height: 100.h,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       Text(
                         loc.translate('smart_consumer_start'),
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -641,7 +641,7 @@ class _RegisterState extends State<Register> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
 
             // 可滚动表单区域（原有UI完全保留）
             Expanded(
@@ -651,7 +651,7 @@ class _RegisterState extends State<Register> {
                 ),
                 padding: EdgeInsets.symmetric(
                   horizontal: _inputHorizontalMargin,
-                  vertical: 10,
+                  vertical: 10.h,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -662,15 +662,15 @@ class _RegisterState extends State<Register> {
                       controller: _usernameController,
                       hintText: loc.translate('input_username_hint'),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // 邮箱+验证码按钮
                     _buildEmailWithVerifyCodeRow(),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // 验证码输入行
                     _buildVerifyCodeRow(),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // 生日选择行
                     _buildInputRow(
@@ -680,7 +680,7 @@ class _RegisterState extends State<Register> {
                       onTap: _selectBirthday,
                       readOnly: true,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // 手机号输入行
                     _buildInputRow(
@@ -689,7 +689,7 @@ class _RegisterState extends State<Register> {
                       hintText: loc.translate('input_phone_hint'),
                       keyboardType: TextInputType.phone,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // 密码输入行
                     _buildInputRow(
@@ -703,6 +703,7 @@ class _RegisterState extends State<Register> {
                               ? Icons.visibility_off
                               : Icons.visibility,
                           color: Colors.grey,
+                          size: 20.r,
                         ),
                         onPressed:
                             () => setState(
@@ -710,7 +711,7 @@ class _RegisterState extends State<Register> {
                             ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // 确认密码输入行（补全之前可能截断的部分）
                     _buildInputRow(
@@ -724,6 +725,7 @@ class _RegisterState extends State<Register> {
                               ? Icons.visibility_off
                               : Icons.visibility,
                           color: Colors.grey,
+                          size: 20.r,
                         ),
                         onPressed:
                             () => setState(
@@ -733,7 +735,7 @@ class _RegisterState extends State<Register> {
                             ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    SizedBox(height: 30.h),
 
                     // 注册按钮（完整保留原有样式）
                     // 注册按钮（修改onTap为_submitRegister）
@@ -743,13 +745,13 @@ class _RegisterState extends State<Register> {
                       child: Container(
                         alignment: Alignment.center,
                         width: double.infinity,
-                        height: 50,
+                        height: 50.h,
                         decoration: BoxDecoration(
                           color:
                               _isRegisterLoading
                                   ? Colors.grey[300]
                                   : const Color.fromARGB(255, 243, 215, 53),
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(25.r),
                         ),
                         child:
                             _isRegisterLoading
@@ -759,9 +761,9 @@ class _RegisterState extends State<Register> {
                                 )
                                 : Text(
                                   loc.translate('register'),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: 16.sp,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),

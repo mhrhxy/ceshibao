@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'dingbudaohang.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -210,15 +211,15 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
                     alignment: Alignment.center,
                     child: Text(
                       AppLocalizations.of(context)?.translate('password_change') ?? '密码修改',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Colors.black87,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 48),
+                SizedBox(width: 48.w),
               ],
             ),
           ),
@@ -301,16 +302,16 @@ class _PasswordChangePageState extends State<PasswordChangePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 80,
+            width: 80.w,
             child: Text(
               title,
-              style: const TextStyle(
+              style:  TextStyle(
                 color: Colors.black87,
-                fontSize: 16,
+                fontSize: 16.sp,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: TextField(
               controller: controller,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'package:flutter_mall/login.dart';
@@ -96,8 +97,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     setState(() => _isLoading = true);
     try {
       Response result = await HttpUtil.post(
-        "$apisendemail?email=$email&type=3",
-        data: {},
+        apisendemail,
+        queryParameters: {"email": email, "type": "3"},
       );
 
       if (result.data['code'] == 200) {
@@ -289,10 +290,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           width: _labelWidth,
           child: Text(
             labelText,
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: TextStyle(fontSize: 16.sp, color: Colors.black87),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           child: SizedBox(
             height: errorText != null ? 70 : 50, // 有错误时增加高度
@@ -323,7 +324,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     padding: const EdgeInsets.only(top: 4, left: 4),
                     child: Text(
                       errorText,
-                      style: const TextStyle(color: Colors.red, fontSize: 12),
+                      style: TextStyle(color: Colors.red, fontSize: 12.sp),
                     ),
                   ),
               ],
@@ -344,14 +345,14 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           width: _labelWidth,
           child: Text(
             loc.translate('email') ,
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: TextStyle(fontSize: 16.sp, color: Colors.black87),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           flex: 2,
           child: SizedBox(
-            height: 50,
+            height: 50.h,
             child: TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
@@ -365,11 +366,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           flex: 1,
           child: SizedBox(
-            height: 30,
+            height: 30.h,
             child: ElevatedButton(
               onPressed: _canGetVerifyCode && !_isLoading ? _sendVerifyCode : null,
               style: ElevatedButton.styleFrom(
@@ -379,7 +380,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
               child: Text(
                 _verifyCodeText,
-                style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontSize: 12),
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontSize: 12.sp),
               ),
             ),
           ),
@@ -417,26 +418,26 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 10),
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 24),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 24.w),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Image.asset(
                         'images/logo.png',
-                        width: 300,
-                        height: 100,
+                        width: 300.w,
+                        height: 100.h,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       Text(
                         loc.translate('smart_consumer_start') ,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           color: Colors.grey[600],
                         ),
                       ),
@@ -446,7 +447,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
             ),
 
-            const SizedBox(height: 40),
+            SizedBox(height: 40.h),
 
             // 表单区域
             Expanded(
@@ -466,22 +467,22 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         controller: _memberNameController,
                         hintText: loc.translate('input_account_hints'),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20.h),
                       _buildEmailWithVerifyCodeRow(),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20.h),
                       _buildInputRow(
                         labelText: loc.translate('verify_code'),
                         controller: _verifyCodeController,
                         hintText: loc.translate('input_verify_code_hint') ,
                         keyboardType: TextInputType.number,
                       ),
-                      const SizedBox(height: 30),
+                      SizedBox(height: 30.h),
                       InkWell(
                         onTap: _isLoading ? null : _goToSecondStep,
                         child: Container(
                           alignment: Alignment.center,
                           width: double.infinity,
-                          height: 50,
+                          height: 50.h,
                           decoration: BoxDecoration(
                             color: _isLoading ? Colors.grey[300] : const Color.fromARGB(255, 243, 215, 53),
                             borderRadius: BorderRadius.circular(25),
@@ -490,7 +491,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                               : Text(
                                   loc.translate('next_step') ?? "下一步",
-                                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                                  style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w500),
                                 ),
                         ),
                       ),
@@ -512,7 +513,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         ),
                         errorText: _pwdErrorText, // 显示密码格式错误
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20.h),
                       // 确认密码输入框
                       _buildInputRow(
                         labelText: loc.translate('confirm_password') ,
@@ -527,13 +528,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           onPressed: () => setState(() => _isObscureConfirmPwd = !_isObscureConfirmPwd),
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      SizedBox(height: 30.h),
                       InkWell(
                         onTap: _isLoading ? null : _submitNewPassword,
                         child: Container(
                           alignment: Alignment.center,
                           width: double.infinity,
-                          height: 50,
+                          height: 50.h,
                           decoration: BoxDecoration(
                             color: _isLoading ? Colors.grey[300] : const Color.fromARGB(255, 243, 215, 53),
                             borderRadius: BorderRadius.circular(25),
@@ -542,7 +543,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                               : Text(
                                   loc.translate('confirm'),
-                                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                                  style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w500),
                                 ),
                         ),
                       ),

@@ -38,6 +38,10 @@
   "cancel": "取消",
   "confirm": "确认",
   "smart_consumer_start": "半价直购的智能消费者的开始",
+  "continue_with_kakao": "继续使用KakaoTalk",
+  "continue_with_naver": "继续使用Naver",
+  "login_with_email": "用邮箱登录",
+  "register_with_email": "用邮箱注册",
   "email_login": "邮箱登录",
   "forgot_password": "忘记密码",
   "forgot_account": "忘记账号",
@@ -382,5 +386,6 @@
   "unknown_product": "未知商品",
   "user_id_missing_comments": "用户ID缺失，无法加载评论",
   "get_user_comments_failed": "获取用户评论失败",
-  "user_no_comments": "该用户暂无评论数据"
+  "user_no_comments": "该用户暂无评论数据",
+  "no_price": "暂无价格"
 }

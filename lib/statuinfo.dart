@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -313,7 +314,7 @@ class _AccountInfoChangePageState extends State<AccountInfoChangePage> {
       builder: (context, child) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           child!,
         ],
       ),
@@ -465,15 +466,15 @@ class _AccountInfoChangePageState extends State<AccountInfoChangePage> {
                           alignment: Alignment.center,
                           child: Text(
                             AppLocalizations.of(context)?.translate('account_info') ?? '账户信息确认/变更',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               color: Colors.black87,
-                              fontSize: 18,
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 48),
+                      SizedBox(width: 48.w),
                     ],
                   ),
                 ),
@@ -492,26 +493,26 @@ class _AccountInfoChangePageState extends State<AccountInfoChangePage> {
                                 borderRadius: BorderRadius.circular(4),
                                 child: Image.network(
                                   _getAvatarUrl(),
-                                  width: 48,
-                                  height: 48,
+                                  width: 48.w,
+                                  height: 48.h,
                                   fit: BoxFit.cover,
                                   errorBuilder: (_, __, ___) => Container(
-                                    width: 48,
-                                    height: 48,
+                                    width: 48.w,
+                                    height: 48.h,
                                     color: Colors.grey[200],
                                     alignment: Alignment.center,
                                     child: const Icon(Icons.person_outline, color: Colors.grey),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+                              SizedBox(width: 8.w),
+                              Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16.w),
                             ],
                           ),
                           isEditable: true,
                           onTap: _pickAndUploadAvatar,
                         ),
-                        const Divider(height: 1, indent: 0, color: Color(0xFFEEEEEE)),
+                        Divider(height: 1.w, indent: 0.w, color: Color(0xFFEEEEEE)),
                         _buildInfoItem(
                           title: AppLocalizations.of(context)?.translate('account_name') ?? '账号名',
                           content: _memberInfo?.memberName ?? '',
@@ -558,9 +559,9 @@ class _AccountInfoChangePageState extends State<AccountInfoChangePage> {
     return ListTile(
       title: Text(
         title,
-        style: const TextStyle(
+        style:  TextStyle(
           color: Colors.black87,
-          fontSize: 16,
+          fontSize: 16.sp,
         ),
       ),
       trailing: trailing ?? Row(
@@ -568,14 +569,14 @@ class _AccountInfoChangePageState extends State<AccountInfoChangePage> {
         children: [
           if (content != null) Text(
             content,
-            style: const TextStyle(
+            style:  TextStyle(
               color: Colors.black87,
-              fontSize: 16,
+              fontSize: 16.sp,
             ),
           ),
           if (isEditable) ...[
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+            SizedBox(width: 8.w),
+            Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16.w),
           ],
         ],
       ),

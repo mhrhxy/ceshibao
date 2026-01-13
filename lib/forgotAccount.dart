@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart'; // 导入剪贴板功能
 import 'package:dio/dio.dart';
 import 'package:flutter_mall/app_localizations.dart';
@@ -76,8 +77,8 @@ class _ForgotAccountState extends State<ForgotAccount> {
     try {
       // 调用发送验证码接口（忘记账号场景type，需与后端确认，这里复用type=3）
       Response result = await HttpUtil.post(
-        "$apisendemail?email=$email&type=4",
-        data: {},
+        apisendemail,
+        queryParameters: {"email": email, "type": "4"},
       );
 
       if (result.data['code'] == 200) {
@@ -218,13 +219,13 @@ class _ForgotAccountState extends State<ForgotAccount> {
           width: _labelWidth,
           child: Text(
             labelText,
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: TextStyle(fontSize: 16.sp, color: Colors.black87),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           child: SizedBox(
-            height: 50,
+            height: 50.h,
             child: TextField(
               controller: controller,
               obscureText: obscureText,
@@ -280,7 +281,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
         Expanded(
           flex: 1,
           child: SizedBox(
-            height: 30,
+            height: 30.h,
             child: ElevatedButton(
               onPressed: _canGetVerifyCode && !_isLoading ? _sendVerifyCode : null,
               style: ElevatedButton.styleFrom(
@@ -290,7 +291,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
               ),
               child: Text(
                 _verifyCodeText,
-                style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontSize: 12),
+                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontSize: 12.sp),
               ),
             ),
           ),
@@ -328,27 +329,27 @@ class _ForgotAccountState extends State<ForgotAccount> {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 10),
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 24),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 24.w),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   // Logo和标语（复用）
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Image.asset(
                         'images/logo.png',
-                        width: 300,
-                        height: 100,
+                        width: 300.w,
+                        height: 100.h,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       Text(
                         loc.translate('smart_consumer_start'),
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           color: Colors.grey[600],
                         ),
                       ),
@@ -358,7 +359,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
               ),
             ),
 
-            const SizedBox(height: 40),
+            SizedBox(height: 40.h),
 
             Expanded(
               child: SingleChildScrollView(
@@ -373,7 +374,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
                     // 第一步：邮箱 + 验证码 + 确认按钮
                     if (_isFirstStep) ...[
                       _buildEmailWithVerifyCodeRow(),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20.h),
                       // 验证码输入框
                       _buildInputRow(
                         labelText: loc.translate('verify_code'),
@@ -381,7 +382,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
                         hintText: loc.translate('input_verify_code_hint'),
                         keyboardType: TextInputType.number,
                       ),
-                      const SizedBox(height: 30),
+                      SizedBox(height: 30.h),
                       // 确认按钮（文字从"下一步"改为"确认"）
                       InkWell(
                         onTap: _isLoading ? null : _verifyEmailAndCode,
@@ -397,7 +398,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
                               ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                               : Text(
                                   loc.translate('confirm') ?? "确认", // 按钮文字改为"确认"
-                                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                                  style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w500),
                                 ),
                         ),
                       ),
@@ -414,11 +415,11 @@ class _ForgotAccountState extends State<ForgotAccount> {
                             Expanded(
                               child: Text(
                                 "${loc.translate('your_account') ?? '您的账号：'} ${_memberName ?? ''}",
-                                style: const TextStyle(fontSize: 16, color: Colors.black87),
+                                style: TextStyle(fontSize: 16.sp, color: Colors.black87),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            SizedBox(width: 10.w),
                             // 复制按钮
                             TextButton(
                               onPressed: _copyMemberName,
@@ -430,13 +431,13 @@ class _ForgotAccountState extends State<ForgotAccount> {
                                 _isCopied 
                                     ? loc.translate('copied') ?? '已复制' 
                                     : loc.translate('copy') ?? '复制',
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 14.sp),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 50),
+                      SizedBox(height: 50.h),
                       // 确认返回登录页按钮
                       InkWell(
                         onTap: _isLoading ? null : _backToLogin,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app_localizations.dart';
 import 'dingbudaohang.dart';
 import 'utils/http_util.dart';
@@ -8,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'after_sales_application.dart';
 import 'order_review.dart';
+import 'main_tab.dart';
 
 // 我的订单页
 // 支付方式数据模型·
@@ -98,7 +100,7 @@ class _MyorderState extends State<Myorder> {
 
         return Card(
           elevation: 2,
-          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           child: InkWell(
             onTap: () {
               setState(() {
@@ -106,7 +108,7 @@ class _MyorderState extends State<Myorder> {
               });
             },
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.r),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -117,21 +119,21 @@ class _MyorderState extends State<Myorder> {
                       Text(
                         card.name,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       card.url.isNotEmpty
                           ? Image.network(
                             '$baseUrl${card.url}',
-                            width: 100,
-                            height: 60,
+                            width: 100.w,
+                            height: 60.h,
                             fit: BoxFit.cover,
                             errorBuilder:
                                 (_, __, ___) => Container(
-                                  width: 100,
-                                  height: 60,
+                                  width: 100.w,
+                                  height: 60.h,
                                   color: Colors.grey[200],
                                   child: const Icon(
                                     Icons.image_not_supported,
@@ -181,54 +183,68 @@ class _MyorderState extends State<Myorder> {
   @override
   void initState() {
     super.initState();
-    // 初始化时加载所有订单
-    loadOrderList(0, 0, true);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 在didChangeDependencies中初始化，此时context完全可用
+    // 初始化订单状态列表
     orderStatusList = [
       {
-        'name':
-            AppLocalizations.of(context)?.translate('payment_ended') ?? '付款结束',
+        'name': '付款结束',
         'count': 0,
-        'orderState': 2,
+        'orderState': 2,  // 修正为API返回的键值
         'orderPayState': 3,
       },
       {
-        'name':
-            AppLocalizations.of(context)?.translate('warehouse_in_ended') ??
-            '入库结束',
+        'name': '入库结束',
         'count': 0,
         'orderState': 5,
         'orderPayState': 0,
       },
       {
-        'name':
-            AppLocalizations.of(context)?.translate('warehouse_out_pending') ??
-            '出库待发',
+        'name': '出库待发',
         'count': 0,
         'orderState': 6,
         'orderPayState': 0,
       },
       {
-        'name':
-            AppLocalizations.of(context)?.translate('shipped_complete') ??
-            '发货完成',
+        'name': '发货完成',
         'count': 0,
         'orderState': 7,
         'orderPayState': 0,
       },
       {
-        'name':
-            AppLocalizations.of(context)?.translate('cancel_order') ?? '取消订单',
+        'name': '取消订单',
         'count': 0,
         'orderState': -1,
         'orderPayState': 0,
       },
     ];
+    // 加载所有订单和统计数据
+    loadOrderList(0, 0, true);
+    fetchOrderStatistics();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 更新订单状态列表的本地化文本
+    for (var status in orderStatusList) {
+      int orderState = status['orderState'];
+      switch (orderState) {
+        case 2:
+          status['name'] = AppLocalizations.of(context)?.translate('payment_ended') ?? '付款结束';
+          break;
+        case 5:
+          status['name'] = AppLocalizations.of(context)?.translate('warehouse_in_ended') ?? '入库结束';
+          break;
+        case 6:
+          status['name'] = AppLocalizations.of(context)?.translate('warehouse_out_pending') ?? '出库待发';
+          break;
+        case 7:
+          status['name'] = AppLocalizations.of(context)?.translate('shipped_complete') ?? '发货完成';
+          break;
+        case -1:
+          status['name'] = AppLocalizations.of(context)?.translate('cancel_order') ?? '取消订单';
+          break;
+      }
+    }
   }
 
   // 根据订单状态获取显示文字和颜色
@@ -398,7 +414,6 @@ class _MyorderState extends State<Myorder> {
 
       Map<String, dynamic> params = {
         'orderState': orderState,
-        'orderPayState': orderPayState,
       };
 
       var response = await HttpUtil.get(
@@ -453,6 +468,7 @@ class _MyorderState extends State<Myorder> {
                   orderItems: [], // 后续从loadOrderProducts加载
                   isExpanded: false,
                   orderOriginNo: shopItem['orderOriginNo']?.toString() ?? '',
+                  orderPlateformNo: shopItem['orderPlateformNo']?.toString() ?? '', // 获取平台订单编号
                   picture: shopItem['picture']?.toString() ?? '', // 获取订单图片
                   productAllPrice:
                       (shopItem['productAllPrice'] ?? 0.0), // 获取订单总价并转换为韩元
@@ -540,7 +556,7 @@ class _MyorderState extends State<Myorder> {
 
           // 如果是全部订单，同时更新各状态的数量
           if (orderState == 0 && orderPayState == 0) {
-            updateOrderStatusCounts();
+            fetchOrderStatistics();
           }
         }
       }
@@ -555,37 +571,39 @@ class _MyorderState extends State<Myorder> {
     }
   }
 
-  // 更新各订单状态的数量
-  void updateOrderStatusCounts() {
-    // 更新全部订单数量
-    totalOrderCount = orderList.length;
-
-    // 重置所有计数为0
-    for (var status in orderStatusList) {
-      status['count'] = 0;
-    }
-
-    // 遍历所有订单，根据状态更新计数
-    for (var order in orderList) {
-      String orderState = order.status;
-
-      // 根据订单状态文本匹配对应的状态项
-      for (var status in orderStatusList) {
-        if (orderState.contains(status['name'])) {
-          status['count']++;
-        } else if (orderState ==
-                (AppLocalizations.of(context)?.translate('cancelled') ??
-                    '已取消') &&
-            status['name'] ==
-                (AppLocalizations.of(context)?.translate('cancel_order') ??
-                    '取消订单')) {
-          status['count']++;
+  // 获取订单统计数据
+  Future<void> fetchOrderStatistics() async {
+    try {
+      var response = await HttpUtil.get(orderCountUrl);
+      
+      // 检查状态码
+      if (response.statusCode == 200) {
+        // 直接使用response.data，因为API返回的直接就是统计数据
+        var statsData = response.data;
+        
+        // 更新全部订单数量
+        totalOrderCount = statsData['0'] ?? 0;
+        
+        // 更新各状态的数量
+        for (var status in orderStatusList) {
+          int orderState = status['orderState'];
+          String stateKey = orderState.toString();
+          int count = statsData[stateKey] ?? 0;
+          status['count'] = count;
         }
+        
+        setState(() {});
+      } else {
+        print('请求失败，状态码: ${response.statusCode}');
       }
+    } catch (e) {
+      print('获取订单统计数据失败: $e');
     }
+  }
 
-    // 触发UI更新
-    setState(() {});
+  // 更新各订单状态的数量（使用新的统计接口）
+  void updateOrderStatusCounts() {
+    fetchOrderStatistics();
   }
 
   // 加载订单项详情
@@ -747,6 +765,7 @@ class _MyorderState extends State<Myorder> {
                       isExpanded:
                           shopOrder.id == orderId ? true : shopOrder.isExpanded,
                       orderOriginNo: shopOrder.orderOriginNo,
+                      orderPlateformNo: shopOrder.orderPlateformNo,
                       picture: shopOrder.picture,
                       productAllPrice: shopOrder.productAllPrice,
                       num: shopOrder.num,
@@ -1322,15 +1341,15 @@ class _MyorderState extends State<Myorder> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+              topLeft: Radius.circular(20.r),
+              topRight: Radius.circular(20.r),
             ),
           ),
           child: Column(
             children: [
               // 顶部标题和关闭按钮
               Padding(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(16.r),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -1340,7 +1359,7 @@ class _MyorderState extends State<Myorder> {
                           )?.translate('select_payment_card') ??
                           '选择支付卡',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1353,7 +1372,7 @@ class _MyorderState extends State<Myorder> {
                   ],
                 ),
               ),
-              Divider(height: 1),
+              Divider(height: 1.h),
               // 卡片列表
               Expanded(
                 child: FutureBuilder<List<PayCard>>(
@@ -1387,7 +1406,7 @@ class _MyorderState extends State<Myorder> {
               ),
               // 确认按钮
               Padding(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(16.r),
                 child: ElevatedButton(
                   onPressed: () {
                     // 处理确认选择
@@ -1403,14 +1422,14 @@ class _MyorderState extends State<Myorder> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    minimumSize: Size(double.infinity, 50),
+                    minimumSize: Size(double.infinity, 50.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(25.r),
                     ),
                   ),
                   child: Text(
                     AppLocalizations.of(context)?.translate('confirm') ?? '确认',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18.sp),
                   ),
                 ),
               ),
@@ -1451,117 +1470,158 @@ class _MyorderState extends State<Myorder> {
   // 支付运费的方法
   void _payShippingFee(String orderId, double shippingFee) async {
     // 显示支付方式弹窗
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            AppLocalizations.of(context)?.translate('select_payment_method') ??
-                '选择支付方式',
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.5,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20.r),
+              topRight: Radius.circular(20.r),
+            ),
           ),
-          content: Container(
-            width: double.maxFinite,
-            height: 300,
-            child: FutureBuilder<List<PaymentMethod>>(
-              future: _fetchPaymentMethods(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      AppLocalizations.of(
-                            context,
-                          )?.translate('get_payment_methods_failed') ??
-                          '获取支付方式失败',
+          child: Column(
+            children: [
+              // 顶部标题和关闭按钮
+              Padding(
+                padding: EdgeInsets.all(16.r),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)?.translate('select_payment_method') ??
+                          '选择支付方式',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  );
-                } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final payment = snapshot.data![index];
-                      return Card(
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: InkWell(
-                            onTap: () {
-                              // 根据支付方式类型调用不同的支付方法
-                              if (payment.name == '卡支付') {
-                                Navigator.of(context).pop();
-                                _showCardSelectionModal(
-                                  context,
-                                  orderId,
-                                  customAmount: shippingFee,
-                                  isOverseasShipping: true,
-                                );
-                              } else if (payment.name == 'Naver支付') {
-                                Navigator.of(context).pop();
-                                _processPaymentWithNaverpay(
-                                  orderId,
-                                  customAmount: shippingFee,
-                                  isOverseasShipping: true,
-                                );
-                              }
-                            },
-                            child: Column(
-                              children: [
-                                Text(
-                                  payment.name,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                payment.url.isNotEmpty
-                                    ? Image.network(
-                                      payment.url,
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (_, __, ___) => Container(
-                                            width: 60,
-                                            height: 60,
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1.h),
+              // 支付方式部分 - 垂直列表选择
+              Expanded(
+                child: FutureBuilder<List<PaymentMethod>>(
+                  future: _fetchPaymentMethods(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          AppLocalizations.of(
+                                context,
+                              )?.translate('get_payment_methods_failed') ??
+                              '获取支付方式失败',
+                        ),
+                      );
+                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      return ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          final payment = snapshot.data![index];
+                          return Card(
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 16.r,
+                              vertical: 8.r,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                // 根据支付方式类型调用不同的支付方法
+                                if (payment.name == '卡支付') {
+                                  Navigator.of(context).pop();
+                                  _showCardSelectionModal(
+                                    context,
+                                    orderId,
+                                    customAmount: shippingFee,
+                                    isOverseasShipping: true,
+                                  );
+                                } else if (payment.name == 'Naver支付') {
+                                  Navigator.of(context).pop();
+                                  _processPaymentWithNaverpay(
+                                    orderId,
+                                    customAmount: shippingFee,
+                                    isOverseasShipping: true,
+                                  );
+                                }
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(16.r),
+                                child: Row(
+                                  children: [
+                                    payment.url.isNotEmpty
+                                        ? Image.network(
+                                          payment.url,
+                                          width: 60.w,
+                                          height: 60.h,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (_, __, ___) => Container(
+                                                width: 60,
+                                                height: 60,
+                                                color: Colors.grey[200],
+                                                child: const Icon(
+                                                  Icons.image_not_supported,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                        )
+                                        : Container(
+                                            width: 60.w,
+                                            height: 60.h,
                                             color: Colors.grey[200],
                                             child: const Icon(
-                                              Icons.image_not_supported,
+                                              Icons.payment,
                                               color: Colors.grey,
                                             ),
                                           ),
-                                    )
-                                    : Container(),
-                              ],
+                                    SizedBox(width: 16.w),
+                                    Expanded(
+                                      child: Text(
+                                        payment.name,
+                                        style: TextStyle(
+                                          fontSize: 18.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(Icons.arrow_forward_ios),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
+                          );
+                        },
+                      );
+                    } else {
+                      return Center(
+                        child: Text(
+                          AppLocalizations.of(
+                                context,
+                              )?.translate('no_available_payment_methods') ??
+                              '暂无可用支付方式',
                         ),
                       );
-                    },
-                  );
-                } else {
-                  return Center(
-                    child: Text(
-                      AppLocalizations.of(
-                            context,
-                          )?.translate('no_available_payment_methods') ??
-                          '暂无可用支付方式',
-                    ),
-                  );
-                }
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                AppLocalizations.of(context)?.translate('disabled') ?? '关闭',
+                    }
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -1606,120 +1666,151 @@ class _MyorderState extends State<Myorder> {
     }
 
     // 显示支付方式弹窗
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        // 使用StatefulBuilder创建局部状态管理
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(
-                AppLocalizations.of(
-                      context,
-                    )?.translate('select_payment_method') ??
-                    '결제수단',
-              ),
-              content: Container(
-                width: double.maxFinite,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.5,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20.r),
+              topRight: Radius.circular(20.r),
+            ),
+          ),
+          child: Column(
+            children: [
+              // 顶部标题和关闭按钮
+              Padding(
+                padding: EdgeInsets.all(16.r),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // 支付方式部分 - 水平排列的正方形选择框
-                    isLoadingPayment
-                        ? Center(child: CircularProgressIndicator())
-                        : paymentError != null
-                        ? Center(child: Text(paymentError))
-                        : paymentMethods.isNotEmpty
-                        ? Container(
-                          height: 100,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: paymentMethods.length,
-                            itemBuilder: (context, index) {
-                              final payment = paymentMethods[index];
-                              return Container(
-                                width: 100,
-                                height: 100,
-                                margin: EdgeInsets.only(right: 16),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: InkWell(
-                                  onTap: () async {
-                                    // 根据支付方式类型调用不同的支付方法
-                                    if (payment.name == '卡支付') {
-                                      Navigator.of(context).pop();
-                                      // 等待支付操作完成
-                                      await _showCardSelectionModal(
-                                        context,
-                                        orderId,
-                                      );
-                                      // 支付完成后刷新订单列表
-                                      if (mounted) {
-                                        onRefresh();
-                                      }
-                                    } else if (payment.name == 'Naver支付') {
-                                      Navigator.of(context).pop();
-                                      // 等待支付操作完成
-                                      await _processPaymentWithNaverpay(
-                                        orderId,
-                                      );
-                                      // 支付完成后刷新订单列表
-                                      if (mounted) {
-                                        onRefresh();
-                                      }
-                                    }
-                                  },
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      payment.url.isNotEmpty
-                                          ? Image.network(
-                                            payment.url,
-                                            width: 40,
-                                            height: 40,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (_, __, ___) => Container(
-                                                  width: 40,
-                                                  height: 40,
-                                                  color: Colors.grey[200],
-                                                  child: const Icon(
-                                                    Icons.image_not_supported,
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                          )
-                                          : Container(),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        payment.name,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                        : Center(
-                          child: Text(
-                            AppLocalizations.of(
-                                  context,
-                                )?.translate('no_available_payment_methods') ??
-                                '暂无可用支付方式',
-                          ),
-                        ),
+                    Text(
+                      AppLocalizations.of(
+                            context,
+                          )?.translate('select_payment_method') ??
+                          '결제수단',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   ],
                 ),
               ),
-            );
-          },
+              Divider(height: 1.h),
+              // 支付方式部分 - 垂直列表选择
+              Expanded(
+                child: isLoadingPayment
+                    ? Center(child: CircularProgressIndicator())
+                    : paymentError != null
+                    ? Center(child: Text(paymentError))
+                    : paymentMethods.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: paymentMethods.length,
+                        itemBuilder: (context, index) {
+                          final payment = paymentMethods[index];
+                          return Card(
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 16.r,
+                              vertical: 8.r,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: InkWell(
+                              onTap: () async {
+                                // 根据支付方式类型调用不同的支付方法
+                                if (payment.name == '卡支付') {
+                                  Navigator.of(context).pop();
+                                  // 等待支付操作完成
+                                  await _showCardSelectionModal(
+                                    context,
+                                    orderId,
+                                  );
+                                  // 支付完成后刷新订单列表
+                                  if (mounted) {
+                                    onRefresh();
+                                  }
+                                } else if (payment.name == 'Naver支付') {
+                                  Navigator.of(context).pop();
+                                  // 等待支付操作完成
+                                  await _processPaymentWithNaverpay(
+                                    orderId,
+                                  );
+                                  // 支付完成后刷新订单列表
+                                  if (mounted) {
+                                    onRefresh();
+                                  }
+                                }
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(16.r),
+                                child: Row(
+                                  children: [
+                                    payment.url.isNotEmpty
+                                        ? Image.network(
+                                            payment.url,
+                                            width: 60.w,
+                                            height: 60.h,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) => Container(
+                                              width: 60,
+                                              height: 60,
+                                              color: Colors.grey[200],
+                                              child: const Icon(
+                                                Icons.image_not_supported,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          )
+                                        : Container(
+                                            width: 60.w,
+                                            height: 60.h,
+                                            color: Colors.grey[200],
+                                            child: const Icon(
+                                              Icons.payment,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                    SizedBox(width: 16.w),
+                                    Expanded(
+                                      child: Text(
+                                        payment.name,
+                                        style: TextStyle(
+                                          fontSize: 18.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(Icons.arrow_forward_ios),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Text(
+                          AppLocalizations.of(
+                                context,
+                              )?.translate('no_available_payment_methods') ??
+                              '暂无可用支付方式',
+                        ),
+                      ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -1817,19 +1908,26 @@ class _MyorderState extends State<Myorder> {
       body: Column(
         children: [
           Container(
-            height: 44,
+            height: 44.h,
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
+            padding: EdgeInsets.symmetric(horizontal: 6.w),
             child: Row(
               children: [
                 IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.black),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    // 清空导航栈并返回底部导航页，显示我的页面
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainTab(initialIndex: 4)),
+                      (route) => false, // 移除所有之前的路由
+                    );
+                  },
                 ),
                 Text(
                   AppLocalizations.of(context)?.translate('my_orders') ??
                       "我的订单",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500),
                 ),
                 const Spacer(),
               ],
@@ -1837,7 +1935,7 @@ class _MyorderState extends State<Myorder> {
           ),
           // 订单状态选项卡
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: EdgeInsets.symmetric(vertical: 10.h),
             color: Colors.white,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -1847,8 +1945,8 @@ class _MyorderState extends State<Myorder> {
                   GestureDetector(
                     onTap: () => changeOrderStatus(-1),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 15),
-                      padding: const EdgeInsets.only(bottom: 5),
+                      margin: EdgeInsets.symmetric(horizontal: 15.w),
+                      padding: EdgeInsets.only(bottom: 5.h),
                       child: Column(
                         children: [
                           Text(
@@ -1857,18 +1955,18 @@ class _MyorderState extends State<Myorder> {
                                 )?.translate('all_orders') ??
                                 '全部订单',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               color:
                                   currentStatusIndex == -1
                                       ? Colors.blue
                                       : Colors.black,
                             ),
                           ),
-                          const SizedBox(height: 5),
+                          SizedBox(height: 5.h),
                           Text(
                             totalOrderCount.toString(),
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: TextStyle(
+                              fontSize: 16.sp,
                               color: Colors.red,
                             ),
                           ),
@@ -1883,25 +1981,25 @@ class _MyorderState extends State<Myorder> {
                     return GestureDetector(
                       onTap: () => changeOrderStatus(index),
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        padding: const EdgeInsets.only(bottom: 5),
+                        margin: EdgeInsets.symmetric(horizontal: 15.w),
+                        padding: EdgeInsets.only(bottom: 5.h),
                         child: Column(
                           children: [
                             Text(
                               status['name'],
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 14.sp,
                                 color:
                                     currentStatusIndex == index
                                         ? Colors.blue
                                         : Colors.black,
                               ),
                             ),
-                            const SizedBox(height: 5),
+                            SizedBox(height: 5.h),
                             Text(
                               status['count'].toString(),
-                              style: const TextStyle(
-                                fontSize: 16,
+                              style: TextStyle(
+                                fontSize: 16.sp,
                                 color: Colors.red,
                               ),
                             ),
@@ -1917,26 +2015,10 @@ class _MyorderState extends State<Myorder> {
 
           // 筛选标签
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
             color: Colors.white,
             child: Row(
               children: [
-                // 左侧的"모든주문"标签 - 去掉圆角
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1),
-                    borderRadius: BorderRadius.zero, // 去掉圆角
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context)?.translate('all_orders_kr') ??
-                        '모든주문',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
                 const Spacer(), // 使用Spacer将直购和推荐标签推到右侧
                 // 右侧的直购和推荐标签
                 Row(
@@ -1945,44 +2027,44 @@ class _MyorderState extends State<Myorder> {
                     Row(
                       children: [
                         Container(
-                          width: 50, // 增加宽度
-                          height: 20,
+                          width: 50.w, // 增加宽度
+                          height: 20.h,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            border: Border.all(color: Colors.grey, width: 1),
-                            borderRadius: BorderRadius.circular(2),
+                            border: Border.all(color: Colors.grey, width: 1.w),
+                            borderRadius: BorderRadius.circular(2.r),
                           ),
                         ),
-                        const SizedBox(width: 5),
+                        SizedBox(width: 5.w),
                         Text(
                           AppLocalizations.of(
                                 context,
                               )?.translate('direct_purchase') ??
                               '直购',
-                          style: const TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12.sp),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 15),
+                    SizedBox(width: 15.w),
                     // 推荐标签 - 选中状态，增加宽度
                     Row(
                       children: [
                         Container(
-                          width: 50, // 增加宽度
-                          height: 20,
+                          width: 50.w, // 增加宽度
+                          height: 20.h,
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 241, 113, 156),
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(2.r),
                           ),
                         ),
-                        const SizedBox(width: 5),
+                        SizedBox(width: 5.w),
                         Text(
                           AppLocalizations.of(
                                 context,
                               )?.translate('recommended') ??
                               '推荐',
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: TextStyle(
+                            fontSize: 12.sp,
                             color: Colors.pink,
                           ),
                         ),
@@ -2015,7 +2097,7 @@ class _MyorderState extends State<Myorder> {
                         itemBuilder: (context, index) {
                           final order = orderList[index];
                           return Container(
-                            margin: const EdgeInsets.only(top: 10),
+                            margin: EdgeInsets.only(top: 10.h),
                             color: const Color.fromRGBO(
                               249,
                               250,
@@ -2032,24 +2114,24 @@ class _MyorderState extends State<Myorder> {
                                   },
                                   behavior: HitTestBehavior.opaque,
                                   child: Container(
-                                    padding: const EdgeInsets.all(15),
+                                    padding: EdgeInsets.all(15.r),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         // 根据子订单数量显示不同的图标或图片
                                         Container(
-                                          width: 70,
-                                          height: 70,
+                                          width: 70.w,
+                                          height: 70.h,
                                           decoration: BoxDecoration(
                                             color: Colors.grey[100],
                                             borderRadius: BorderRadius.circular(
-                                              8,
+                                              8.r,
                                             ),
                                           ),
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.circular(
-                                              8,
+                                              8.r,
                                             ),
                                             child: Image.network(
                                               order.shopOrders.length == 1
@@ -2057,61 +2139,53 @@ class _MyorderState extends State<Myorder> {
                                                       ? order.picture
                                                       : order.picture)
                                                   : order.picture,
-                                              width: 70,
-                                              height: 70,
+                                              width: 70.w,
+                                              height: 70.h,
                                               fit: BoxFit.cover,
                                               errorBuilder: (_, __, ___) => Center(
                                                 child: Icon(
                                                   order.shopOrders.length == 1
                                                       ? Icons.store
                                                       : Icons.shopping_cart_checkout,
-                                                  size: 36,
+                                                  size: 36.r,
                                                   color: Colors.blue,
                                                 ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
+                                        SizedBox(width: 8.w),
                                         // 商品信息
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
+                                              // 平台订单编号和原始订单编号
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  // 平台订单编号
+                                                  if (order.orderPlateformNo != null && order.orderPlateformNo.isNotEmpty)
+                                                    Text(
+                                                      ' ${order.orderPlateformNo}',
+                                                      style: TextStyle(
+                                                        fontSize: 12.sp,
+                                                        color: Colors.grey[500],
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                              
                                               // 根据子订单数量显示不同的标题
                                               Row(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.center,
                                                 children: [
-                                                  // 标题文本：只有一个子订单时显示店铺名称，否则显示订单号
-                                                  Flexible(
-                                                    fit: FlexFit.loose,
-                                                    child: Text(
-                                                      order.shopOrders.length ==
-                                                              1
-                                                          ? order
-                                                              .shopOrders[0]
-                                                              .shopName
-                                                          : '订单号: ${order.orderOriginNo}',
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                      maxLines: 2,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      softWrap: true,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 4,
-                                                  ), // 添加小间距使布局更协调
                                                   // 蓝色圆形数量标签 - 显示商品数量
                                                   Container(
-                                                    width: 20,
-                                                    height: 20,
+                                                    width: 20.w,
+                                                    height: 20.h,
                                                     decoration: BoxDecoration(
                                                       shape: BoxShape.circle,
                                                       color: Colors.blue,
@@ -2122,15 +2196,15 @@ class _MyorderState extends State<Myorder> {
                                                               1
                                                           ? '${order.shopOrders[0].num}'
                                                           : '${order.count}',
-                                                      style: const TextStyle(
-                                                        fontSize: 12,
+                                                      style: TextStyle(
+                                                        fontSize: 12.sp,
                                                         color: Colors.white,
                                                       ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
-                                              const SizedBox(height: 5),
+                                              SizedBox(height: 5.h),
                                               // 价格 - 只有一个子订单时显示子订单价格，否则显示总订单价格
                                               Text(
                                                 order.shopOrders.length == 1
@@ -2141,47 +2215,47 @@ class _MyorderState extends State<Myorder> {
                                                       'KRW',
                                                     )
                                                     : order.price,
-                                                style: const TextStyle(
-                                                  fontSize: 16,
+                                                style: TextStyle(
+                                                  fontSize: 16.sp,
                                                   color: Colors.red,
                                                 ),
                                               ),
-                                              const SizedBox(height: 5),
+                                              SizedBox(height: 5.h),
                                               // 根据子订单数量显示不同的文本
                                               if (order.shopOrders.length > 1)
                                                 // 多个子订单时，显示店铺数量
                                                 Text(
                                                   '共${order.shopOrders.length}家店铺',
                                                   style: TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: 12.sp,
                                                     color: Colors.grey[600],
                                                   ),
                                                 ),
                                             ],
                                           ),
                                         ),
-                                        // 右侧状态、按钮和箭头的水平布局
+                                        // 外层水平布局：左侧状态+按钮列，右侧箭头列
                                         Row(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
                                           children: [
-                                            // 蓝框内的垂直布局：订单状态和取消订单按钮（居中对齐）
+                                            // 左侧垂直布局：状态文本和所有按钮
                                             Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                               children: [
-                                                // 显示订单状态文本
+                                                // 订单状态文本
                                                 Text(
                                                   order.status,
                                                   style: TextStyle(
-                                                    fontSize: 14,
+                                                    fontSize: 14.sp,
                                                     fontWeight: FontWeight.w600,
                                                     color: getStatusTextColor(order.status),
                                                   ),
                                                 ),
-                                                const SizedBox(height: 8),
+                                                SizedBox(height: 8.h),
                                                 // 取消退款按钮（只有退款状态为1时显示，且只有当子订单数量为1时，才在总订单处显示）
                                                 order.refundStatus == 1 &&
                                                         order
@@ -2199,27 +2273,27 @@ class _MyorderState extends State<Myorder> {
                                                             );
                                                           },
                                                           style: TextButton.styleFrom(
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  horizontal: 8,
-                                                                  vertical: 2,
-                                                                ),
-                                                          ),
-                                                          child: Text(
-                                                            AppLocalizations.of(
-                                                                  context,
-                                                                )?.translate(
-                                                                  'cancel_refund',
-                                                                ) ??
-                                                                '取消退款',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color: Colors.red,
-                                                            ),
+                                                          padding:
+                                                              EdgeInsets.symmetric(
+                                                                horizontal: 8.w,
+                                                                vertical: 2.h,
+                                                              ),
+                                                        ),
+                                                        child: Text(
+                                                          AppLocalizations.of(
+                                                                context,
+                                                              )?.translate(
+                                                                'cancel_refund',
+                                                              ) ??
+                                                              '取消退款',
+                                                          style: TextStyle(
+                                                            fontSize: 12.sp,
+                                                            color: Colors.red,
                                                           ),
                                                         ),
-                                                        const SizedBox(
-                                                          height: 4,
+                                                        ),
+                                                        SizedBox(
+                                                          height: 4.h,
                                                         ),
                                                       ],
                                                     )
@@ -2243,9 +2317,9 @@ class _MyorderState extends State<Myorder> {
                                                         },
                                                         style: TextButton.styleFrom(
                                                           padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 8,
-                                                                vertical: 2,
+                                                              EdgeInsets.symmetric(
+                                                                horizontal: 8.w,
+                                                                vertical: 2.h,
                                                               ),
                                                         ),
                                                         child: Text(
@@ -2256,12 +2330,12 @@ class _MyorderState extends State<Myorder> {
                                                               ) ??
                                                               '取消订单',
                                                           style: TextStyle(
-                                                            fontSize: 12,
+                                                            fontSize: 12.sp,
                                                             color: Colors.red,
                                                           ),
                                                         ),
                                                       ),
-                                                      const SizedBox(height: 4),
+                                                      SizedBox(height: 4.h),
                                                       // 立即支付按钮（只有待支付状态显示）
                                                       TextButton(
                                                         onPressed: () {
@@ -2270,9 +2344,9 @@ class _MyorderState extends State<Myorder> {
                                                         },
                                                         style: TextButton.styleFrom(
                                                           padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 8,
-                                                                vertical: 2,
+                                                              EdgeInsets.symmetric(
+                                                                horizontal: 8.w,
+                                                                vertical: 2.h,
                                                               ),
                                                         ),
                                                         child: Text(
@@ -2283,7 +2357,7 @@ class _MyorderState extends State<Myorder> {
                                                               ) ??
                                                               '立即支付',
                                                           style: TextStyle(
-                                                            fontSize: 12,
+                                                            fontSize: 12.sp,
                                                             color: Colors.blue,
                                                           ),
                                                         ),
@@ -2296,7 +2370,7 @@ class _MyorderState extends State<Myorder> {
                                                     order.payStatus == '3')
                                                   Column(
                                                     children: [
-                                                      const SizedBox(height: 4),
+                                                      SizedBox(height: 4.h),
                                                       TextButton(
                                                         onPressed: () {
                                                           // 运费支付的逻辑
@@ -2307,9 +2381,9 @@ class _MyorderState extends State<Myorder> {
                                                         },
                                                         style: TextButton.styleFrom(
                                                           padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 8,
-                                                                vertical: 2,
+                                                              EdgeInsets.symmetric(
+                                                                horizontal: 8.w,
+                                                                vertical: 2.h,
                                                               ),
                                                         ),
                                                         child: Text(
@@ -2320,7 +2394,7 @@ class _MyorderState extends State<Myorder> {
                                                               ) ??
                                                               '支付运费',
                                                           style: TextStyle(
-                                                            fontSize: 12,
+                                                            fontSize: 12.sp,
                                                             color: Colors.blue,
                                                           ),
                                                         ),
@@ -2343,7 +2417,7 @@ class _MyorderState extends State<Myorder> {
                                                      (order.orderState == '4' || order.orderState == '5' || order.orderState == '6')))
                                                   Column(
                                                     children: [
-                                                      const SizedBox(height: 4),
+                                                      SizedBox(height: 4.h),
                                                       TextButton(
                                                         onPressed: () {
                                                           // 申请售后的逻辑
@@ -2354,9 +2428,9 @@ class _MyorderState extends State<Myorder> {
                                                         },
                                                         style: TextButton.styleFrom(
                                                           padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 8,
-                                                                vertical: 2,
+                                                              EdgeInsets.symmetric(
+                                                                horizontal: 8.w,
+                                                                vertical: 2.h,
                                                               ),
                                                         ),
                                                         child: Text(
@@ -2367,7 +2441,7 @@ class _MyorderState extends State<Myorder> {
                                                               ) ??
                                                               '申请售后',
                                                           style: TextStyle(
-                                                            fontSize: 12,
+                                                            fontSize: 12.sp,
                                                             color: Colors.blue,
                                                           ),
                                                         ),
@@ -2382,7 +2456,7 @@ class _MyorderState extends State<Myorder> {
                                                         1)
                                                   Column(
                                                     children: [
-                                                      const SizedBox(height: 4),
+                                                      SizedBox(height: 4.h),
                                                       TextButton(
                                                         onPressed: () {
                                                           // 去评价的逻辑
@@ -2393,9 +2467,9 @@ class _MyorderState extends State<Myorder> {
                                                         },
                                                         style: TextButton.styleFrom(
                                                           padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 8,
-                                                                vertical: 2,
+                                                              EdgeInsets.symmetric(
+                                                                horizontal: 8.w,
+                                                                vertical: 2.h,
                                                               ),
                                                         ),
                                                         child: Text(
@@ -2406,7 +2480,7 @@ class _MyorderState extends State<Myorder> {
                                                               ) ??
                                                               '去评价',
                                                           style: TextStyle(
-                                                            fontSize: 12,
+                                                            fontSize: 12.sp,
                                                             color: Colors.blue,
                                                           ),
                                                         ),
@@ -2415,7 +2489,7 @@ class _MyorderState extends State<Myorder> {
                                                   ),
                                               ],
                                             ),
-                                            const SizedBox(width: 4),
+                                            SizedBox(width: 4.w),
                                             // 展开/收起箭头 - 保持不变
                                             Icon(
                                               order.isExpanded
@@ -2433,7 +2507,7 @@ class _MyorderState extends State<Myorder> {
                                 // 展开的订单详情
                                 if (order.isExpanded)
                                   Container(
-                                    padding: const EdgeInsets.all(15),
+                                    padding: EdgeInsets.all(15.r),
                                     decoration: BoxDecoration(
                                       border: Border(
                                         top: BorderSide(
@@ -2448,14 +2522,14 @@ class _MyorderState extends State<Myorder> {
                                         // 配送地址 - 添加灰色背景和圆角
                                         Container(
                                           width: double.infinity,
-                                          padding: const EdgeInsets.all(12),
-                                          margin: const EdgeInsets.only(
-                                            bottom: 15,
+                                          padding: EdgeInsets.all(12.r),
+                                          margin: EdgeInsets.only(
+                                            bottom: 15.h,
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.grey[100],
                                             borderRadius: BorderRadius.circular(
-                                              8,
+                                              8.r,
                                             ),
                                           ),
                                           child: Column(
@@ -2469,24 +2543,24 @@ class _MyorderState extends State<Myorder> {
                                                       'shipping_address',
                                                     ) ??
                                                     '配送地址',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
+                                                style: TextStyle(
+                                                  fontSize: 14.sp,
                                                   fontWeight: FontWeight.w500,
                                                   color: Colors.black,
                                                 ),
                                               ),
-                                              const SizedBox(height: 5),
+                                              SizedBox(height: 5.h),
                                               Text(
                                                 order.address,
-                                                style: const TextStyle(
-                                                  fontSize: 15,
+                                                style: TextStyle(
+                                                  fontSize: 15.sp,
                                                   color: Colors.black87,
                                                 ),
                                               ),
                                               Text(
                                                 '${AppLocalizations.of(context)?.translate('recipient') ?? '收件人'}: ${order.recipient}',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
+                                                style: TextStyle(
+                                                  fontSize: 14.sp,
                                                   color: Colors.black87,
                                                 ),
                                               ),
@@ -2563,6 +2637,8 @@ class _MyorderState extends State<Myorder> {
                                                                             newExpandedState,
                                                                         orderOriginNo:
                                                                             eachShopOrder.orderOriginNo,
+                                                                        orderPlateformNo:
+                                                                            eachShopOrder.orderPlateformNo,
                                                                         picture:
                                                                             eachShopOrder.picture,
                                                                         productAllPrice:
@@ -2615,6 +2691,8 @@ class _MyorderState extends State<Myorder> {
                                                                             false,
                                                                         orderOriginNo:
                                                                             eachShopOrder.orderOriginNo,
+                                                                        orderPlateformNo:
+                                                                            eachShopOrder.orderPlateformNo,
                                                                         picture:
                                                                             eachShopOrder.picture,
                                                                         productAllPrice:
@@ -2691,6 +2769,17 @@ class _MyorderState extends State<Myorder> {
                                                                         crossAxisAlignment:
                                                                             CrossAxisAlignment.start,
                                                                         children: [
+                                                                          // 子订单平台订单编号
+                                                                          if (shopOrder.orderPlateformNo != null && shopOrder.orderPlateformNo.isNotEmpty)
+                                                                            Text(
+                                                                              shopOrder.orderPlateformNo,
+                                                                              style: TextStyle(
+                                                                                fontSize:
+                                                                                    12,
+                                                                                color:
+                                                                                    Colors.grey[500],
+                                                                              ),
+                                                                            ),
                                                                           Text(
                                                                             shopOrder.shopName,
                                                                             style: const TextStyle(
@@ -2726,9 +2815,9 @@ class _MyorderState extends State<Myorder> {
                                                                               shopOrder.productAllPrice,
                                                                               'KRW',
                                                                             ),
-                                                                            style: const TextStyle(
+                                                                            style:  TextStyle(
                                                                               fontSize:
-                                                                                  16,
+                                                                                  16.sp,
                                                                               fontWeight:
                                                                                   FontWeight.w600,
                                                                               color:
@@ -2772,7 +2861,7 @@ class _MyorderState extends State<Myorder> {
                                                                                       '去评价',
                                                                                   style: TextStyle(
                                                                                     fontSize:
-                                                                                        12,
+                                                                                        12.sp,
                                                                                     color:
                                                                                         Colors.blue,
                                                                                   ),
@@ -2821,7 +2910,7 @@ class _MyorderState extends State<Myorder> {
                                                                                       '申请售后',
                                                                                   style: TextStyle(
                                                                                     fontSize:
-                                                                                        12,
+                                                                                        12.sp,
                                                                                     color:
                                                                                         Colors.blue,
                                                                                   ),
@@ -2862,7 +2951,7 @@ class _MyorderState extends State<Myorder> {
                                                                                       '取消退款',
                                                                                   style: TextStyle(
                                                                                     fontSize:
-                                                                                        12,
+                                                                                        12.sp,
                                                                                     color:
                                                                                         Colors.red,
                                                                                   ),
@@ -2873,7 +2962,7 @@ class _MyorderState extends State<Myorder> {
                                                                       ),
                                                                       SizedBox(
                                                                         width:
-                                                                            10,
+                                                                            10.w,
                                                                       ), // 添加右侧间距
                                                                       Icon(
                                                                         shopOrder.isExpanded
@@ -2904,13 +2993,13 @@ class _MyorderState extends State<Myorder> {
                                                                       (
                                                                         item,
                                                                       ) => Container(
-                                                                        margin: const EdgeInsets.only(
+                                                                        margin:  EdgeInsets.only(
                                                                           bottom:
-                                                                              12,
+                                                                              12.sp,
                                                                         ),
                                                                         padding:
-                                                                            const EdgeInsets.all(
-                                                                              12,
+                                                                             EdgeInsets.all(
+                                                                              12.sp,
                                                                             ),
                                                                         decoration: BoxDecoration(
                                                                           borderRadius:
@@ -2928,9 +3017,9 @@ class _MyorderState extends State<Myorder> {
                                                                             Image.network(
                                                                               item.imageUrl,
                                                                               width:
-                                                                                  60,
+                                                                                  60.w,
                                                                               height:
-                                                                                  60,
+                                                                                  60.h,
                                                                               fit:
                                                                                   BoxFit.cover,
                                                                               errorBuilder:
@@ -2940,9 +3029,9 @@ class _MyorderState extends State<Myorder> {
                                                                                     ___,
                                                                                   ) => Container(
                                                                                     width:
-                                                                                        60,
+                                                                                        60.w,
                                                                                     height:
-                                                                                        60,
+                                                                                        60.h,
                                                                                     color:
                                                                                         Colors.grey[200],
                                                                                     child: const Icon(
@@ -2952,9 +3041,9 @@ class _MyorderState extends State<Myorder> {
                                                                                     ),
                                                                                   ),
                                                                             ),
-                                                                            const SizedBox(
+                                                                             SizedBox(
                                                                               width:
-                                                                                  12,
+                                                                                  12.w,
                                                                             ),
                                                                             // 商品信息
                                                                             Expanded(
@@ -2966,9 +3055,9 @@ class _MyorderState extends State<Myorder> {
                                                                                 children: [
                                                                                   Text(
                                                                                     item.name,
-                                                                                    style: const TextStyle(
+                                                                                    style:  TextStyle(
                                                                                       fontSize:
-                                                                                          16,
+                                                                                          16.sp,
                                                                                       color:
                                                                                           Colors.black87,
                                                                                     ),
@@ -2988,7 +3077,7 @@ class _MyorderState extends State<Myorder> {
                                                                                             '无规格'),
                                                                                     style: TextStyle(
                                                                                       fontSize:
-                                                                                          14,
+                                                                                          14.sp,
                                                                                       color:
                                                                                           Colors.grey[600],
                                                                                     ),
@@ -2999,9 +3088,9 @@ class _MyorderState extends State<Myorder> {
                                                                                     children: [
                                                                                       Text(
                                                                                         item.price,
-                                                                                        style: const TextStyle(
+                                                                                        style:  TextStyle(
                                                                                           fontSize:
-                                                                                              18,
+                                                                                              18.sp,
                                                                                           color:
                                                                                               Colors.red,
                                                                                           fontWeight:
@@ -3012,7 +3101,7 @@ class _MyorderState extends State<Myorder> {
                                                                                         'x${item.quantity}',
                                                                                         style: TextStyle(
                                                                                           fontSize:
-                                                                                              15,
+                                                                                              15.sp,
                                                                                           color:
                                                                                               Colors.grey[600],
                                                                                         ),
@@ -3060,8 +3149,8 @@ class _MyorderState extends State<Myorder> {
                                                           // 商品图片
                                                           Image.network(
                                                             item.imageUrl,
-                                                            width: 60,
-                                                            height: 60,
+                                                            width: 60.w,
+                                                            height: 60.h,
                                                             fit: BoxFit.cover,
                                                             errorBuilder:
                                                                 (
@@ -3069,8 +3158,8 @@ class _MyorderState extends State<Myorder> {
                                                                   __,
                                                                   ___,
                                                                 ) => Container(
-                                                                  width: 60,
-                                                                  height: 60,
+                                                                  width: 60.w,
+                                                                  height: 60.h,
                                                                   color:
                                                                       Colors
                                                                           .grey[200],
@@ -3083,8 +3172,8 @@ class _MyorderState extends State<Myorder> {
                                                                   ),
                                                                 ),
                                                           ),
-                                                          const SizedBox(
-                                                            width: 12,
+                                                           SizedBox(
+                                                            width: 12.w,
                                                           ),
                                                           // 商品信息
                                                           Expanded(
@@ -3098,9 +3187,9 @@ class _MyorderState extends State<Myorder> {
                                                               children: [
                                                                 Text(
                                                                   item.name,
-                                                                  style: const TextStyle(
+                                                                  style:  TextStyle(
                                                                     fontSize:
-                                                                        16,
+                                                                        16.sp,
                                                                     color:
                                                                         Colors
                                                                             .black87,
@@ -3124,7 +3213,7 @@ class _MyorderState extends State<Myorder> {
                                                                           '无规格'),
                                                                   style: TextStyle(
                                                                     fontSize:
-                                                                        14,
+                                                                        14.sp,
                                                                     color:
                                                                         Colors
                                                                             .grey[600],
@@ -3137,9 +3226,9 @@ class _MyorderState extends State<Myorder> {
                                                                   children: [
                                                                     Text(
                                                                       item.price,
-                                                                      style: const TextStyle(
+                                                                      style:  TextStyle(
                                                                         fontSize:
-                                                                            18,
+                                                                            18.sp,
                                                                         color:
                                                                             Colors.red,
                                                                         fontWeight:
@@ -3150,7 +3239,7 @@ class _MyorderState extends State<Myorder> {
                                                                       'x${item.quantity}',
                                                                       style: TextStyle(
                                                                         fontSize:
-                                                                            15,
+                                                                            15.sp,
                                                                         color:
                                                                             Colors.grey[600],
                                                                       ),
@@ -3251,6 +3340,7 @@ class ShopOrderData {
   List<OrderItem> orderItems;
   bool isExpanded;
   String orderOriginNo;
+  String orderPlateformNo; // 本平台子订单编号
   String picture; // 订单图片
   double productAllPrice; // 订单总价
   int num; // 商品数量
@@ -3267,6 +3357,7 @@ class ShopOrderData {
     required this.orderItems,
     this.isExpanded = false,
     required this.orderOriginNo,
+    this.orderPlateformNo = '', // 默认平台订单编号为空
     this.picture = '',
     this.productAllPrice = 0.0,
     this.num = 0,

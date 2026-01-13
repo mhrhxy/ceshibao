@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/scheduler.dart';
 import 'dingbudaohang.dart';
 import 'package:daum_postcode_view/daum_postcode_view.dart';
@@ -247,9 +248,17 @@ class _PaymentPageState extends State<PaymentPage> {
 
         setState(() {
           _addressList = formattedAddressList;
-          // 如果有地址且未选中任何地址，则默认选中第一个地址
+          // 如果有地址且未选中任何地址，则优先选择默认地址，否则选择第一个地址
           if (_addressList.isNotEmpty && _selectedAddressIndex == null) {
-            _selectedAddressIndex = 0;
+            // 查找默认地址（isDefault为true）
+            int defaultIndex = _addressList.indexWhere((item) => item['isDefault']);
+            if (defaultIndex != -1) {
+              // 如果找到默认地址，选中它
+              _selectedAddressIndex = defaultIndex;
+            } else {
+              // 如果没有默认地址，选中第一个地址
+              _selectedAddressIndex = 0;
+            }
           }
           _isLoadingAddress = false;
         });
@@ -454,25 +463,25 @@ class _PaymentPageState extends State<PaymentPage> {
   // 构建单个商品项
   Widget _buildProductItem(Map<String, dynamic> product) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFFF0F0F0))),
+        border: Border(top: BorderSide(color: Color(0xFFF0F0F0), width: 1.w)),
       ),
       child: Row(
         children: [
           // 商品图片
           Container(
-            width: 80,
-            height: 80,
+            width: 80.w,
+            height: 80.h,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(4.r),
               image: DecorationImage(
                 image: NetworkImage(product['image']),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          SizedBox(width: 10),
+          SizedBox(width: 10.w),
           // 商品信息
           Expanded(
             child: Column(
@@ -480,26 +489,26 @@ class _PaymentPageState extends State<PaymentPage> {
               children: [
                 Text(
                   product['name'],
-                  style: TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 14.sp),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   product['description'],
-                  style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
+                  style: TextStyle(fontSize: 12.sp, color: Color(0xFF999999)),
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       '₩${(double.tryParse(product['price']?.toString() ?? '0') ?? 0).round().toString()}',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color.fromARGB(255, 3, 209, 54)),
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Color.fromARGB(255, 3, 209, 54)),
                     ),
                     Text(
                       'x${product['quantity'] ?? 1}',
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14.sp),
                     ),
                   ],
                 ),
@@ -527,20 +536,20 @@ class _PaymentPageState extends State<PaymentPage> {
         List<Map<String, dynamic>> shopProducts = shopEntry.value;
         
         return Container(
-          margin: const EdgeInsets.only(top: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          margin: EdgeInsets.only(top: 10.h),
+          padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 12.h),
           color: Colors.white,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(Icons.store_outlined, size: 16),
-                  SizedBox(width: 5),
-                  Text(shopName, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                  Icon(Icons.store_outlined, size: 16.r),
+                  SizedBox(width: 5.w),
+                  Text(shopName, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500)),
                 ],
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               // 渲染该店铺的所有商品
               ...shopProducts.map((product) => _buildProductItem(product)).toList()
             ]
@@ -553,8 +562,8 @@ class _PaymentPageState extends State<PaymentPage> {
 
   Widget _buildDeliveryInfo(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.all(15),
+      margin: EdgeInsets.only(top: 10.h),
+      padding: EdgeInsets.all(15.w),
       color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -562,7 +571,7 @@ class _PaymentPageState extends State<PaymentPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(AppLocalizations.of(context)?.translate('shipping_info') ?? '配送信息', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  Text(AppLocalizations.of(context)?.translate('shipping_info') ?? '配送信息', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
                   ElevatedButton(
                     onPressed: () {
                       // 显示地址弹窗并获取地址列表
@@ -574,28 +583,28 @@ class _PaymentPageState extends State<PaymentPage> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 6.h),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
                     ),
-                    child: Text(AppLocalizations.of(context)?.translate('get_address') ?? '调取地址', style:  TextStyle(fontSize: 12, color: Colors.white)),
+                    child: Text(AppLocalizations.of(context)?.translate('get_address') ?? '调取地址', style:  TextStyle(fontSize: 12.sp, color: Colors.white)),
                   ),
                 ],
               ),
-          const SizedBox(height: 15),
+          SizedBox(height: 15.h),
           
           // 配送信息表单
           Column(
             children: [
               _buildFormItem(context, 'name', AppLocalizations.of(context)?.translate('name') ?? '名字'),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               _buildFormItem(context, 'phone', AppLocalizations.of(context)?.translate('phone') ?? '电话'),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Row(
                 children: [
                   Expanded(
                     child: _buildFormItem(context, 'customs_code', AppLocalizations.of(context)?.translate('personal_customs_code') ?? '个人通关号码'),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10.w),
                   OutlinedButton(
                     onPressed: () async {
                       // 打开外部浏览器访问海关个人通关码网址
@@ -612,14 +621,14 @@ class _PaymentPageState extends State<PaymentPage> {
                     style: OutlinedButton.styleFrom(
                       backgroundColor: Colors.white,
                       side: BorderSide(color: Colors.grey),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
                     ),
-                    child: Text(AppLocalizations.of(context)?.translate('query_issue') ?? '查询/签发', style:  TextStyle(fontSize: 12, color: Colors.black)),
+                    child: Text(AppLocalizations.of(context)?.translate('query_issue') ?? '查询/签发', style:  TextStyle(fontSize: 12.sp, color: Colors.black)),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Row(
                 children: [
                   Expanded(child: _buildFormItem(context, 'postal_code', AppLocalizations.of(context)?.translate('postal_code') ?? '邮编')),
@@ -629,10 +638,10 @@ class _PaymentPageState extends State<PaymentPage> {
                     style: OutlinedButton.styleFrom(
                       backgroundColor: Colors.white,
                       side: BorderSide(color: Colors.grey),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
                     ),
-                    child: Text(AppLocalizations.of(context)?.translate('search_postcode') ?? '搜索邮编', style:  TextStyle(fontSize: 12, color: Colors.black)),
+                    child: Text(AppLocalizations.of(context)?.translate('search_postcode') ?? '搜索邮编', style:  TextStyle(fontSize: 12.sp, color: Colors.black)),
                   ),
                 ],
               ),
@@ -680,23 +689,23 @@ class _PaymentPageState extends State<PaymentPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 70,
+          width: 70.w,
           child: Text(
             label,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14.sp),
             textAlign: TextAlign.right,
           ),
         ),
-        const SizedBox(width: 20), // 添加标签和输入框之间的间距
+        SizedBox(width: 20.w), // 添加标签和输入框之间的间距
         Expanded(
           child: TextField(
             decoration: InputDecoration(
               hintText: '${AppLocalizations.of(context)?.translate('please_input') ?? '请输入'}$label',
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              hintStyle: const TextStyle(fontSize: 12, color: Colors.grey),
+              contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+              hintStyle: TextStyle(fontSize: 12.sp, color: Colors.grey),
             ),
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14.sp),
             readOnly: readOnly,
             onChanged: (text) {
               // 处理字段的输入变化
@@ -925,7 +934,7 @@ class _PaymentPageState extends State<PaymentPage> {
 //                         style: TextStyle(fontSize: 18,),
 //                       ),
 //                       IconButton(
-//                         icon: const Icon(Icons.close),
+//                         icon: Icon(Icons.close, size: 20.w),
 //                         onPressed: () => Navigator.pop(context),
 //                       ),
 //                     ],
@@ -960,7 +969,7 @@ class _PaymentPageState extends State<PaymentPage> {
 //                                     });
 //                                   },
 //                                   child: Padding(
-//                                     padding: const EdgeInsets.all(16),
+//                                     padding: EdgeInsets.all(16.w),
 //                                     child: Row(
 //                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //                                       children: [
@@ -971,7 +980,7 @@ class _PaymentPageState extends State<PaymentPage> {
 //                                               width: 40,
 //                                               height: 40,
 //                                               decoration: BoxDecoration(
-//                                                 borderRadius: BorderRadius.circular(4),
+//                                                 borderRadius: BorderRadius.circular(4.r),
 //                                                 color: Colors.grey[200],
 //                                                 image: card['url'] != null
 //                                                     ? DecorationImage(
@@ -1234,17 +1243,17 @@ class _PaymentPageState extends State<PaymentPage> {
   
   Widget _buildCouponPointsSection(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 10, bottom: 10),
-      padding: const EdgeInsets.all(15),
+      margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
+      padding: EdgeInsets.all(15.w),
       color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             alignment: Alignment.centerLeft,
-            child: Text(AppLocalizations.of(context)?.translate('my_points') ?? '我的积分', style:  TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            child: Text(AppLocalizations.of(context)?.translate('my_points') ?? '我的积分', style:  TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
           ),
-          const SizedBox(height: 15),
+          SizedBox(height: 15.h),
           
           // 主要内容行 - 所有内容在同一行
           Row(
@@ -1255,12 +1264,12 @@ class _PaymentPageState extends State<PaymentPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(AppLocalizations.of(context)?.translate('coupon') ?? '优惠券', style:  TextStyle(fontSize: 14)),
-                  const SizedBox(height: 20),
+                  Text(AppLocalizations.of(context)?.translate('coupon') ?? '优惠券', style:  TextStyle(fontSize: 14.sp)),
+                  SizedBox(height: 20.h),
                   Row(
                     children: [
-                      Text(AppLocalizations.of(context)?.translate('points') ?? '积分', style:  TextStyle(fontSize: 14)),
-                      const SizedBox(width: 10),
+                      Text(AppLocalizations.of(context)?.translate('points') ?? '积分', style:  TextStyle(fontSize: 14.sp)),
+                      SizedBox(width: 10.w),
                       // 全额使用按钮
                       GestureDetector(
                         onTap: () {
@@ -1280,12 +1289,12 @@ class _PaymentPageState extends State<PaymentPage> {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                           decoration: BoxDecoration(
                             color: Colors.green,
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(2.r),
                           ),
-                          child: Text(AppLocalizations.of(context)?.translate('use_all') ?? '全额使用', style:  TextStyle(fontSize: 10, color: Colors.white)),
+                          child: Text(AppLocalizations.of(context)?.translate('use_all') ?? '全额使用', style:  TextStyle(fontSize: 10.sp, color: Colors.white)),
                         ),
                       ),
                     ],
@@ -1308,24 +1317,24 @@ class _PaymentPageState extends State<PaymentPage> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(AppLocalizations.of(context)?.translate('available_points') ?? '可用优惠券', style:  TextStyle(fontSize: 12)),
-                        const SizedBox(width: 5),
+                        Text(AppLocalizations.of(context)?.translate('available_points') ?? '可用优惠券', style:  TextStyle(fontSize: 12.sp)),
+                        SizedBox(width: 5.w),
                         _isLoadingPoints 
-                          ? const CircularProgressIndicator(strokeWidth: 1) 
-                          : Text('$userCoupons${AppLocalizations.of(context)?.translate('pointss') ?? '张'}', style:  TextStyle(fontSize: 12, color: const Color.fromARGB(255, 0, 255, 106))),
-                        const SizedBox(width: 5),
-                        const Icon(Icons.arrow_forward_ios, size: 12),
+                          ? CircularProgressIndicator(strokeWidth: 1.w) 
+                          : Text('$userCoupons${AppLocalizations.of(context)?.translate('pointss') ?? '张'}', style:  TextStyle(fontSize: 12.sp, color: const Color.fromARGB(255, 0, 255, 106))),
+                        SizedBox(width: 5.w),
+                        Icon(Icons.arrow_forward_ios, size: 12.r),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   // 积分输入框和P单位
                   Row(
                     children: [
                       // 积分输入框（缩小高度）
                       SizedBox(
-                        width: 80,
-                        height: 28,
+                        width: 80.w,
+                        height: 28.h,
                         child: TextField(
                           controller: _pointsController,
                           enabled: () {
@@ -1341,10 +1350,10 @@ class _PaymentPageState extends State<PaymentPage> {
                           }(),
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                             isDense: true,
                           ),
-                          style: const TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: 14.sp),
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
                             if (value.isEmpty) {
@@ -1374,14 +1383,14 @@ class _PaymentPageState extends State<PaymentPage> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 5),
-                      Text(AppLocalizations.of(context)?.translate('points_unit') ?? 'P', style:  TextStyle(fontSize: 14)),
+                      SizedBox(width: 5.w),
+                      Text(AppLocalizations.of(context)?.translate('points_unit') ?? 'P', style:  TextStyle(fontSize: 14.sp)),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   // 全额积分显示
-                  Text('${AppLocalizations.of(context)?.translate('total') ?? '全额'}: $userPoints${AppLocalizations.of(context)?.translate('points_unit') ?? 'P'}', style:  TextStyle(fontSize: 12)),
-                  const SizedBox(height: 5),
+                  Text('${AppLocalizations.of(context)?.translate('total') ?? '全额'}: $userPoints${AppLocalizations.of(context)?.translate('points_unit') ?? 'P'}', style:  TextStyle(fontSize: 12.sp)),
+                  SizedBox(height: 5.h),
                   // 积分抵扣金额显示
                   // if (_pointsDeductionAmount > 0)
                   //   Text('${AppLocalizations.of(context)?.translate('points_deduction') ?? '积分抵扣'}: -₩${_pointsDeductionAmount.round().toString()}', 
@@ -1422,10 +1431,10 @@ class _PaymentPageState extends State<PaymentPage> {
     finalAmount = finalAmount < 0 ? 0 : finalAmount;
     
     return Container(
-        padding: const EdgeInsets.all(15),
-        decoration: const BoxDecoration(
+        padding: EdgeInsets.all(15.w),
+        decoration: BoxDecoration(
           color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.grey)),
+          border: Border(top: BorderSide(color: Colors.grey, width: 1.w)),
         ),
         child: Column(
           children: [
@@ -1434,21 +1443,21 @@ class _PaymentPageState extends State<PaymentPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   Text('选中商品:${categoryCount}种类 总数量: ${totalQuantity}个', style: TextStyle(fontSize: 12, color: Color(0xFF999999))),
-                    const SizedBox(height: 5),
-                    Text(formattedPrice, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.green)),
+                   Text('选中商品:${categoryCount}种类 总数量: ${totalQuantity}个', style: TextStyle(fontSize: 12.sp, color: Color(0xFF999999))),
+                    SizedBox(height: 5.h),
+                    Text(formattedPrice, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500, color: Colors.green)),
                     // 优惠券抵扣金额显示
                     if (couponDeductionAmount > 0)
                       Text('${AppLocalizations.of(context)?.translate('coupon_deduction') ?? '优惠券抵扣'}: -₩${couponDeductionAmount.round().toString()}', 
-                        style: const TextStyle(fontSize: 14, color: Colors.red)),
+                        style: TextStyle(fontSize: 14.sp, color: Colors.red)),
                     // 积分抵扣金额显示
                     if (_pointsDeductionAmount > 0)
                       Text('${AppLocalizations.of(context)?.translate('points_deduction') ?? '积分抵扣'}: -₩${_pointsDeductionAmount.round().toString()}', 
-                        style: const TextStyle(fontSize: 14, color: Colors.red)),
+                        style: TextStyle(fontSize: 14.sp, color: Colors.red)),
                     // 最终支付金额显示
                     if (couponDeductionAmount > 0 || _pointsDeductionAmount > 0)
                       Text('${AppLocalizations.of(context)?.translate('final_pay') ?? '实付金额'}: ₩${finalAmount.round().toString()}', 
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
+                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.green)),
                   ],
                 ),
                 const Spacer(),
@@ -1456,13 +1465,13 @@ class _PaymentPageState extends State<PaymentPage> {
                   onPressed: _isCreatingOrder ? null : _createOrder,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    minimumSize: const Size(120, 45),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                    minimumSize: Size(120.w, 45.h),
                   ),
                   child: _isCreatingOrder 
-                    ? CircularProgressIndicator(color: Colors.white, strokeWidth: 2) 
-                    : Text(AppLocalizations.of(context)?.translate('buy_now') ?? '立即购买', style:  TextStyle(fontSize: 16, color: Colors.white)),
+                    ? CircularProgressIndicator(color: Colors.white, strokeWidth: 2.w) 
+                    : Text(AppLocalizations.of(context)?.translate('buy_now') ?? '立即购买', style:  TextStyle(fontSize: 16.sp, color: Colors.white)),
                 ),
               ],
             ),
@@ -1717,7 +1726,8 @@ class _PaymentPageState extends State<PaymentPage> {
           'requestBusiness': _deliveryNotes, // 配送事项
           'personPassNo': _customsCode, // 个人通过编码
           'currency': 'KRW', // 目前金额币种
-          'couponAmount': couponDeductionAmount, // 优惠券抵扣金额
+          // 积分和优惠券只能使用一种，所以couponAmount字段同时用于两者的抵扣金额
+          'couponAmount': couponDeductionAmount > 0 ? couponDeductionAmount : _pointsDeductionAmount,
           'picture': orderInfoDTOList.isNotEmpty ? (orderInfoDTOList.first['orderProductInfoList'] is List && (orderInfoDTOList.first['orderProductInfoList'] as List).isNotEmpty ? (orderInfoDTOList.first['orderProductInfoList'] as List).first['imgUrl'] : '') : ''
         },
         'orderInfoDTOList': orderInfoDTOList
@@ -1775,15 +1785,15 @@ class _PaymentPageState extends State<PaymentPage> {
             child: Container(
               width: MediaQuery.of(context).size.width * 0.98, // 进一步增大宽度
               height: MediaQuery.of(context).size.height * 0.9, // 进一步增大高度
-              margin: const EdgeInsets.all(10),
+              margin: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 5,
-                    blurRadius: 10,
+                    spreadRadius: 5.w,
+                    blurRadius: 10.w,
                   ),
                 ],
               ),
@@ -1791,7 +1801,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 children: [
                   // 弹窗标题
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
                       border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
                     ),
@@ -1803,7 +1813,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          icon: const Icon(Icons.close),
+                          icon: Icon(Icons.close, size: 20.w),
                         ),
                       ],
                     ),
@@ -1856,17 +1866,17 @@ class _PaymentPageState extends State<PaymentPage> {
         Align(
           alignment: Alignment.topCenter,
           child: Container(
-            margin: const EdgeInsets.only(top: 100),
+            margin: EdgeInsets.only(top: 100.h),
             width: MediaQuery.of(context).size.width * 0.85,
             height: MediaQuery.of(context).size.height * 0.6,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 5,
-                  blurRadius: 10,
+                  spreadRadius: 5.w,
+                  blurRadius: 10.w,
                 ),
               ],
             ),
@@ -1874,7 +1884,7 @@ class _PaymentPageState extends State<PaymentPage> {
               children: [
                 // 弹窗标题
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16.w),
                   decoration:  BoxDecoration(
                     border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
                   ),
@@ -1888,7 +1898,7 @@ class _PaymentPageState extends State<PaymentPage> {
                             _showAddressModal = false;
                           });
                         },
-                        icon: const Icon(Icons.close),
+                        icon: Icon(Icons.close, size: 20.w),
                       ),
                     ],
                   ),
@@ -1920,7 +1930,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           )
                         : // 正常显示地址列表
                           ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: EdgeInsets.all(16.w),
                             itemCount: _addressList.length,
                             itemBuilder: (context, index) {
                               final address = _addressList[index];
@@ -1933,14 +1943,14 @@ class _PaymentPageState extends State<PaymentPage> {
                                   });
                                 },
                                 child: Container(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  padding: const EdgeInsets.all(12),
+                                  margin: EdgeInsets.only(bottom: 12.h),
+                                  padding: EdgeInsets.all(12.w),
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                       color: isSelected ? Colors.green : Colors.grey.shade300,
                                       width: isSelected ? 2 : 1,
                                     ),
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(8.r),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1961,8 +1971,8 @@ class _PaymentPageState extends State<PaymentPage> {
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(address['address'], style: const TextStyle(fontSize: 14)),
-                                                Text('${AppLocalizations.of(context)?.translate('recipient') ?? '收件人'}: ${address['receiver']}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                                Text(address['address'], style: TextStyle(fontSize: 14.sp)),
+                                                Text('${AppLocalizations.of(context)?.translate('recipient') ?? '收件人'}: ${address['receiver']}', style: TextStyle(fontSize: 12.sp, color: Colors.grey)),
                                               ],
                                             ),
                                           ),
@@ -1970,13 +1980,13 @@ class _PaymentPageState extends State<PaymentPage> {
                                       ),
                                       if (address['isDefault'])
                                         Container(
-                                          margin: const EdgeInsets.only(top: 8),
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          margin: EdgeInsets.only(top: 8.h),
+                                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                                           decoration: BoxDecoration(
                                             color: Colors.green.shade100,
                                             borderRadius: BorderRadius.circular(4),
                                           ),
-                                          child: Text(AppLocalizations.of(context)?.translate('default_address') ?? '默认地址', style: TextStyle(fontSize: 10, color: Colors.green)),
+                                          child: Text(AppLocalizations.of(context)?.translate('default_address') ?? '默认地址', style: TextStyle(fontSize: 10.sp, color: Colors.green)),
                                         ),
                                     ],
                                   ),
@@ -1987,7 +1997,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 // 底部按钮
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16.w),
                   decoration:  BoxDecoration(
                     border: Border(top: BorderSide(color: Colors.grey.shade200)),
                   ),
@@ -2021,10 +2031,10 @@ class _PaymentPageState extends State<PaymentPage> {
                             : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                           ),
-                          child: Text(AppLocalizations.of(context)?.translate('confirm_selection') ?? '确认选择', style: TextStyle(fontSize: 14, color: Colors.white)),
+                          child: Text(AppLocalizations.of(context)?.translate('confirm_selection') ?? '确认选择', style: TextStyle(fontSize: 14.sp, color: Colors.white)),
                         ),
                       ),
                     ],
@@ -2063,9 +2073,9 @@ class _PaymentPageState extends State<PaymentPage> {
             height: MediaQuery.of(context).size.height * 0.7,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12.r),
+                topRight: Radius.circular(12.r),
               ),
               boxShadow: [
                 BoxShadow(
@@ -2128,15 +2138,15 @@ class _PaymentPageState extends State<PaymentPage> {
                                 Color timeColor = isAvailable ? const Color(0xFFE63B3B) : Colors.grey;
                                 
                                 return Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(8.r),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.grey.shade100,
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
+                                        spreadRadius: 1.w,
+                                blurRadius: 3.w,
                                       ),
                                     ],
                                   ),
@@ -2144,7 +2154,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                     children: [
                                       // 优惠券内容
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                                         child: Row(
                                           children: [
                                             // 金额/折扣部分
@@ -2159,38 +2169,51 @@ class _PaymentPageState extends State<PaymentPage> {
                                                       crossAxisAlignment: CrossAxisAlignment.baseline,
                                                       textBaseline: TextBaseline.alphabetic,
                                                       children: [
-                                                        const Text(
-                                                          '₩', // 韩元符号
-                                                          style: TextStyle(
-                                                            fontSize: 18,
-                                                            fontWeight: FontWeight.bold,
+                                                        FittedBox(
+                                                          fit: BoxFit.scaleDown,
+                                                          child: Text(
+                                                            '₩', // 韩元符号
+                                                            style: TextStyle(
+                                                              fontSize: 18.sp,
+                                                              fontWeight: FontWeight.bold,
+                                                            ),
                                                           ),
                                                         ),
-                                                        Text(
-                                                          '${coupon['returnAmount']}', // 显示满减金额
-                                                          style: TextStyle(
-                                                            fontSize: 36,
-                                                            fontWeight: FontWeight.bold,
-                                                            color: mainColor,
+                                                        SizedBox(width: 2.w),
+                                                        FittedBox(
+                                                          fit: BoxFit.scaleDown,
+                                                          child: Text(
+                                                            '${(double.tryParse(coupon['returnAmount']?.toString() ?? '0') ?? 0).toInt()}', // 显示满减金额（去掉小数）
+                                                            style: TextStyle(
+                                                              fontSize: 24.sp,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: mainColor,
+                                                            ),
                                                           ),
                                                         ),
                                                       ],
                                                     )
                                                   else if (coupon['type'] == '2') // 折扣券
-                                                    Text(
-                                                      '${((double.tryParse(coupon['returnAmount']?.toString() ?? '0') ?? 0.0) / 10).toStringAsFixed(1)}折', // 转换为折扣显示，确保有默认值
-                                                      style: TextStyle(
-                                                        fontSize: 36,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: mainColor,
+                                                    FittedBox(
+                                                      fit: BoxFit.scaleDown,
+                                                      child: Text(
+                                                        '${((double.tryParse(coupon['returnAmount']?.toString() ?? '0') ?? 0.0) / 10).toStringAsFixed(1)}折', // 转换为折扣显示，确保有默认值
+                                                        style: TextStyle(
+                                                          fontSize: 24.sp,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: mainColor,
+                                                        ),
                                                       ),
                                                     ),
                                                   // 显示使用条件：满多少金额
-                                                  Text(
-                                                    '满${coupon['amount']}可用',
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      color: textColor,
+                                                  FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    child: Text(
+                                                      '满${(double.tryParse(coupon['amount']?.toString() ?? '0') ?? 0).toInt()}可用',
+                                                      style: TextStyle(
+                                                        fontSize: 14.sp,
+                                                        color: textColor,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
@@ -2205,21 +2228,24 @@ class _PaymentPageState extends State<PaymentPage> {
                                                   Text(
                                                     '${coupon['type'] == '1' ? '满减券' : '折扣券'}',
                                                     style: TextStyle(
-                                                      fontSize: 14,
+                                                      fontSize: 14.sp,
                                                       color: textColor,
                                                       fontWeight: FontWeight.w500,
                                                     ),
                                                   ),
-                                                  const SizedBox(height: 8),
-                                                  // 显示使用时间
-                                                  Text(
-                                                    '${coupon['startTime']} - ${coupon['endTime']}',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.grey[500],
+                                                  // 显示使用时间（只有当时间不为null时才显示）
+                                                  if (coupon['startTime'] != null && coupon['startTime'].toString().isNotEmpty && 
+                                                      coupon['endTime'] != null && coupon['endTime'].toString().isNotEmpty) ...[
+                                                    SizedBox(height: 8.h),
+                                                    Text(
+                                                      '${coupon['startTime']} - ${coupon['endTime']}',
+                                                      style: TextStyle(
+                                                        fontSize: 12.sp,
+                                                        color: Colors.grey[500],
+                                                      ),
+                                                      softWrap: true,
                                                     ),
-                                                    softWrap: true,
-                                                  ),
+                                                  ],
                                                 ],
                                               ),
                                             ),
@@ -2253,9 +2279,9 @@ class _PaymentPageState extends State<PaymentPage> {
                                                       ),
                                                       child: Text(
                                                         statusText,
-                                                        style: const TextStyle(
+                                                        style:  TextStyle(
                                                           color: Colors.white,
-                                                          fontSize: 13,
+                                                          fontSize: 13.sp,
                                                           fontWeight: FontWeight.bold,
                                                         ),
                                                         softWrap: false,

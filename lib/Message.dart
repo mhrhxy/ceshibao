@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dingbudaohang.dart'; 
 import 'utils/http_util.dart';
 import 'config/service_url.dart';
@@ -107,6 +108,39 @@ class _MessageState extends State<Message> {
         width: MediaQuery.of(context).size.width,
         child: Column(
           children: [
+            // 返回按钮和标题区域
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              color: Colors.white,
+              child: Row(
+                children: [
+                  // 返回按钮
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      child: Icon(
+                        Icons.arrow_back,
+                        size: 24.w,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  // 标题
+                  SizedBox(width: 16.w),
+                  Text(
+                    '通知',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             // 标签切换区域
             Container(
               color: Colors.white,
@@ -123,7 +157,7 @@ class _MessageState extends State<Message> {
                         _loadDataByType(type);
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
                         alignment: Alignment.center,
                         child: Column(
                           children: [
@@ -131,15 +165,15 @@ class _MessageState extends State<Message> {
                               label,
                               style: TextStyle(
                                 color: isActive ? Colors.blue : Colors.black87,
-                                fontSize: 16,
+                                fontSize: 16.sp,
                                 fontWeight: isActive ? FontWeight.w500 : FontWeight.normal,
                               ),
                             ),
                             if (isActive)
                               Container(
-                                margin: const EdgeInsets.only(top: 4),
-                                height: 2,
-                                width: 40,
+                                margin: EdgeInsets.only(top: 4.h),
+                                height: 2.h,
+                                width: 40.w,
                                 color: Colors.blue,
                               ),
                           ],
@@ -162,7 +196,7 @@ class _MessageState extends State<Message> {
                           : _currentTab == 3
                               // 公告样式列表
                               ? ListView.builder(
-                                  padding: const EdgeInsets.all(8),
+                                  padding: EdgeInsets.all(8.w),
                                   itemCount: _messageList.length,
                                   itemBuilder: (context, index) {
                                     final item = _messageList[index];
@@ -180,15 +214,15 @@ class _MessageState extends State<Message> {
                                         );
                                       },
                                       child: Card(
-                                        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                                         elevation: 0,
                                         color: Colors.white,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(8.r),
                                           side: BorderSide.none,
                                         ),
                                         child: Padding(
-                                          padding: const EdgeInsets.all(16),
+                                          padding: EdgeInsets.all(16.w),
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
@@ -197,17 +231,17 @@ class _MessageState extends State<Message> {
                                                 // 公告类型标识
                                                 Image(
                                                   image: AssetImage(isImportant ? 'images/zhong.png' : 'images/pu.png'),
-                                                  width: 24,
-                                                  height: 24,
+                                                  width: 24.w,
+                                                  height: 24.h,
                                                   fit: BoxFit.contain,
                                                 ),
-                                                const SizedBox(width: 8),
+                                                SizedBox(width: 8.w),
                                                 // 公告标题
                                                 Expanded(
                                                   child: Text(
                                                     item['noticeTitle'] ?? '',
                                                     style: TextStyle(
-                                                      fontSize: 16,
+                                                      fontSize: 16.sp,
                                                       fontWeight: FontWeight.w500,
                                                       color: isImportant ? Colors.red : const Color.fromARGB(221, 145, 144, 144),
                                                     ),
@@ -217,15 +251,15 @@ class _MessageState extends State<Message> {
                                                 ),
                                               ],
                                             ),
-                                            const SizedBox(height: 8),
-                                            const Divider(height: 1, color: Color.fromARGB(221, 231, 229, 229)),
-                                            const SizedBox(height: 8),
+                                            SizedBox(height: 8.h),
+                                            Divider(height: 1.h, color: Color.fromARGB(221, 231, 229, 229)),
+                                            SizedBox(height: 8.h),
                                             // 公告内容预览 - 使用Html组件渲染HTML内容
                                             Html(
                                               data: item['noticeContent'] ?? '',
                                               style: {
                                                 'body': Style(
-                                                  fontSize: FontSize(14),
+                                                  fontSize: FontSize(14.sp),
                                                   color: Colors.grey[600],
                                                   margin: Margins.zero,
                                                   padding: HtmlPaddings.zero,
@@ -234,7 +268,7 @@ class _MessageState extends State<Message> {
                                                 ),
                                               },
                                             ),
-                                            const SizedBox(height: 12),
+                                            SizedBox(height: 12.h),
                                             // 公告类型和时间
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -242,14 +276,14 @@ class _MessageState extends State<Message> {
                                                 Text(
                                                   isImportant ? AppLocalizations.of(context)?.translate('important') ?? '重要' : AppLocalizations.of(context)?.translate('normal') ?? '普通',
                                                   style: TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: 12.sp,
                                                     color: isImportant ? const Color.fromRGBO(244, 67, 54, 1) : const Color.fromRGBO(158, 158, 158, 1),
                                                   ),
                                                 ),
                                                 Text(
                                                   item['createTime'] ?? '',
                                                   style: TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: 12.sp,
                                                     color: Colors.grey[500],
                                                   ),
                                                 ),
@@ -265,7 +299,7 @@ class _MessageState extends State<Message> {
                               : _currentTab == 2
                                   // 活动消息样式列表
                                   ? ListView.builder(
-                                      padding: const EdgeInsets.all(16),
+                                      padding: EdgeInsets.all(16.w),
                                       itemCount: _messageList.length,
                                       itemBuilder: (context, index) {
                                         final item = _messageList[index];
@@ -293,14 +327,14 @@ class _MessageState extends State<Message> {
                                             }
                                           },
                                           child: Container(
-                                            margin: const EdgeInsets.only(bottom: 16),
+                                            margin: EdgeInsets.only(bottom: 16.h),
                                             decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(8.r),
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: Colors.black12,
-                                                  blurRadius: 3,
-                                                  offset: const Offset(0, 2),
+                                                  blurRadius: 3.w,
+                                                  offset: Offset(0, 2.h),
                                                 ),
                                               ],
                                             ),
@@ -312,11 +346,11 @@ class _MessageState extends State<Message> {
                                                       ? activeSet['activeUrl']! 
                                                       : 'https://picsum.photos/800/400?random=${activeSet['activeSetId'] ?? index}',
                                                   width: double.infinity,
-                                                  height: 200,
+                                                  height: 200.h,
                                                   fit: BoxFit.cover,
                                                   errorBuilder: (context, error, stackTrace) => Container(
                                                     width: double.infinity,
-                                                    height: 200,
+                                                    height: 200.h,
                                                     color: Colors.grey[200],
                                                     child: const Center(
                                                       child: Icon(Icons.image_not_supported, color: Colors.grey),
@@ -326,38 +360,38 @@ class _MessageState extends State<Message> {
                                                 
                                                 // 活动标题和描述
                                                 Positioned(
-                                                  left: 16,
-                                                  top: 16,
-                                                  right: 16,
+                                                  left: 16.w,
+                                                  top: 16.h,
+                                                  right: 16.w,
                                                   child: Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       Text(
                                                         activeSet['activeName'] ?? '',
                                                         style: TextStyle(
-                                                          fontSize: 20,
+                                                          fontSize: 20.sp,
                                                           fontWeight: FontWeight.bold,
                                                           color: Colors.white,
                                                           shadows: [
                                                             Shadow(
                                                               color: Colors.black.withOpacity(0.5),
-                                                              offset: const Offset(0, 1),
-                                                              blurRadius: 2,
+                                                              offset: Offset(0, 1.h),
+                                                              blurRadius: 2.w,
                                                             ),
                                                           ],
                                                         ),
                                                       ),
-                                                      const SizedBox(height: 8),
+                                                      SizedBox(height: 8.h),
                                                       Text(
                                                         '${coupon['type'] == '1' ? AppLocalizations.of(context)?.translate('full_reduction') ?? '满减' : AppLocalizations.of(context)?.translate('discount_coupon') ?? '折扣券'}: 满${coupon['amount']}返${coupon['returnAmount']}',
                                                         style: TextStyle(
-                                                          fontSize: 14,
+                                                          fontSize: 14.sp,
                                                           color: Colors.white,
                                                           shadows: [
                                                             Shadow(
                                                               color: Colors.black.withOpacity(0.5),
-                                                              offset: const Offset(0, 1),
-                                                              blurRadius: 2,
+                                                              offset: Offset(0, 1.h),
+                                                              blurRadius: 2.w,
                                                             ),
                                                           ],
                                                         ),
@@ -368,8 +402,8 @@ class _MessageState extends State<Message> {
                                                 
                                                 // 右下角按钮
                                                 Positioned(
-                                                  right: 16,
-                                                  bottom: 16,
+                                                  right: 16.w,
+                                                  bottom: 16.h,
                                                   child: ElevatedButton(
                                                     onPressed: (item['used'] == true || coupon['couponUseId'] != null) ? null : () async {
                                                       // 调用领取优惠券接口
@@ -403,19 +437,19 @@ class _MessageState extends State<Message> {
                                                       backgroundColor: Colors.transparent,
                                                       foregroundColor: Colors.white,
                                                       disabledForegroundColor: Colors.white,
-                                                      side: BorderSide(color: Colors.white, width: 1),
+                                                      side: BorderSide(color: Colors.white, width: 1.w),
                                                       disabledBackgroundColor: Colors.transparent,
                                                       shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(4),
+                                                        borderRadius: BorderRadius.circular(4.r),
                                                       ),
-                                                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                                                      padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 8.h),
                                                       elevation: 0,
-                                                      textStyle: const TextStyle(fontSize: 14),
+                                                      textStyle: TextStyle(fontSize: 14.sp),
                                                     ),
                                                     child: Text(
                                                       (item['used'] == true || coupon['couponUseId'] != null) ? AppLocalizations.of(context)?.translate('already_claimed') ?? '已领取' : AppLocalizations.of(context)?.translate('claim_now') ?? '立即领取',
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
+                                                      style: TextStyle(
+                                                        fontSize: 14.sp,
                                                       ),
                                                     ),
                                                   ),
@@ -501,14 +535,14 @@ class _MessageState extends State<Message> {
                                             }
                                           },
                                           child: Container(
-                                            margin: const EdgeInsets.symmetric(
-                                                horizontal: 16, vertical: 8),
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 16.w, vertical: 8.h),
                                             decoration: BoxDecoration(
                                               color: cardColor,
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(8.r),
                                             ),
                                             child: Padding(
-                                              padding: const EdgeInsets.all(12),
+                                              padding: EdgeInsets.all(12.w),
                                               child: Row(
                                                 children: [
                                                   // 左侧内容区域
@@ -518,16 +552,16 @@ class _MessageState extends State<Message> {
                                                       children: [
                                                         Text(
                                                           '${AppLocalizations.of(context)?.translate('order_no') ?? '订单号: '}${item['notifyNo'] ?? ''}',
-                                                          style: const TextStyle(
-                                                              fontSize: 16,
+                                                          style: TextStyle(
+                                                              fontSize: 16.sp,
                                                               fontWeight: FontWeight.w500,
                                                               color: Colors.black87),
                                                         ),
-                                                        const SizedBox(height: 4),
+                                                        SizedBox(height: 4.h),
                                                         Text(
                                                           item['message'] ?? '',
-                                                          style: const TextStyle(
-                                                              fontSize: 14,
+                                                          style: TextStyle(
+                                                              fontSize: 14.sp,
                                                               color: Colors.black),
                                                         ),
                                                       ],
@@ -536,8 +570,8 @@ class _MessageState extends State<Message> {
                                                   // 右侧图片区域
                                                   if (item['pictureRow'] != null && item['pictureRow'].isNotEmpty)
                                                     SizedBox(
-                                                      width: 80,
-                                                      height: 80,
+                                                      width: 80.w,
+                                                      height: 80.h,
                                                       child: Image.network(
                                                         item['pictureRow'],
                                                         fit: BoxFit.cover,
@@ -548,12 +582,12 @@ class _MessageState extends State<Message> {
                                                   else
                                                     // 没有图片时显示默认占位图
                                                     SizedBox(
-                                                      width: 80,
-                                                      height: 80,
+                                                      width: 80.w,
+                                                      height: 80.h,
                                                       child: Container(
                                                         decoration: BoxDecoration(
                                                           color: Colors.grey[200],
-                                                          borderRadius: BorderRadius.circular(4),
+                                                          borderRadius: BorderRadius.circular(4.r),
                                                         ),
                                                         child: const Icon(Icons.shopping_cart_outlined),
                                                       ),

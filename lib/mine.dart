@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart'; // 导入国际化工具类
 import 'dingbudaohang.dart';
 import 'myreview.dart';
@@ -150,9 +151,9 @@ class _MineState extends State<Mine> {
             top: 0,
             left: 0,
             right: 0,
-            height: 300,
+            height: 300.h,
             child: Image(
-              image: const AssetImage('images/bjttb.png'),
+              image: AssetImage('images/bjttb.png'),
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200]),
             ),
@@ -161,33 +162,32 @@ class _MineState extends State<Mine> {
           // 主体内容
           ListView(
             padding: EdgeInsets.only(
-              top: statusBarHeight + 60,
-              left: 16,
-              right: 16,
+              top: statusBarHeight + 60.h,
+              left: 16.w,
+              right: 16.w,
             ),
             children: [
               // 欢迎语（带用户名占位符）
               Text(
                 translate('welcome_user').replaceAll('%s', userName),
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: 16.sp,
                   color: Colors.black87,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 16),
-
+              SizedBox(height: 16.h),
               // 黄色优惠券和积分卡片
               Container(
-                height: 100,
+                height: 100.h,
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFCC00),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+                      blurRadius: 4.w,
+                      offset: Offset(0, 2.h),
                     )
                   ],
                 ),
@@ -208,14 +208,14 @@ class _MineState extends State<Mine> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(translate('held_coupons'), style: const TextStyle(fontSize: 18, color: Colors.white)),
-                            const SizedBox(height: 8),
-                            Text("$userCoupons", style: const TextStyle(fontSize: 14, color: Colors.white)),
+                            Text(translate('held_coupons'), style: TextStyle(fontSize: 18.sp, color: Colors.white)),
+                            SizedBox(height: 8.h),
+                            Text("$userCoupons", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
                           ],
                         ),
                       ),
                     ),
-                    Container(width: 1, height: 40, color: const Color(0xFFE0B800)),
+                    Container(width: 1.w, height: 40.h, color: const Color(0xFFE0B800)),
                     // 积分部分
                     Expanded(
                       child: GestureDetector(
@@ -226,9 +226,9 @@ class _MineState extends State<Mine> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(translate('held_points'), style: const TextStyle(fontSize: 18, color: Colors.white)),
-                            const SizedBox(height: 8),
-                            Text("$userPoints${translate('points_unit')}", style: const TextStyle(fontSize: 14, color: Colors.white)),
+                            Text(translate('held_points'), style: TextStyle(fontSize: 18.sp, color: Colors.white)),
+                            SizedBox(height: 8.h),
+                            Text("$userPoints${translate('points_unit')}", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
                           ],
                         ),
                       ),
@@ -236,31 +236,31 @@ class _MineState extends State<Mine> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
 
               // 订单和购物车卡片
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(color: const Color(0xFFB3D1FF), width: 1.5),
-                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFB3D1FF), width: 1.5.w),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Column(
                   children: [
                     _buildBorderedItem(translate('my_orders')),
-                    Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 16), color: const Color(0xFFB3D1FF)),
+                    Container(height: 1.w, margin: EdgeInsets.symmetric(horizontal: 16.w), color: const Color(0xFFB3D1FF)),
                     _buildBorderedItem(translate('cart_and_collect')),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
 
               // 功能选项列表
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(color: const Color(0xFFB3D1FF), width: 1.5),
-                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFB3D1FF), width: 1.5.w),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Column(
                   children: functionItems
@@ -322,14 +322,14 @@ class _MineState extends State<Mine> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: 16.sp,
                 color: Color(0xFF333333),
               ),
             ),
@@ -387,29 +387,29 @@ class _MineState extends State<Mine> {
             // else if (key == "notice") { /* 跳转公告页面 */ }
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             child: Row(
               children: [
-                Icon(icon, color: color, size: 22),
-                const SizedBox(width: 12),
+                Icon(icon, color: color, size: 22.w),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 15,
+                    style: TextStyle(
+                      fontSize: 15.sp,
                       color: Color(0xFF333333),
                     ),
                   ),
                 ),
-                const Icon(Icons.arrow_forward_ios, color: Color(0xFF999999), size: 18),
+                Icon(Icons.arrow_forward_ios, color: Color(0xFF999999), size: 18.w),
               ],
             ),
           ),
         ),
         if (index != total - 1)
           Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
+            height: 1.w,
+            margin: EdgeInsets.symmetric(horizontal: 16.w),
             color: const Color(0xFFF0F0F0),
           ),
       ],

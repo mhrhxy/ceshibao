@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dingbudaohang.dart'; 
 import 'utils/http_util.dart';
 import 'config/service_url.dart';
@@ -77,11 +78,11 @@ class _Notices extends State<notice> {
             // 标题和返回按钮区域
            Container(
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                  icon: Icon(Icons.arrow_back, color: Colors.black87, size: 20.w),
                   onPressed: () => Navigator.pop(context),
                 ),
                 Expanded(
@@ -89,15 +90,15 @@ class _Notices extends State<notice> {
                     alignment: Alignment.center,
                     child: Text(
                       AppLocalizations.of(context)!.translate('notification_settings'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black87,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 48),
+                SizedBox(width: 48.w),
               ],
             ),
           ),
@@ -125,22 +126,22 @@ class _Notices extends State<notice> {
                           }
                           
                           return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: Colors.grey.shade100, width: 1.0),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  notice.managerName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black87,
-                                  ),
+                              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: Colors.grey.shade100, width: 1.0.w),
                                 ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    notice.managerName,
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
                                 Switch(
                                   value: _noticeStatus[notice.managerId] ?? false,
                                   onChanged: (bool value) {

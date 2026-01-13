@@ -1,5 +1,6 @@
 // 公告页
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dingbudaohang.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import './utils/http_util.dart'; 
@@ -202,11 +203,11 @@ class _NoticePages extends State<NoticePage> {
           children: [
             Container(
               color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                    icon: Icon(Icons.arrow_back, color: Colors.black87, size: 20.w),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
@@ -214,15 +215,15 @@ class _NoticePages extends State<NoticePage> {
                       alignment: Alignment.center,
                       child: Text(
                         AppLocalizations.of(context)?.translate("announcement") ?? '公告',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.black87,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48),
+                  SizedBox(width: 48.w),
                 ],
               ),
             ),
@@ -239,14 +240,14 @@ class _NoticePages extends State<NoticePage> {
                           color: Colors.black87,
                           child: ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(8.w),
                           itemCount: noticeList.length + (hasMoreData ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index == noticeList.length) {
                               // 加载更多指示器
                               return isLoading
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(16),
+                                  ? Padding(
+                                      padding: EdgeInsets.all(16.w),
                                       child: Center(child: CircularProgressIndicator()),
                                     )
                                   : Container();
@@ -267,15 +268,15 @@ class _NoticePages extends State<NoticePage> {
                                 );
                               },
                               child: Card(
-                                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                                 elevation: 0,
                                 color: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(8.r),
                                   side: BorderSide.none,
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: EdgeInsets.all(16.w),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -285,17 +286,17 @@ class _NoticePages extends State<NoticePage> {
                                         // 根据公告重要性显示不同的图片
                                         Image(
                                           image: AssetImage(isImportant ? 'images/zhong.png' : 'images/pu.png'),
-                                          width: 24,
-                                          height: 24,
+                                          width: 24.w,
+                                          height: 24.h,
                                           fit: BoxFit.contain,
                                         ),
-                                        const SizedBox(width: 8),
+                                        SizedBox(width: 8.w),
                                         // 公告标题
                                         Expanded(
                                           child: Text(
                                             notice.noticeTitle,
                                             style: TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 16.sp,
                                             fontWeight: FontWeight.w500,
                                             color: isImportant ? Colors.red : const Color.fromARGB(221, 145, 144, 144),
                                           ),
@@ -305,15 +306,15 @@ class _NoticePages extends State<NoticePage> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
-                                    const Divider(height: 1, color: Color.fromARGB(221, 231, 229, 229)),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: 8.h),
+                                    Divider(height: 1.h, color: Color.fromARGB(221, 231, 229, 229)),
+                                    SizedBox(height: 8.h),
                                     // 公告内容预览 - 使用Html组件渲染HTML内容
                                     Html(
                                       data: notice.noticeContent,
                                       style: {
                                         'body': Style(
-                                          fontSize: FontSize(14),
+                                          fontSize: FontSize(14.sp),
                                           color: Colors.grey[600],
                                           margin: Margins.zero,
                                           padding: HtmlPaddings.zero,
@@ -322,7 +323,7 @@ class _NoticePages extends State<NoticePage> {
                                         ),
                                       },
                                     ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: 12.h),
                                     // 公告类型和时间
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -330,14 +331,14 @@ class _NoticePages extends State<NoticePage> {
                                         Text(
                                           isImportant ? (AppLocalizations.of(context)?.translate("important") ?? '重要') : (AppLocalizations.of(context)?.translate("normal") ?? '普通'),
                                           style: TextStyle(
-                                            fontSize: 12,
+                                            fontSize: 12.sp,
                                             color: isImportant ? const Color.fromRGBO(244, 67, 54, 1) : const Color.fromRGBO(158, 158, 158, 1),
                                           ),
                                         ),
                                         Text(
                                           notice.createTime ?? '',
                                           style: TextStyle(
-                                            fontSize: 12,
+                                            fontSize: 12.sp,
                                             color: Colors.grey[500],
                                           ),
                                         ),

@@ -6,6 +6,7 @@ import 'package:flutter_mall/provider/counter.dart';
 import 'package:flutter_mall/utils/shared_preferences_util.dart';
 import 'package:flutter_mall/welcome.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'config/nav_key.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -31,50 +32,55 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 使用MultiProvider来管理应用的状态
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => Counter()),
-        ChangeNotifierProvider(create: (_) => CartModel()),
-        ChangeNotifierProvider(create: (_) => LanguageProvider()),
-      ],
-      child: Consumer<LanguageProvider>(
-        builder: (context, languageProvider, child) {
-          return MaterialApp(
-            navigatorKey: NavKey.navKey,
-            title: 'shopping',
-            locale: languageProvider.currentLocale, // 动态设置当前语言
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [Locale('zh'), Locale('ko'),Locale('en')],
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-              useMaterial3: true,
-            ),
-            home: const Welcome(),
-            // 配置深度链接处理
-            onGenerateRoute: (settings) {
-              // 处理深度链接
-              if (settings.name?.startsWith('flutterappxm://') ?? false) {
-                String path = settings.name!.replaceFirst('flutterappxm://', '');
-                
-                if (path == 'orders') {
-                  // 导入Myorder页面
-                  return MaterialPageRoute(
-                    builder: (context) => const Myorder(),
-                  );
-                }
-              }
-              
-              // 默认路由处理
-              return null;
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      builder: (context, child) {
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => Counter()),
+            ChangeNotifierProvider(create: (_) => CartModel()),
+            ChangeNotifierProvider(create: (_) => LanguageProvider()),
+          ],
+          child: Consumer<LanguageProvider>(
+            builder: (context, languageProvider, child) {
+              return MaterialApp(
+                navigatorKey: NavKey.navKey,
+                title: 'shopping',
+                locale: languageProvider.currentLocale, // 动态设置当前语言
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [Locale('zh'), Locale('ko'),Locale('en')],
+                theme: ThemeData(
+                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+                  useMaterial3: true,
+                ),
+                home: const Welcome(),
+                // 配置深度链接处理
+                onGenerateRoute: (settings) {
+                  // 处理深度链接
+                  if (settings.name?.startsWith('flutterappxm://') ?? false) {
+                    String path = settings.name!.replaceFirst('flutterappxm://', '');
+                    
+                    if (path == 'orders') {
+                      // 导入Myorder页面
+                      return MaterialPageRoute(
+                        builder: (context) => const Myorder(),
+                      );
+                    }
+                  }
+                  
+                  // 默认路由处理
+                  return null;
+                },
+              );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

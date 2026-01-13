@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'login.dart';
 import 'register.dart';
 import 'main_tab.dart';
 import 'language_provider.dart';
+import 'app_localizations.dart';
 class Loginto extends StatelessWidget {
   const Loginto({super.key});
 
@@ -33,16 +35,16 @@ class Loginto extends StatelessWidget {
             children: [
               Image.asset(
                 'images/logo.png',
-                width: 300,
-                height: 100,
+                width: 300.w,
+                height: 100.h,
                 fit: BoxFit.contain,
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               
               Text(
-                '“半价直购的智能消费者的开始',
+                '“${AppLocalizations.of(context).translate('smart_consumer_start')}',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   color: Colors.grey[600],
                 ),
               ),
@@ -54,7 +56,7 @@ class Loginto extends StatelessWidget {
           
           // 底部按钮区（保持不变）
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 30.0),
+            padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 30.0.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -71,6 +73,7 @@ class Loginto extends StatelessWidget {
                               child: Text(
                                 '中文',
                                 style: TextStyle(
+                                  fontSize: 14.sp,
                                   color: languageProvider.currentLocale.languageCode == 'zh' 
                                       ? Colors.blue 
                                       : Colors.black87,
@@ -80,12 +83,13 @@ class Loginto extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: 16.w),
                             TextButton(
                               onPressed: () => languageProvider.setEnglish(),
                               child: Text(
                                 'English',
                                 style: TextStyle(
+                                  fontSize: 14.sp,
                                   color: languageProvider.currentLocale.languageCode == 'en' 
                                       ? Colors.blue 
                                       : Colors.black87,
@@ -95,12 +99,13 @@ class Loginto extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: 16.w),
                             TextButton(
                               onPressed: () => languageProvider.setKorean(),
                               child: Text(
                                 '한국어',
                                 style: TextStyle(
+                                  fontSize: 14.sp,
                                   color: languageProvider.currentLocale.languageCode == 'ko' 
                                       ? Colors.blue 
                                       : Colors.black87,
@@ -116,7 +121,7 @@ class Loginto extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 
                 // KakaoTalk登录按钮
                 ElevatedButton(
@@ -125,29 +130,29 @@ class Loginto extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.yellow,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     elevation: 0,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Icon(Icons.chat_bubble_outline, color: Colors.black),
-                      SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       Text(
-                        '카카오톡으로 계속하기',
+                        AppLocalizations.of(context).translate('continue_with_kakao'),
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 
                 // Naver登录按钮
                 ElevatedButton(
@@ -156,36 +161,36 @@ class Loginto extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     elevation: 0,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Text(
                         'N',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       Text(
-                        '네이버로 계속하기',
+                        AppLocalizations.of(context).translate('continue_with_naver'),
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 
                 // 底部操作区
                 Row(
@@ -200,19 +205,19 @@ class Loginto extends StatelessWidget {
                         );
                       },
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 12.w),
                         minimumSize: Size.zero,
                       ),
-                      child: const Text(
-                        '이메일로 로그인',
+                      child: Text(
+                        AppLocalizations.of(context).translate('login_with_email'),
                         style: TextStyle(
                           color: Colors.black87,
-                          fontSize: 14,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
-                    const VerticalDivider(
-                      width: 1,
+                    VerticalDivider(
+                      width: 1.w,
                       color: Colors.grey,
                     ),
                     TextButton(
@@ -224,19 +229,19 @@ class Loginto extends StatelessWidget {
                         );
                       },
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 12.w),
                         minimumSize: Size.zero,
                       ),
-                      child: const Text(
-                        '이메일로 가입',
+                      child: Text(
+                        AppLocalizations.of(context).translate('register_with_email'),
                         style: TextStyle(
                           color: Colors.black87,
-                          fontSize: 14,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
-                    const VerticalDivider(
-                      width: 1,
+                    VerticalDivider(
+                      width: 1.w,
                       color: Colors.grey,
                     ),
                     ElevatedButton(
@@ -249,17 +254,17 @@ class Loginto extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 236, 82, 26),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                         minimumSize: Size.zero,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
-                      child: const Text(
-                        '돌리보기',
+                      child: Text(
+                        AppLocalizations.of(context).translate('back'),
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
@@ -282,4 +287,3 @@ void main() {
     debugShowCheckedModeBanner: false,
   ));
 }
-    

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_mall/utils/http_util.dart';
 import 'package:flutter_mall/utils/shared_preferences_util.dart';
@@ -34,9 +35,9 @@ class _LoginState extends State<Login> {
   bool _isLoginLoading = false;
 
   // 布局参数
-  final double _labelWidth = 60;
-  final double _inputHorizontalMargin = 40;
-  final double _logoRightPadding = 30;
+  final double _labelWidth = 60.w;
+  final double _inputHorizontalMargin = 40.w;
+  final double _logoRightPadding = 30.w;
 
   @override
   void initState() {
@@ -211,13 +212,13 @@ class _LoginState extends State<Login> {
           width: _labelWidth,
           child: Text(
             labelText,
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: TextStyle(fontSize: 16.sp, color: Colors.black87),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           child: SizedBox(
-            height: 50,
+            height: 50.h,
             child: TextField(
               controller: controller,
               obscureText: obscureText,
@@ -225,9 +226,9 @@ class _LoginState extends State<Login> {
               enabled: enabled,
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               ),
             ),
           ),
@@ -245,11 +246,11 @@ class _LoginState extends State<Login> {
       appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: 60,
+          toolbarHeight: 60.h,
           leading: Padding(
-            padding: EdgeInsets.only(left: 4, top: 4),
+            padding: EdgeInsets.only(left: 4.w, top: 4.h),
             child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black, size: 24),
+              icon: Icon(Icons.arrow_back, color: Colors.black, size: 24.r),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -273,29 +274,29 @@ class _LoginState extends State<Login> {
                 ),
               ),
               padding: EdgeInsets.only(
-                top: 50,
-                bottom: 30,
+                top: 50.h,
+                bottom: 30.h,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // 返回按钮已移至AppBar
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   // Logo和标语
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Image.asset(
                         'images/logo.png',
-                        width: 300,
-                        height: 100,
+                        width: 300.w,
+                        height: 100.h,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       Text(
-                        '“半价直购的智能消费者的开始',
+                        '“${AppLocalizations.of(context).translate('smart_consumer_start')}',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           color: Colors.grey[600],
                         ),
                       ),
@@ -305,13 +306,13 @@ class _LoginState extends State<Login> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
 
             // 登录表单区域
             Container(
               margin: EdgeInsets.symmetric(
                 horizontal: _inputHorizontalMargin,
-                vertical: 10,
+                vertical: 10.h,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -323,7 +324,7 @@ class _LoginState extends State<Login> {
                     hintText: loc.translate('input_account_hint'),
                     enabled: !_isLoginLoading,
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   // 密码输入行
                   _buildInputRow(
@@ -334,14 +335,14 @@ class _LoginState extends State<Login> {
                     enabled: !_isLoginLoading,
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   // 辅助按钮区
                   Align(
                     alignment: Alignment.centerRight,
                     child: Wrap(
-                      spacing: 16.0,
-                      runSpacing: 4.0,
+                      spacing: 16.0.w,
+                      runSpacing: 4.0.h,
                       children: [
                         TextButton(
                           onPressed: _isLoginLoading ? null : () {
@@ -350,11 +351,11 @@ class _LoginState extends State<Login> {
                             );
                           },
                           style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            padding: EdgeInsets.symmetric(horizontal: 8.w),
                           ),
                           child: Text(
                             loc.translate('register'),
-                            style: const TextStyle(color: Colors.black87, fontSize: 14),
+                            style: TextStyle(color: Colors.black87, fontSize: 14.sp),
                           ),
                         ),
                         TextButton(
@@ -365,7 +366,7 @@ class _LoginState extends State<Login> {
                           },
                           child: Text(
                             loc.translate('forgot_account'),
-                            style: const TextStyle(color: Colors.black87, fontSize: 14),
+                            style: TextStyle(color: Colors.black87, fontSize: 14.sp),
                           ),
                         ),
                         TextButton(
@@ -376,14 +377,14 @@ class _LoginState extends State<Login> {
                           },
                           child: Text(
                             loc.translate('forgot_password'),
-                            style: const TextStyle(color: Colors.black87, fontSize: 14),
+                            style: TextStyle(color: Colors.black87, fontSize: 14.sp),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30.h),
 
                   // 登录按钮
                   InkWell(
@@ -391,20 +392,20 @@ class _LoginState extends State<Login> {
                     child: Container(
                       alignment: Alignment.center,
                       width: double.infinity,
-                      height: 50,
+                      height: 50.h,
                       decoration: BoxDecoration(
                         color: _isLoginLoading ? Colors.grey[300] : const Color.fromARGB(255, 243, 215, 53),
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(25.r),
                       ),
                       child: _isLoginLoading
                           ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                           : Text(
                               loc.translate('login'),
-                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                              style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w500),
                             ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                 ],
               ),
             ),

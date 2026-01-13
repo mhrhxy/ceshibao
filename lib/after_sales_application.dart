@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'utils/screen_adapter.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dingbudaohang.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'refund_application_page.dart';
@@ -38,15 +38,15 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                       alignment: Alignment.center,
                       child: Text(
                       AppLocalizations.of(context)?.translate('select_refund_method') ?? '选择退款方式',
-                        style: const TextStyle(
+                        style:  TextStyle(
                           color: Colors.black87,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48),
+                  SizedBox(width: 48.w),
                 ],
               ),
             ),
@@ -59,16 +59,16 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 2,
+                    spreadRadius: 1.w,
+                    blurRadius: 2.w,
                     offset: const Offset(0, 1),
                   ),
                 ],
               ),
               child: ListTile(
                 leading: Container(
-                  width: 40,
-                  height: 40,
+                  width: 40.w,
+                  height: 40.h,
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF2E8),
                     borderRadius: BorderRadius.circular(20),
@@ -80,8 +80,8 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                 ),
                 title: Text(
                   AppLocalizations.of(context)?.translate('return_refund_or_refund') ?? '退货退款 或 退款',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style:  TextStyle(
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -89,8 +89,8 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     AppLocalizations.of(context)?.translate('click_to_apply_return_refund_or_refund') ?? '点击后可申请"退货退款"或"退款（未收到货或与商家协商一致）"',
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style:  TextStyle(
+                      fontSize: 14.sp,
                       color: Color(0xFF666666),
                     ),
                   ),
@@ -154,15 +154,15 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            leading: const Icon(
+            leading:  Icon(
               Icons.receipt_long_outlined,
               color: Color(0xFFFF6B35),
-              size: 28,
+              size: 28.w,
             ),
             title: Text(
               AppLocalizations.of(context)?.translate('apply_return_refund') ?? '申请退货退款',
-              style: const TextStyle(
-                fontSize: 16,
+              style:  TextStyle(
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -171,13 +171,13 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
               child: Text(
                 AppLocalizations.of(context)?.translate('return_refund_description') ?? '已收到货，可申请退货退款。商家收货后为您处理退款，您可放心退货',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   color: Color(0xFF666666),
                   height: 1.5,
                 ),
               ),
             ),
-            trailing: const Icon(Icons.chevron_right, size: 24),
+            trailing: Icon(Icons.chevron_right, size: 24.w),
             onTap: () {
               Navigator.pop(context);
               // 跳转到退货退款页面
@@ -197,7 +197,7 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
       );
       
       if (canOnlyRefund) {
-        refundOptions.add(const SizedBox(height: 16));
+        refundOptions.add(SizedBox(height: 16.h));
       }
     }
     
@@ -211,15 +211,15 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            leading: const Icon(
+            leading:  Icon(
               Icons.money_off,
               color: Color(0xFFFF6B35),
-              size: 28,
+              size: 28.w,
             ),
             title: Text(
               AppLocalizations.of(context)?.translate('apply_refund_no_return') ?? '申请退款（无需退货）',
-              style: const TextStyle(
-                fontSize: 16,
+              style:  TextStyle(
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -228,13 +228,13 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
               child: Text(
                 AppLocalizations.of(context)?.translate('refund_no_return_description') ?? '未收到货、已拒收快递、与商家协商一致，可申请退款',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   color: Color(0xFF666666),
                   height: 1.5,
                 ),
               ),
             ),
-            trailing: const Icon(Icons.chevron_right, size: 24),
+            trailing: Icon(Icons.chevron_right, size: 24.w),
             onTap: () {
               Navigator.pop(context);
               // 跳转到仅退款页面
@@ -267,8 +267,8 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
           child: Text(
             AppLocalizations.of(context)?.translate('current_order_status_not_support_after_sales') ?? '当前订单状态暂不支持申请售后',
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
+            style:  TextStyle(
+              fontSize: 14.sp,
               color: Color(0xFF666666),
             ),
           ),
@@ -298,13 +298,13 @@ class _AfterSalesApplicationState extends State<AfterSalesApplication> {
                 child: Text(
                   AppLocalizations.of(context)?.translate('please_select_refund_type') ?? '请选择退款类型',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
               ...refundOptions,
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
             ],
           ),
         );

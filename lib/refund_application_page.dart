@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/src/multipart_file.dart'; // 用于MediaType
@@ -242,11 +243,11 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
           Text(
             specifications,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               color: Color(0xFF999999),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
         ],
       );
     } else {
@@ -561,7 +562,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(16),
-          height: 350, // 调整弹框高度
+          height: 350.h, // 调整弹框高度
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -569,22 +570,22 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                   Text(
                     '请选择申请类型',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF333333),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, size: 20, color: Color(0xFF999999)),
+                    icon: Icon(Icons.close, size: 20.w, color: Color(0xFF999999)),
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                   ),
                 ],
               ),
-              const SizedBox(height: 24), // 增加上下间距
+              SizedBox(height: 24.h), // 增加上下间距
               Expanded(
                 child: Column(
                   children: _refundTypeOptions.map((option) {
@@ -605,13 +606,13 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                             Text(
                               option['label'],
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 16.sp,
                                 color: isSelected ? Colors.red : Color(0xFF333333), // 当前选择项标红
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               ),
                             ),
                             if (isSelected)
-                              const Icon(Icons.check, color: Colors.red, size: 20),
+                              Icon(Icons.check, color: Colors.red, size: 20.w),
                           ],
                         ),
                       ),
@@ -650,15 +651,15 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                       alignment: Alignment.center,
                       child: Text(
                         getPageTitle(),
-                        style: const TextStyle(
+                        style:  TextStyle(
                           color: Colors.black87,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48),
+                  SizedBox(width: 48.w),
                 ],
               ),
             ),
@@ -686,17 +687,17 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                       children: [
                                         // 商品图片
                                         Container(
-                                          width: 80,
-                                          height: 80,
+                                          width: 80.w,
+                                          height: 80.h,
                                           color: Color(0xFFF4F4F4),
                                           child: product['imgUrl'] != null && product['imgUrl'].isNotEmpty
                                               ? Image.network(
                                                   product['imgUrl'],
                                                   fit: BoxFit.cover,
                                                 )
-                                              : const Icon(Icons.image, size: 40, color: Color(0xFFCCCCCC)),
+                                              : Icon(Icons.image, size: 40.w, color: Color(0xFFCCCCCC)),
                                         ),
-                                        const SizedBox(width: 12),
+                                        SizedBox(width: 12.w),
                                         // 商品信息
                                         Expanded(
                                           child: Column(
@@ -705,23 +706,23 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                               Text(
                                                 product['titleCn'] ?? product['title'] ?? product['titleEn'] ?? '',
                                                 style: TextStyle(
-                                                  fontSize: 14,
+                                                  fontSize: 14.sp,
                                                   color: Color(0xFF333333),
                                                 ),
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
-                                              const SizedBox(height: 8),
+                                              SizedBox(height: 8.h),
                                               // 显示规格信息，没有规格则不显示
                                               _buildSpecifications(product),
                                               // 数量选择组件
                                               Row(
                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                 children: [
-                                                  const Text(
+                                                   Text(
                                                     '数量',
                                                     style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 12.sp,
                                                       color: Color(0xFF999999),
                                                     ),
                                                   ),
@@ -747,25 +748,25 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                                             });
                                                           },
                                                           child: Container(
-                                                            width: 30,
-                                                            height: 30,
+                                                            width: 30.w,
+                                                            height: 30.h,
                                                             alignment: Alignment.center,
                                                             child: Icon(
                                                               Icons.remove,
-                                                              size: 16,
+                                                              size: 16.w,
                                                               color: (_refundQuantities[index] ?? 1) <= 0 ? Color(0xFFCCCCCC) : Color(0xFF333333),
                                                             ),
                                                           ),
                                                         ),
                                                         // 数量显示
                                                         Container(
-                                                          width: 40,
-                                                          height: 30,
+                                                          width: 40.w,
+                                                          height: 30.h,
                                                           alignment: Alignment.center,
                                                           child: Text(
                                                             '${_refundQuantities[index] ?? 1}',
                                                             style: TextStyle(
-                                                              fontSize: 14,
+                                                              fontSize: 14.sp,
                                                               color: Color(0xFF333333),
                                                             ),
                                                           ),
@@ -784,12 +785,12 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                                             });
                                                           },
                                                           child: Container(
-                                                            width: 30,
-                                                            height: 30,
+                                                            width: 30.w,
+                                                            height: 30.h,
                                                             alignment: Alignment.center,
                                                             child: Icon(
                                                               Icons.add,
-                                                              size: 16,
+                                                              size: 16.w,
                                                               color: (_refundQuantities[index] ?? 1) >= (_maxQuantities[index] ?? 1) ? Color(0xFFCCCCCC) : Color(0xFF333333),
                                                             ),
                                                           ),
@@ -818,10 +819,10 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                             Text(
                               '申请类型',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 14.sp,
                                 color: Color(0xFF333333),
                               ),
                             ),
@@ -832,13 +833,13 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                     (option) => option['value'] == _currentRefundType,
                                     orElse: () => _refundTypeOptions[0]
                                   )['label'],
-                                  style: const TextStyle(
-                                    fontSize: 14,
+                                  style:  TextStyle(
+                                    fontSize: 14.sp,
                                     color: Color(0xFF333333),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFFCCCCCC)),
+                                SizedBox(width: 8.w),
+                                Icon(Icons.arrow_forward_ios, size: 14.w, color: Color(0xFFCCCCCC)),
                               ],
                             ),
                           ],
@@ -854,14 +855,14 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                           Text(
                             '申请金额',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               color: Color(0xFF333333),
                             ),
                           ),
-                          const SizedBox(height: 8), // 添加间距
+                          SizedBox(height: 8.h), // 添加间距
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -871,7 +872,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                         controller: _amountController,
                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                         style: TextStyle(
-                                          fontSize: 24,
+                                          fontSize: 24.sp,
                                           fontWeight: FontWeight.w500,
                                           color: Color(0xFF333333),
                                         ),
@@ -902,7 +903,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                       child: Text(
                                         '¥$_refundAmount',
                                         style: TextStyle(
-                                          fontSize: 24, // 增大字号
+                                          fontSize: 24.sp, // 增大字号
                                           fontWeight: FontWeight.w500,
                                           color: Color(0xFF333333), // 改为黑色
                                         ),
@@ -925,12 +926,12 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                 },
                                 child: Row(
                                   children: [
-                                    Icon(_isEditingAmount ? Icons.check : Icons.edit, size: 14, color: Color(0xFF999999)),
-                                    const SizedBox(width: 4),
+                                    Icon(_isEditingAmount ? Icons.check : Icons.edit, size: 14.w, color: Color(0xFF999999)),
+                                    SizedBox(width: 4.w),
                                     Text(
                                       _isEditingAmount ? '完成' : '修改金额',
                                       style: TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 12.sp,
                                         color: Color(0xFF999999),
                                       ),
                                     ),
@@ -954,36 +955,36 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                               Text(
                                 '申请说明',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                   color: Color(0xFF333333),
                                 ),
                               ),
-                              const Text(
+                               Text(
                                 '您还可以输入170字',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   color: Color(0xFF999999),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           Container(
                             width: double.infinity,
-                            height: 120,
+                            height: 120.h,
                             decoration: BoxDecoration(
                               border: Border.all(color: Color(0xFFEEEEEE)),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: TextField(
                               controller: _descriptionController,
-                              decoration: const InputDecoration(
+                              decoration:  InputDecoration(
                                 hintText: '请您详细填写申请说明',
                                 hintStyle: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                   color: Color(0xFFCCCCCC),
                                 ),
                                 border: InputBorder.none,
@@ -994,7 +995,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                             ),
                           ),
                           
-                          const SizedBox(height: 20),
+                          SizedBox(height: 20.h),
                           
                           Wrap(
                             spacing: 12,
@@ -1002,8 +1003,8 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                             children: [
                               // 已上传的图片
                               ..._uploadedImages.map((imageUrl) => Container(
-                                width: 80,
-                                height: 80,
+                                width: 80.w,
+                                height: 80.h,
                                 // 移除right margin，使用Wrap的spacing控制间距
                                 clipBehavior: Clip.none, // 允许内容超出容器边界
                                 decoration: BoxDecoration(
@@ -1025,14 +1026,14 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                           });
                                         },
                                         child: Container(
-                                          width: 24,
-                                          height: 24,
+                                          width: 24.w,
+                                          height: 24.h,
                                           decoration: BoxDecoration(
                                             color: Colors.red,
                                             shape: BoxShape.circle,
-                                            border: Border.all(color: Colors.white, width: 2),
+                                            border: Border.all(color: Colors.white, width: 2.w),
                                           ),
-                                          child: Icon(Icons.close, size: 16, color: Colors.white),
+                                          child: Icon(Icons.close, size: 16.w, color: Colors.white),
                                         ),
                                       ),
                                     ),
@@ -1043,8 +1044,8 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                               GestureDetector(
                                 onTap: _pickImage,
                                 child: Container(
-                                  width: 80,
-                                  height: 80,
+                                  width: 80.w,
+                                  height: 80.h,
                                   decoration: BoxDecoration(
                                     border: Border.all(color: Color(0xFFEEEEEE)),
                                     borderRadius: BorderRadius.circular(4),
@@ -1052,12 +1053,12 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.camera_alt, size: 24, color: Color(0xFFCCCCCC)),
-                                      const SizedBox(height: 8),
-                                      const Text(
+                                      Icon(Icons.camera_alt, size: 24.w, color: Color(0xFFCCCCCC)),
+                                      SizedBox(height: 8.h),
+                                       Text(
                                         '上传图片',
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 12.sp,
                                           color: Color(0xFF999999),
                                         ),
                                       ),
@@ -1081,7 +1082,7 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
               padding: const EdgeInsets.all(16),
               child: SizedBox(
                 width: double.infinity,
-                height: 44,
+                height: 44.h,
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitRefundApplication,
                   style: ElevatedButton.styleFrom(
@@ -1092,10 +1093,10 @@ class _RefundApplicationPageState extends State<RefundApplicationPage> {
                   ),
                   child: _isSubmitting
                       ? CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                      : const Text(
+                      :  Text(
                           '提交申请',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.white,
                           ),

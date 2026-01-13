@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -55,9 +56,9 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                 Text(
                   AppLocalizations.of(context)?.translate('exit_member_confirm_tip') ?? '退出会员后积分与优惠券将会清空，确认退出会员？',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18), // 增大文字大小
+                  style: TextStyle(fontSize: 18.sp), // 增大文字大小
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 // 按钮容器：左右排列
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,7 +66,7 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                     // 确认按钮
                     Expanded(
                       child: SizedBox(
-                        height: 50,
+                        height: 50.h,
                         child: ElevatedButton(
                           onPressed: () async {
                             Navigator.pop(context); // 关闭确认提示框
@@ -78,8 +79,8 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25), // 圆角设计
                             ),
-                            textStyle: const TextStyle(
-                              fontSize: 18,
+                            textStyle:  TextStyle(
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -87,11 +88,11 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12), // 按钮间距
+                    SizedBox(width: 12.w), // 按钮间距
                     // 取消按钮
                     Expanded(
                       child: SizedBox(
-                        height: 50,
+                        height: 50.h,
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pop(context); // 关闭确认提示框
@@ -102,8 +103,8 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25), // 圆角设计
                             ),
-                            textStyle: const TextStyle(
-                              fontSize: 18,
+                            textStyle:  TextStyle(
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -113,7 +114,7 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                     )
                   ]
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
               ],
             ),
             actions: [], // 清空默认actions
@@ -277,16 +278,16 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 80,
+            width: 80.w,
             child: Text(
               title,
-              style: const TextStyle(
+              style:  TextStyle(
                 color: Colors.black87,
-                fontSize: 16,
+                fontSize: 16.sp,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: TextField(
               controller: controller,
@@ -365,15 +366,15 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                     alignment: Alignment.center,
                     child: Text(
                       AppLocalizations.of(context)?.translate('exit_member') ?? '退出会员页',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Colors.black87,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 48),
+                SizedBox(width: 48.w),
               ],
             ),
           ),
@@ -421,8 +422,8 @@ class _ExitMemberPageState extends State<ExitMemberPage> {
                             : Center(
                                 child: Text(
                                   AppLocalizations.of(context)?.translate('confirm') ?? '确认',
-                                  style: const TextStyle(
-                                    fontSize: 16,
+                                  style:  TextStyle(
+                                    fontSize: 16.sp,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mall/cartadd.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart';
 import 'package:flutter_mall/utils/http_util.dart';
 import './config/service_url.dart';
@@ -333,6 +335,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
   Future<bool> _addToCart([
     Map<String, dynamic>? selectedSku,
     Map<String, String>? selectedSpecs,
+    int quantity = 1,
   ]) async {
     // 校验关键参数
     if ((_productId == null || _productId!.isEmpty)) {
@@ -362,7 +365,17 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
         return false;
       }
 
-      final targetSku = selectedSku ?? _selectedSku;
+      // 确保targetSku总是有值：如果selectedSku不为空就使用它，否则使用_selectedSku，如果都没有值就使用第一个可用的SKU
+      Map<String, dynamic> targetSku;
+      if (selectedSku != null && selectedSku.isNotEmpty) {
+        targetSku = selectedSku;
+      } else if (_selectedSku.isNotEmpty) {
+        targetSku = _selectedSku;
+      } else if (_productSkuDetailList.isNotEmpty) {
+        targetSku = _productSkuDetailList[0];
+      } else {
+        targetSku = {};
+      }
       final targetSpecs = selectedSpecs ?? _selectedSpecs;
 
       // 生成规格名称字符串
@@ -408,7 +421,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
         "productId": _productId,
         "secId":
             targetSku.isNotEmpty
-                ? (targetSku['productSkuDetail']?['skuDetailId'] ?? "0")
+                ? (targetSku['productSkuDetail']?['skuDetailId'])
                 : "0",
         "productName": _productTitle,
         "shopId": 0, // 自营商品店铺ID可能为0
@@ -418,7 +431,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
         "productUrl": _images.isNotEmpty ? _images[0] : "",
         "totalPrice": currentPrice,
         "totalPlusPrice": currentPromotionPrice,
-        "num": 1,
+        "num": quantity,
         "productPrice": currentPrice,
         "productPlusPrice": currentPromotionPrice,
         "minNum": _minNum,
@@ -474,6 +487,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
   void _showBottomSheet({bool isBuyNow = false}) {
     Map<String, String> _localSelectedSpecs = {};
     Map<String, dynamic> _localSelectedSku = {};
+    int _quantity = 1; // 默认数量为1
 
     showModalBottomSheet(
       context: context,
@@ -486,7 +500,15 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
             builder: (sheetContext, sheetSetState) {
               if (_localSelectedSpecs.isEmpty && _selectedSpecs.isNotEmpty) {
                 _localSelectedSpecs = Map.from(_selectedSpecs);
-                _localSelectedSku = _selectedSku;
+              }
+              
+              // 确保_localSelectedSku总是有值
+              if (_localSelectedSku.isEmpty) {
+                if (_selectedSku.isNotEmpty) {
+                  _localSelectedSku = _selectedSku;
+                } else if (_productSkuDetailList.isNotEmpty) {
+                  _localSelectedSku = _productSkuDetailList[0];
+                }
               }
 
               // 匹配选中的规格对应的SKU
@@ -521,7 +543,10 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                   }
 
                   if (isMatch) {
-                    sheetSetState(() => _localSelectedSku = sku);
+                    sheetSetState(() {
+                      _localSelectedSku = sku;
+                      _quantity = 1; // 选择不同规格时重置数量为默认值
+                    });
                     break;
                   }
                 }
@@ -569,14 +594,14 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                           _images.isNotEmpty
                               ? _images[0]
                               : "https://picsum.photos/id/237/100/100",
-                          width: 100,
-                          height: 100,
+                          width: 100.w,
+                          height: 100.h,
                           fit: BoxFit.cover,
                           errorBuilder:
                               (_, __, ___) =>
                                   const Icon(Icons.error, color: Colors.red),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12.w),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -590,44 +615,114 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                                 displayPriceCNY
                                         ? "¥${displayPromotionPriceCNY.toStringAsFixed(2)}"
                                         : "¥${displayPriceCNY.toStringAsFixed(2)}",
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                       color: Colors.black,
-                                      fontSize: 18,
+                                      fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   if (displayPromotionPriceCNY != null &&
                                       displayPromotionPriceCNY !=
                                           displayPriceCNY) ...[
-                                    const SizedBox(width: 16),
+                                    SizedBox(width: 16.w),
                                     Text(
                                       "¥${displayPriceCNY.toStringAsFixed(2)}",
-                                      style: const TextStyle(
+                                      style:  TextStyle(
                                         color: Colors.grey,
-                                        fontSize: 16,
+                                        fontSize: 16.sp,
                                         decoration: TextDecoration.lineThrough,
                                       ),
                                     ),
                                   ],
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               Text(
                                 _productTitle,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 14.sp),
                               ),
                               if (_localSelectedSku.isNotEmpty &&
                                   _localSelectedSku['productSkuDetail'] !=
                                       null) ...[
-                                const SizedBox(height: 4),
+                                SizedBox(height: 4.h),
                                 Text(
                                   "${AppLocalizations.of(context)?.translate('stock') ?? '库存'}: ${_localSelectedSku['productSkuDetail']['inventory'] ?? 0}件",
-                                  style: const TextStyle(
+                                  style:  TextStyle(
                                     color: Colors.grey,
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                   ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${AppLocalizations.of(context)?.translate('quantity') ?? '数量'}: ",
+                                      style: TextStyle(color: Colors.grey, fontSize: 12.sp),
+                                    ),
+                                    // 减号按钮
+                                    GestureDetector(
+                                      onTap: () {
+                                        if (_quantity > 1) {
+                                          sheetSetState(() => _quantity--);
+                                        }
+                                      },
+                                      child: Container(
+                                        width: 24.w,
+                                        height: 24.h,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.grey, width: 1.w),
+                                          borderRadius: BorderRadius.circular(3.r),
+                                        ),
+                                        child: Text(
+                                          '-',
+                                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                    // 数量显示
+                                    Container(
+                                      width: 40.w,
+                                      height: 24.h,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          top: BorderSide(color: Colors.grey, width: 1.w),
+                                          bottom: BorderSide(color: Colors.grey, width: 1.w),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        '$_quantity',
+                                        style: TextStyle(fontSize: 12.sp),
+                                      ),
+                                    ),
+                                    // 加号按钮
+                                    GestureDetector(
+                                      onTap: () {
+                                        int maxQuantity = _localSelectedSku.isNotEmpty && _localSelectedSku['productSkuDetail'] != null 
+                                            ? (_localSelectedSku['productSkuDetail']['inventory'] ?? 1) 
+                                            : 1;
+                                        if (_quantity < maxQuantity) {
+                                          sheetSetState(() => _quantity++);
+                                        }
+                                      },
+                                      child: Container(
+                                        width: 24.w,
+                                        height: 24.h,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.grey, width: 1.w),
+                                          borderRadius: BorderRadius.circular(3.r),
+                                        ),
+                                        child: Text(
+                                          '+',
+                                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ],
@@ -639,7 +734,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                         ),
                       ],
                     ),
-                    const Divider(height: 24),
+                    Divider(height: 24.h),
                     Expanded(
                       child: SingleChildScrollView(
                         padding: EdgeInsets.zero,
@@ -672,12 +767,12 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                   children: [
                                     Text(
                                       propName,
-                                      style: const TextStyle(
-                                        fontSize: 16,
+                                      style:  TextStyle(
+                                        fontSize: 16.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: 12.h),
                                     LayoutBuilder(
                                       builder: (context, constraints) {
                                         int maxButtonsPerRow = 3;
@@ -728,7 +823,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                                                     ? Colors.red
                                                                     : Colors
                                                                         .grey,
-                                                            width: 1,
+                                                            width: 1.w,
                                                           ),
                                                           borderRadius:
                                                               BorderRadius.circular(
@@ -745,7 +840,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                                                     ? Colors.red
                                                                     : Colors
                                                                         .black,
-                                                            fontSize: 14,
+                                                            fontSize: 14.sp,
                                                           ),
                                                           overflow:
                                                               TextOverflow
@@ -759,7 +854,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                         );
                                       },
                                     ),
-                                    const SizedBox(height: 20),
+                                    SizedBox(height: 20.h),
                                   ],
                                 );
                               }).toList(),
@@ -782,7 +877,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                     ),
                     Container(
                       width: double.infinity,
-                      height: 50,
+                      height: 50.h,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
@@ -796,6 +891,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                             bool addSuccess = await _addToCart(
                               _localSelectedSku,
                               _localSelectedSpecs,
+                              _quantity,
                             );
                             if (addSuccess) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -809,6 +905,11 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                 ),
                               );
                               Navigator.pop(context);
+                              // 跳转到购物车页面
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Cart()),
+                              );
                               // 更新页面选中状态
                               setState(() {
                                 _selectedSpecs = _localSelectedSpecs;
@@ -877,8 +978,8 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                     context,
                                   )?.translate('add_to_cart_btn') ??
                                   "加入购物车",
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style:  TextStyle(
+                            fontSize: 16.sp,
                             color: Colors.white,
                           ),
                         ),
@@ -1023,7 +1124,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
 
           // 平台信息栏
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
             color: const Color(0xFFF5F5F5),
             child: Row(
               children: [
@@ -1031,14 +1132,14 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                   '自营商品',
                   style: TextStyle(
                     color: Colors.red,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Text(
                   '平台保障',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
                 ),
               ],
             ),
@@ -1077,13 +1178,13 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
           _images[i],
           fit: BoxFit.cover,
           width: double.infinity,
-          height: 400,
+          height: 400.h,
           errorBuilder:
               (_, __, ___) => Container(
                 color: Colors.grey[200],
-                child: const Icon(
+                child: Icon(
                   Icons.image_not_supported,
-                  size: 50,
+                  size: 50.r,
                   color: Colors.grey,
                 ),
               ),
@@ -1094,14 +1195,14 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
     if (mediaList.isEmpty) {
       return Container(
         width: double.infinity,
-        height: 400,
+        height: 400.h,
         color: Colors.grey[200],
-        child: const Center(child: Text('暂无媒体内容')),
+        child: Center(child: Text('暂无媒体内容', style: TextStyle(fontSize: 16.sp))),
       );
     }
 
     return SizedBox(
-      height: 400,
+      height: 400.h,
       child: Stack(
         children: [
           PageView.builder(
@@ -1116,20 +1217,20 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
             },
           ),
           Positioned(
-            top: 16,
-            left: 16,
+            top: 16.h,
+            left: 16.w,
             child: Container(
-              width: 40,
-              height: 40,
+              width: 40.w,
+              height: 40.h,
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
               ),
               child: IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.arrow_back,
                   color: Colors.white,
-                  size: 20,
+                  size: 20.r,
                 ),
                 onPressed: () => Navigator.pop(context),
                 padding: EdgeInsets.zero,
@@ -1137,17 +1238,17 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
             ),
           ),
           Positioned(
-            top: 16,
-            right: 16,
+            top: 16.h,
+            right: 16.w,
             child: Container(
-              width: 40,
-              height: 40,
+              width: 40.w,
+              height: 40.h,
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
               ),
               child: IconButton(
-                icon: const Icon(Icons.share, color: Colors.white, size: 20),
+                icon: Icon(Icons.share, color: Colors.white, size: 20.r),
                 onPressed: () {},
                 padding: EdgeInsets.zero,
               ),
@@ -1155,22 +1256,22 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
           ),
           // 媒体页码指示器
           Positioned(
-            bottom: 16,
+            bottom: 16.h,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 6.h,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Text(
                   '${_currentPage + 1}/${mediaList.length}',
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: TextStyle(color: Colors.white, fontSize: 14.sp),
                 ),
               ),
             ),
@@ -1210,10 +1311,10 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                           margin: const EdgeInsets.only(right: 20),
                           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300, width: 1),
+                            border: Border.all(color: Colors.grey.shade300, width: 1.w),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Text(text, style: const TextStyle(fontSize: 14)),
+                          child: Text(text, style: TextStyle(fontSize: 14.sp)),
                         ))
                     .toList(),
               ),
@@ -1227,9 +1328,9 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
             children: [
               Text(
                 _getProductName(productAutom),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
             ],
           ),
         ),
@@ -1251,7 +1352,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
             : null;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1259,33 +1360,33 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
           Text(
             mainPromotionPriceKRW != null &&
                     mainPromotionPriceKRW != mainOriginalPriceKRW
-                ? "KRW ${mainPromotionPriceKRW.toStringAsFixed(0)}"
-                : "KRW ${mainOriginalPriceKRW.toStringAsFixed(0)}",
-            style: const TextStyle(
-              fontSize: 18,
+                ? "KRW ${((mainPromotionPriceKRW / 10).floor() * 10).toString()}"
+                : "KRW ${((mainOriginalPriceKRW / 10).floor() * 10).toString()}",
+            style: TextStyle(
+              fontSize: 18.sp,
               color: Colors.black,
               fontWeight: FontWeight.w600,
             ),
           ),
           if (mainPromotionPriceKRW != null &&
               mainPromotionPriceKRW != mainOriginalPriceKRW) ...[
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
-              "KRW ${mainOriginalPriceKRW.toStringAsFixed(0)}",
-              style: const TextStyle(
-                fontSize: 14,
+              "KRW ${((mainOriginalPriceKRW / 10).floor() * 10).toString()}",
+              style: TextStyle(
+                fontSize: 14.sp,
                 color: Colors.grey,
                 decoration: TextDecoration.lineThrough,
               ),
             ),
           ],
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             mainPromotionPriceCNY != null &&
                     mainPromotionPriceCNY != mainOriginalPriceCNY
                 ? "¥${mainPromotionPriceCNY.toStringAsFixed(2)}"
                 : "¥${mainOriginalPriceCNY.toStringAsFixed(2)}",
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey),
           ),
         ],
       ),
@@ -1297,30 +1398,30 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
     final productDetail = productAutom['productDetail'] ?? '';
 
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0.w),
       color: Colors.white,
-      margin: const EdgeInsets.only(top: 8),
+      margin: EdgeInsets.only(top: 8.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             AppLocalizations.of(context)!.translate('ProductDetails'),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // 解析并显示HTML商品详情
           productDetail.isEmpty
-              ? const Center(
+              ? Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: CircularProgressIndicator(),
+                  padding: EdgeInsets.symmetric(vertical: 20.h),
+                  child: const CircularProgressIndicator(),
                 ),
               )
               : Html(
                 data: productDetail,
                 style: {
                   "*": Style(
-                    width: Width(MediaQuery.of(context).size.width - 32),
+                    width: Width(MediaQuery.of(context).size.width - 32.w),
                   ),
                 },
               ),
@@ -1332,9 +1433,9 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
   // 构建评论部分
   Widget _buildCommentsSection() {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0.w),
       color: Colors.white,
-      margin: const EdgeInsets.only(top: 8),
+      margin: EdgeInsets.only(top: 8.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1351,34 +1452,35 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
             },
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.only(bottom: 8.h),
               child: Text(
                 AppLocalizations.of(context)?.translate('Reviews') ?? "评价",
-                style: const TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // 评论列表
           _isCommentsLoading
               ? const Center(child: CircularProgressIndicator())
               : _commentError != null
               ? Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text(_commentError!),
+                  padding: EdgeInsets.symmetric(vertical: 20.h),
+                  child: Text(_commentError!, style: TextStyle(fontSize: 14.sp)),
                 ),
               )
               : _realComments.isEmpty
               ? Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
+                  padding: EdgeInsets.symmetric(vertical: 20.h),
                   child: Text(
                     AppLocalizations.of(context)?.translate('no_comments') ??
                         "暂无评论",
+                    style: TextStyle(fontSize: 14.sp),
                   ),
                 ),
               )
@@ -1387,7 +1489,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                     _realComments
                         .map(
                           (comment) => Container(
-                            margin: const EdgeInsets.only(bottom: 16),
+                            margin: EdgeInsets.only(bottom: 16.h),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -1432,24 +1534,24 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                         comment['memberAvator'] != null
                                             ? Image.network(
                                               comment['memberAvator'],
-                                              width: 18,
-                                              height: 18,
+                                              width: 18.w,
+                                              height: 18.h,
                                               fit: BoxFit.cover,
                                               errorBuilder:
-                                                  (_, __, ___) => const Icon(
+                                                  (_, __, ___) => Icon(
                                                     Icons.person,
-                                                    size: 18,
+                                                    size: 18.r,
                                                     color: Colors.grey,
                                                   ),
                                             )
-                                            : const Icon(
+                                            : Icon(
                                               Icons.person,
-                                              size: 18,
+                                              size: 18.r,
                                               color: Colors.grey,
                                             ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8.w),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -1460,14 +1562,14 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                           // 显示 nickname
                                           Text(
                                             comment['nickname'] ?? "匿名用户",
-                                            style: const TextStyle(
-                                              fontSize: 14,
+                                            style:  TextStyle(
+                                              fontSize: 14.sp,
                                             ),
                                           ),
                                           // VIP标识
                                           if (comment['goodObserve'] ==
                                               "2") ...[
-                                            const SizedBox(width: 4),
+                                            SizedBox(width: 4.w),
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
@@ -1475,28 +1577,28 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                                     vertical: 1,
                                                   ),
                                               color: Colors.orange,
-                                              child: const Text(
+                                              child:  Text(
                                                 "V",
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 10,
+                                                  fontSize: 10.sp,
                                                 ),
                                               ),
                                             ),
                                           ],
-                                          const SizedBox(width: 8),
+                                          SizedBox(width: 8.w),
                                           Text(
                                             _parseCommentSpecs(
                                               comment['sec'] ?? "",
                                             ),
-                                            style: const TextStyle(
-                                              fontSize: 12,
+                                            style:  TextStyle(
+                                              fontSize: 12.sp,
                                               color: Colors.grey,
                                             ),
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 8),
+                                      SizedBox(height: 8.h),
                                       // 星级评分
                                       Row(
                                         children: List.generate(5, (index) {
@@ -1511,34 +1613,34 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                             index < starRating
                                                 ? Icons.star
                                                 : Icons.star_border,
-                                            size: 14,
+                                            size: 14.sp,
                                             color: Colors.yellow,
                                           );
                                         }),
                                       ),
-                                      const SizedBox(height: 4),
+                                      SizedBox(height: 4.h),
                                       Text(
                                         comment['info'] ?? "",
-                                        style: const TextStyle(fontSize: 14),
+                                        style: TextStyle(fontSize: 14.sp),
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8.w),
                                 // 评论图片
                                 if (comment['pictureUrl'] != null &&
                                     comment['pictureUrl'].isNotEmpty)
                                   // 处理评论图片：获取第一张并确保URL格式正确
                                   Image.network(
                                     _fixImageUrl('$baseUrl${comment['pictureUrl'].split(',').first.trim()}'),
-                                    width: 100,
-                                    height: 100,
+                                    width: 100.w,
+                                    height: 100.h,
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) => Container(
-                                      width: 100,
-                                      height: 100,
+                                      width: 100.w,
+                                      height: 100.h,
                                       color: Colors.grey[200],
-                                      child: const Icon(Icons.image_not_supported, size: 20, color: Colors.grey),
+                                      child: Icon(Icons.image_not_supported, size: 20.sp, color: Colors.grey),
                                     ),
                                   ),
                               ],
@@ -1633,54 +1735,54 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
   // 底部操作栏
   Widget _buildBottomBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       color: Colors.white,
       child: Row(
         children: [
           IconButton(
             icon: Icon(
               Icons.favorite,
-              size: 28,
+              size: 28.r,
               color: isFavorite ? Colors.red : Colors.grey,
             ),
             onPressed: _toggleFavorite,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Expanded(
             child: SizedBox(
-              height: 48,
+              height: 48.h,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
                 onPressed: () => _showBottomSheet(isBuyNow: false),
                 child: Text(
                   AppLocalizations.of(context)?.translate('add_to_cart_kr') ??
                       "加入购物车",
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16.sp, color: Colors.white),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Expanded(
             child: SizedBox(
-              height: 48,
+              height: 48.h,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
                 onPressed: () => _showBottomSheet(isBuyNow: true),
                 child: Text(
                   AppLocalizations.of(context)?.translate('buy_request_kr') ??
                       "请求购买",
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16.sp, color: Colors.white),
                 ),
               ),
             ),
@@ -1752,8 +1854,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   });
                 },
                 child: Container(
-                  width: 80,
-                  height: 80,
+                  width: 80.w,
+                  height: 80.h,
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(40),
@@ -1761,7 +1863,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   child: Icon(
                     _isPlaying ? Icons.pause : Icons.play_arrow,
                     color: Colors.white,
-                    size: 48,
+                    size: 48.sp,
                   ),
                 ),
               ),
