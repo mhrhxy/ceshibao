@@ -307,16 +307,16 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   enabled: !_isLoading,
                   readOnly: readOnly,
                   decoration: InputDecoration(
-                    hintText: hintText,
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: errorText != null ? Colors.red : Colors.grey, // 错误时显示红色边框
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    suffixIcon: suffixIcon,
+                hintText: hintText,
+                hintStyle: const TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: errorText != null ? Colors.red : Colors.grey, // 错误时显示红色边框
                   ),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                suffixIcon: suffixIcon,
+              ),
                 ),
                 // 新增：显示错误提示
                 if (errorText != null)
@@ -361,7 +361,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 hintText: loc.translate('input_email_hint') ,
                 hintStyle: const TextStyle(color: Colors.grey),
                 border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               ),
             ),
           ),

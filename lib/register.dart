@@ -36,8 +36,8 @@ class _RegisterState extends State<Register> {
   String _verifyCodeText = "";
   bool _isFirstInit = true;
 
-  // 布局参数（原有数值完全保留）
-  final double _labelWidth = 60.w;
+  // 布局参数（增加标签宽度避免换行）
+  final double _labelWidth = 80.w;
   final double _inputHorizontalMargin = 40.w;
   final double _logoRightPadding = 30.w;
 
@@ -467,6 +467,8 @@ class _RegisterState extends State<Register> {
           child: Text(
             labelText,
             style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
         SizedBox(width: 10.w),
@@ -508,6 +510,8 @@ class _RegisterState extends State<Register> {
           child: Text(
             loc.translate('email'),
             style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
         SizedBox(width: 10.w),
