@@ -49,9 +49,9 @@ class ActiveSet {
 
   factory ActiveSet.fromJson(Map<String, dynamic> json) {
     return ActiveSet(
-      activeSetId: json['activeSetId'] ?? 0,
-      type: json['type'] ?? '',
-      couponId: json['couponId'] ?? 0,
+      activeSetId: (json['activeSetId'] ?? 0).toInt(),
+      type: json['type'].toString() ?? '',
+      couponId: (json['couponId'] ?? 0).toInt(),
       activeName: json['activeName'] ?? '',
       activeUrl: json['activeUrl'] ?? '',
       url: json['url'],
@@ -96,20 +96,20 @@ class Coupon {
 
   factory Coupon.fromJson(Map<String, dynamic> json) {
     return Coupon(
-      couponId: json['couponId'] ?? 0,
-      activeId: json['activeId'] ?? 0,
-      amount: json['amount'] ?? 0,
-      returnAmount: json['returnAmount'] ?? 0,
+      couponId: (json['couponId'] ?? 0).toInt(),
+      activeId: (json['activeId'] ?? 0).toInt(),
+      amount: (json['amount'] ?? 0).toInt(),
+      returnAmount: (json['returnAmount'] ?? 0).toInt(),
       startTime: json['startTime'] ?? '',
       endTime: json['endTime'] ?? '',
-      returnSupport: json['returnSupport'] ?? '',
-      type: json['type'] ?? '',
-      newUserUsed: json['newUserUsed'] ?? '',
-      couponUseId: json['couponUseId'],
-      memberId: json['memberId'],
+      returnSupport: json['returnSupport']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      newUserUsed: json['newUserUsed']?.toString() ?? '',
+      couponUseId: json['couponUseId']?.toInt(),
+      memberId: json['memberId']?.toInt(),
       memberName: json['memberName'],
       useTime: json['useTime'],
-      couponUse: json['couponUse'] ?? '',
+      couponUse: json['couponUse']?.toString() ?? '',
     );
   }
 }
@@ -141,8 +141,10 @@ class _ActivityPageState extends State<ActivityPage> {
 
     try {
       final response = await HttpUtil.get(activityListUrl);
+      print('Response data: ${response.data}');
       if (response.data['code'] == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
+        print('Activity data list: $data');
         setState(() {
           _activityList = data.map((item) => Activity.fromJson(item)).toList();
           _isLoading = false;
@@ -154,6 +156,7 @@ class _ActivityPageState extends State<ActivityPage> {
         });
       }
     } catch (e) {
+      print('Error fetching activities: $e');
       setState(() {
         _errorMsg = AppLocalizations.of(context)?.translate('network_error_retry') ?? '网络请求失败，请稍后重试';
         _isLoading = false;
