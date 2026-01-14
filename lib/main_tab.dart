@@ -5,7 +5,7 @@ import 'cartadd.dart';
 class MainTab extends StatefulWidget {
   final int initialIndex; // 初始选中的页面索引
   
-  const MainTab({super.key, this.initialIndex = 2}); // 默认选中首页
+  const MainTab({super.key, this.initialIndex = 1}); // 默认选中首页
 
   @override
   State<MainTab> createState() => _MainTabState();
