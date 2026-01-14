@@ -1168,11 +1168,6 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 12.w),
-                Text(
-                  '平台保障',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
-                ),
               ],
             ),
           ),
