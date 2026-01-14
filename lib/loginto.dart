@@ -124,73 +124,73 @@ class Loginto extends StatelessWidget {
                 SizedBox(height: 16.h),
                 
                 // KakaoTalk登录按钮
-                ElevatedButton(
-                  onPressed: () {
-                    // KakaoTalk登录逻辑
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.chat_bubble_outline, color: Colors.black),
-                      SizedBox(width: 8.w),
-                      Text(
-                        AppLocalizations.of(context).translate('continue_with_kakao'),
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 16.h),
+                // ElevatedButton(
+                //   onPressed: () {
+                //     // KakaoTalk登录逻辑
+                //   },
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: Colors.yellow,
+                //     padding: EdgeInsets.symmetric(vertical: 16.h),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(8.r),
+                //     ),
+                //     elevation: 0,
+                //   ),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       Icon(Icons.chat_bubble_outline, color: Colors.black),
+                //       SizedBox(width: 8.w),
+                //       Text(
+                //         AppLocalizations.of(context).translate('continue_with_kakao'),
+                //         style: TextStyle(
+                //           color: Colors.black,
+                //           fontSize: 16.sp,
+                //           fontWeight: FontWeight.w500,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // SizedBox(height: 16.h),
                 
-                // Naver登录按钮
-                ElevatedButton(
-                  onPressed: () {
-                    // Naver登录逻辑
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'N',
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        AppLocalizations.of(context).translate('continue_with_naver'),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 32.h),
+                // // Naver登录按钮
+                // ElevatedButton(
+                //   onPressed: () {
+                //     // Naver登录逻辑
+                //   },
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: Colors.green,
+                //     padding: EdgeInsets.symmetric(vertical: 16.h),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(8.r),
+                //     ),
+                //     elevation: 0,
+                //   ),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       Text(
+                //         'N',
+                //         style: TextStyle(
+                //           fontSize: 20.sp,
+                //           fontWeight: FontWeight.bold,
+                //           color: Colors.white,
+                //         ),
+                //       ),
+                //       SizedBox(width: 8.w),
+                //       Text(
+                //         AppLocalizations.of(context).translate('continue_with_naver'),
+                //         style: TextStyle(
+                //           color: Colors.white,
+                //           fontSize: 16.sp,
+                //           fontWeight: FontWeight.w500,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // SizedBox(height: 32.h),
                 
                 // 底部操作区
                 Row(
