@@ -142,12 +142,12 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                   Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
 
                   // 2. 第三方登录（不变）
-                  _buildAccountItem(
-                    title: AppLocalizations.of(context)?.translate('third_party_login') ?? '第三方登录',
-                    icon: Icons.people_outline,
-                    onTap: () {},
-                  ),
-                  Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
+                  // _buildAccountItem(
+                  //   title: AppLocalizations.of(context)?.translate('third_party_login') ?? '第三方登录',
+                  //   icon: Icons.people_outline,
+                  //   onTap: () {},
+                  // ),
+                  // Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
 
                   // 3. 密码更改（不变）
                   _buildAccountItem(

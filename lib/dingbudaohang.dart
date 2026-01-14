@@ -54,11 +54,12 @@ class FixedActionTopBar extends StatelessWidget implements PreferredSizeWidget {
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: InkWell(
                       onTap: () {
-                        // 点击logo返回底部导航栏页面
-                        Navigator.push(
+                        // 点击logo返回底部导航栏页面，使用pushReplacement避免页面重叠
+                       Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const MainTab(),
+                          PageRouteBuilder(
+                            pageBuilder: (_, __, ___) => const MainTab(),
+                            transitionDuration: Duration.zero,
                           ),
                         );
                       },

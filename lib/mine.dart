@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart'; // 导入国际化工具类
+import 'package:url_launcher/url_launcher.dart'; // 导入URL启动工具
 import 'dingbudaohang.dart';
 import 'myreview.dart';
 import 'address.dart';
@@ -352,7 +353,7 @@ class _MineState extends State<Mine> {
     return Column(
       children: [
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             // 根据唯一key判断跳转，不受语言切换影响
             if (key == "review") {
               Navigator.push(
@@ -382,6 +383,19 @@ class _MineState extends State<Mine> {
                   builder: (context) => ActivityPage(), // 跳转到活动页面
                 ),
               );
+            } else if (key == "consultation") {
+              // 跳转到Kakao官网
+              final Uri url = Uri.parse('https://www.kakaocorp.com/');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } else {
+                // 如果无法打开URL，显示错误信息
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)?.translate('cannot_open_url') ?? '无法打开链接'),
+                  ),
+                );
+              }
             }
             // 其他功能项可按key扩展点击逻辑（示例）
             // else if (key == "notice") { /* 跳转公告页面 */ }

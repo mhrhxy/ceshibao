@@ -352,7 +352,7 @@
   "shipping_info_text": "COUZIK 묶음 해외 구매 대행 서비스\n주문하신 모든 상품이 입고된 후\n무게를 측정하여 국제 배송비를 산출합니다.\n\n대행 수수료 및 상품가 결제(1차) 후\n국제 배송비 결제(2차)가 완료되어야 출고됩니다.\n\n예상 배송비는 추정치이며 실제 비용과 차이가 있을 수 있습니다.",
   "no_weight_fee_data": "중량별 배송비 데이터가 없습니다",
   "disclaimer_text": "지식재산권 침해 소지가 있거나 통관 불가 상품, 파손 위험이 높은 상품은 주문이 취소될 수 있습니다.\n\n지식재산권 미인지 상품의 통관 중 압류/폐기 책임은 신청자에게 있습니다.\n\n총 주문액이 150달러를 초과할 경우 관세가 부과될 수 있습니다.\n\n통관 정보 불일치로 인한 통관 지연에 대해 COUZIK은 책임을 지지 않습니다.",
-  "order_exceeds_max_limit": "주문 금액이 최대 한도 %s를 초과했습니다",
+  "order_exceeds_max_limit": "주문 금액이 최대 한도를 초과했습니다",
   "catelog_load_failed": "카테고리 불러오기 실패: ",
   "sub_catelog_load_failed": "하위 카테고리 불러오기 실패: ",
   "no_sub_catelog_data": "하위 카테고리 데이터가 없습니다",
@@ -388,5 +388,6 @@
   "user_id_missing_comments": "사용자 ID 누락으로 리뷰를 불러올 수 없습니다",
   "get_user_comments_failed": "사용자 리뷰 조회 실패",
   "user_no_comments": "이 사용자의 리뷰가 없습니다",
-  "no_price": "가격 없음"
+  "no_price": "가격 없음",
+  "quantity_cannot_less_1": "수량은 1 이상이어야 합니다"
 }

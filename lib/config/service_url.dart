@@ -1,7 +1,7 @@
 
 // const baseUrl = "http://10.168.96.23:9999";
-const baseUrl = "http://192.168.0.120:9999";
-// const baseUrl = "https://www.couzik.com/stage-api/app";
+// const baseUrl = "http://192.168.0.120:9999";
+const baseUrl = "https://www.couzik.com/stage-api/app";
 // 首页
 const homeDataUrl = "$baseUrl/api/home/index";
 // 品牌列表
@@ -186,3 +186,5 @@ const listactivityListUrl = "$baseUrl/product/active/listAllNoAuth";
 const activityReceiveCouponUrl = "$baseUrl/product/coupon/couponUse/{activeId}";
 // 订单数量统计
 const orderCountUrl = "$baseUrl/order/countOrderList";
+// 设置用户默认地址
+const setDefaultAddressUrl = "$baseUrl/system/uaddress/setDefault/{addressId}";

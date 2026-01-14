@@ -9,6 +9,7 @@ import 'dingbudaohang.dart';
 import 'productdetails.dart';
 import 'self_product_details.dart';
 import 'package:flutter_mall/app_localizations.dart';
+import 'model/toast_model.dart';
 
 // 购物车页面
 
@@ -498,6 +499,7 @@ class _CartState extends State<Cart> {
         queryParameters: {
           'pageSize': _collectPageSize,
           'pageNum': _currentCollectPage,
+          'selfSupport': _selfSupport, // 是否自营：1否 2是（直购=1，推荐=2）
         },
       );
       if (response.data['code'] == 200) {
@@ -534,6 +536,7 @@ class _CartState extends State<Cart> {
         queryParameters: {
           'pageSize': _collectPageSize,
           'pageNum': _currentCollectPage,
+          'selfSupport': 1, // 是否自营：1否 2是
         },
       );
       if (response.data['code'] == 200) {
@@ -558,17 +561,17 @@ class _CartState extends State<Cart> {
 
   Future<void> _updateQuantityApi(CartItem item, int change) async {
     if (_token == null || _token!.isEmpty) {
-      _showSnackBar(AppLocalizations.of(context)?.translate('please_login_first') ?? '请先登录');
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('please_login_first') ?? '请先登录');
       return;
     }
     if (_memberId == null) {
-      _showSnackBar(AppLocalizations.of(context)?.translate('member_info_missing') ?? '会员信息缺失');
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('member_info_missing') ?? '会员信息缺失');
       return;
     }
 
     final int newQuantity = item.num + change;
     if (newQuantity < 1) {
-      _showSnackBar(AppLocalizations.of(context)?.translate('quantity_cannot_less_1') ?? '数量不能小于1');
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('quantity_cannot_less_1') ?? '数量不能小于1');
       return;
     }
 
@@ -614,13 +617,13 @@ class _CartState extends State<Cart> {
           }
         }
       });
-      _showSnackBar('${AppLocalizations.of(context)?.translate('update_failed') ?? '修改失败'}: ${e.toString().replaceAll('Exception: ', '')}');
+      ToastUtil.showCustomToast(context, '${AppLocalizations.of(context)?.translate('update_failed') ?? '修改失败'}: ${e.toString().replaceAll('Exception: ', '')}');
     }
   }
 
   Future<void> _deleteCartItem(Shop shop, CartItem item) async {
     if (_token == null || _token!.isEmpty) {
-      _showSnackBar(AppLocalizations.of(context)?.translate('please_login_first') ?? '请先登录');
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('please_login_first') ?? '请先登录');
       setState(() => _itemOffset[item.cartId] = 0.0);
       return;
     }
@@ -640,13 +643,13 @@ class _CartState extends State<Cart> {
             _shops.remove(shop);
           }
         });
-        _showSnackBar(AppLocalizations.of(context)?.translate('delete_success') ?? '删除成功');
+        ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('delete_success') ?? '删除成功');
       } else {
         throw Exception(response.data['msg'] ?? AppLocalizations.of(context)?.translate('delete_failed') ?? '删除失败');
       }
     } catch (e) {
       setState(() => _itemOffset[item.cartId] = 0.0);
-      _showSnackBar('${AppLocalizations.of(context)?.translate('delete_failed') ?? '删除失败'}: ${e.toString().replaceAll('Exception: ', '')}');
+      ToastUtil.showCustomToast(context, '${AppLocalizations.of(context)?.translate('delete_failed') ?? '删除失败'}: ${e.toString().replaceAll('Exception: ', '')}');
     }
   }
 
@@ -698,15 +701,9 @@ class _CartState extends State<Cart> {
       // 比较订单金额和最大限额
       if (totalPrice > maxLimit) {
         // 如果超过限额，显示提示信息
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.translate('order_exceeds_max_limit') ?? '订单金额超过最大限额 $maxLimit',
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        ToastUtil.showCustomToast(
+          context,
+          AppLocalizations.of(context)?.translate('order_exceeds_max_limit') ?? '订单金额超过最大限额 $maxLimit',
         );
         return;
       }
@@ -1491,10 +1488,9 @@ Widget _buildShippingFeeListDialog() {
                 ),
             onPressed: () {
               setState(() => _showDisclaimer = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                 SnackBar(
-                  content: Text(AppLocalizations.of(context)?.translate('agreed_and_paid') ?? "已同意并完成付款流程"),
-                ),
+              ToastUtil.showCustomToast(
+                context,
+                AppLocalizations.of(context)?.translate('agreed_and_paid') ?? "已同意并完成付款流程",
               );
             },
             child: GestureDetector(
@@ -1564,6 +1560,10 @@ Widget _buildShippingFeeListDialog() {
                               _selfSupport = 1;
                             });
                             _fetchCartList();
+                            // 如果当前在收藏列表标签，也需要刷新收藏列表
+                            if (_currentTab == 1) {
+                              _loadCollectList();
+                            }
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
@@ -1586,6 +1586,10 @@ Widget _buildShippingFeeListDialog() {
                               _selfSupport = 2;
                             });
                             _fetchCartList();
+                            // 如果当前在收藏列表标签，也需要刷新收藏列表
+                            if (_currentTab == 1) {
+                              _loadCollectList();
+                            }
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),

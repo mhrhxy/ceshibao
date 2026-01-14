@@ -2234,138 +2234,124 @@ class _MyorderState extends State<Myorder> {
                                             ],
                                           ),
                                         ),
-                                        // 外层水平布局：左侧状态+按钮列，右侧箭头列
+                                        // 外层水平布局：状态+按钮列和展开/收起箭头
                                         Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            // 左侧垂直布局：状态文本和所有按钮
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                // 订单状态文本
-                                                Text(
-                                                  order.status,
-                                                  style: TextStyle(
-                                                    fontSize: 14.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: getStatusTextColor(order.status),
+                                            // 左侧占位符
+                                            Container(),
+                                            // 中间垂直布局：状态文本和所有按钮
+                                            Container(
+                                              width: 120.w,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children: [
+                                                  // 订单状态文本
+                                                  Text(
+                                                    order.status,
+                                                    style: TextStyle(
+                                                      fontSize: 14.sp,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: getStatusTextColor(order.status),
+                                                    ),
                                                   ),
-                                                ),
-                                                SizedBox(height: 8.h),
-                                                // 取消退款按钮（只有退款状态为1时显示，且只有当子订单数量为1时，才在总订单处显示）
-                                                order.refundStatus == 1 &&
-                                                        order
-                                                                .shopOrders
-                                                                .length ==
-                                                            1
-                                                    ? Column(
+                                                  SizedBox(height: 8.h),
+                                                  // 取消退款按钮（只有退款状态为1时显示，且只有当子订单数量为1时，才在总订单处显示）
+                                                  order.refundStatus == 1 && order.shopOrders.length == 1
+                                                      ? Column(
+                                                          children: [
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                // 取消退款的逻辑
+                                                                _cancelRefund(order.shopOrders[0]);
+                                                              },
+                                                              style: TextButton.styleFrom(
+                                                                padding: EdgeInsets.symmetric(
+                                                                  horizontal: 8.w,
+                                                                  vertical: 2.h,
+                                                                ),
+                                                              ),
+                                                              child: Text(
+                                                                AppLocalizations.of(context)?.translate('cancel_refund') ?? '取消退款',
+                                                                style: TextStyle(
+                                                                  fontSize: 12.sp,
+                                                                  color: Colors.red,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(height: 4.h),
+                                                          ],
+                                                        )
+                                                      : Container(),
+                                                  // 取消订单按钮和立即支付按钮（只有待支付状态显示）
+                                                  if (order.status ==
+                                                      (AppLocalizations.of(
+                                                            context,
+                                                          )?.translate(
+                                                            'pending_payment',
+                                                          ) ??
+                                                          '待支付'))
+                                                    Column(
                                                       children: [
                                                         TextButton(
                                                           onPressed: () {
-                                                            // 取消退款的逻辑
-                                                            _cancelRefund(
-                                                              order
-                                                                  .shopOrders[0],
+                                                            // 取消订单的逻辑
+                                                            _cancelOrder(
+                                                              order.id,
                                                             );
                                                           },
                                                           style: TextButton.styleFrom(
-                                                          padding:
-                                                              EdgeInsets.symmetric(
-                                                                horizontal: 8.w,
-                                                                vertical: 2.h,
-                                                              ),
-                                                        ),
-                                                        child: Text(
-                                                          AppLocalizations.of(
-                                                                context,
-                                                              )?.translate(
-                                                                'cancel_refund',
-                                                              ) ??
-                                                              '取消退款',
-                                                          style: TextStyle(
-                                                            fontSize: 12.sp,
-                                                            color: Colors.red,
+                                                            padding:
+                                                                EdgeInsets.symmetric(
+                                                                  horizontal: 8.w,
+                                                                  vertical: 2.h,
+                                                                ),
+                                                          ),
+                                                          child: Text(
+                                                            AppLocalizations.of(
+                                                                  context,
+                                                                )?.translate(
+                                                                  'cancel_order',
+                                                                ) ??
+                                                                '取消订单',
+                                                            style: TextStyle(
+                                                              fontSize: 12.sp,
+                                                              color: Colors.red,
+                                                            ),
                                                           ),
                                                         ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 4.h,
+                                                        SizedBox(height: 4.h),
+                                                        // 立即支付按钮（只有待支付状态显示）
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            // 立即支付的逻辑
+                                                            _payOrder(order.id);
+                                                          },
+                                                          style: TextButton.styleFrom(
+                                                            padding:
+                                                                EdgeInsets.symmetric(
+                                                                  horizontal: 8.w,
+                                                                  vertical: 2.h,
+                                                                ),
+                                                          ),
+                                                          child: Text(
+                                                            AppLocalizations.of(
+                                                                  context,
+                                                                )?.translate(
+                                                                  'pay_now',
+                                                                ) ??
+                                                                '立即支付',
+                                                            style: TextStyle(
+                                                              fontSize: 12.sp,
+                                                              color: Colors.blue,
+                                                            ),
+                                                          ),
                                                         ),
                                                       ],
-                                                    )
-                                                    : Container(),
-                                                // 取消订单按钮和立即支付按钮（只有待支付状态显示）
-                                                if (order.status ==
-                                                    (AppLocalizations.of(
-                                                          context,
-                                                        )?.translate(
-                                                          'pending_payment',
-                                                        ) ??
-                                                        '待支付'))
-                                                  Column(
-                                                    children: [
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          // 取消订单的逻辑
-                                                          _cancelOrder(
-                                                            order.id,
-                                                          );
-                                                        },
-                                                        style: TextButton.styleFrom(
-                                                          padding:
-                                                              EdgeInsets.symmetric(
-                                                                horizontal: 8.w,
-                                                                vertical: 2.h,
-                                                              ),
-                                                        ),
-                                                        child: Text(
-                                                          AppLocalizations.of(
-                                                                context,
-                                                              )?.translate(
-                                                                'cancel_order',
-                                                              ) ??
-                                                              '取消订单',
-                                                          style: TextStyle(
-                                                            fontSize: 12.sp,
-                                                            color: Colors.red,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: 4.h),
-                                                      // 立即支付按钮（只有待支付状态显示）
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          // 立即支付的逻辑
-                                                          _payOrder(order.id);
-                                                        },
-                                                        style: TextButton.styleFrom(
-                                                          padding:
-                                                              EdgeInsets.symmetric(
-                                                                horizontal: 8.w,
-                                                                vertical: 2.h,
-                                                              ),
-                                                        ),
-                                                        child: Text(
-                                                          AppLocalizations.of(
-                                                                context,
-                                                              )?.translate(
-                                                                'pay_now',
-                                                              ) ??
-                                                              '立即支付',
-                                                          style: TextStyle(
-                                                            fontSize: 12.sp,
-                                                            color: Colors.blue,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                                                    ),
 
-                                                // 运费支付按钮（只有orderState等于5并且payStatus等于3时显示）
+                                                  // 运费支付按钮（只有orderState等于5并且payStatus等于3时显示）
                                                 if (order.orderState == '5' &&
                                                     order.payStatus == '3')
                                                   Column(
@@ -2489,7 +2475,7 @@ class _MyorderState extends State<Myorder> {
                                                   ),
                                               ],
                                             ),
-                                            SizedBox(width: 4.w),
+                                            ),
                                             // 展开/收起箭头 - 保持不变
                                             Icon(
                                               order.isExpanded

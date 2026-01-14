@@ -160,55 +160,33 @@ class _AddressBookPageState extends State<AddressBookPage> {
   }
 
   Future<void> _setAsDefault(int userAddressId) async {
-    final addressItem = addressList.firstWhere(
-      (item) => item['userAddressId'] == userAddressId,
-      orElse: () => throw Exception(AppLocalizations.of(context)?.translate('address_not_found') ?? "未找到地址信息"),
-    );
-    final originalData = addressItem['original'];
-
+    // 只更新UI中的加载状态，不影响整个页面
     setState(() {
-      _isLoading = true;
-      _errorMsg = null;
+      // 只设置地址列表的加载状态，不影响其他部分
+      _isLoadingMore = true;
     });
 
     try {
-
-      final updateData = {
-        "userAddressId": userAddressId,
-        "tel": originalData['tel'],
-        "tagName": originalData['tagName'],
-        "addressDetail": originalData['addressDetail'],
-        "defaultAddress": "2",
-        "tag": originalData['tag'],
-        "country": originalData['country'],
-        "state": originalData['state'],
-        "city": originalData['city'],
-        "district": originalData['district'],
-        "name": originalData['name'],
-      };
-
+      // 使用新的设置默认地址接口，只需要传递地址ID
+      final url = setDefaultAddressUrl.replaceAll('{addressId}', userAddressId.toString());
       final response = await HttpUtil.put(
-        uoputedlist,
-        data: updateData,
+        url,
+        data: {},
       );
 
       if (response.data['code'] == 200) {
         _showErrorSnackBar(AppLocalizations.of(context)?.translate('set_as_default_address_success') ?? "已设为默认地址");
-        _currentPage = 1;
-        _maxPage = 1; // 重置最大页数
-        fetchAddressList();
+        // 重新获取地址列表，但保持页面其他部分不变
+        await fetchAddressList();
       } else {
         throw Exception(response.data['msg'] ?? (AppLocalizations.of(context)?.translate('set_default_address_failed') ?? '设置默认地址失败'));
       }
     } catch (e) {
-      setState(() {
-        _errorMsg = e.toString();
-        _showErrorSnackBar(_errorMsg!);
-      });
+      _showErrorSnackBar(e.toString());
       // developer.log('设置默认地址接口请求失败: $e');
     } finally {
       setState(() {
-        _isLoading = false;
+        _isLoadingMore = false;
       });
     }
   }

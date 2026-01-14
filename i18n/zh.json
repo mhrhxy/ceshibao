@@ -351,7 +351,7 @@
   "shipping_info_text": "COUZIK捆绑海外代购服务\n订购的订单内所有商品入库后\n会称重所有的商品，计算国际运费。\n\n代理手续费与商品价值结算（1次）后\n国际运费结算（2次）完成后，货物才会出库。\n\n预期运费只是预期，与实际运费有差距",
   "no_weight_fee_data": "暂无重量相关运费数据",
   "disclaimer_text": "包含侵权知识产权，不可通关商品、破损危险较高的商品时订单可能会部分或全部取消。\n\n管理者对未认知知识产权商品 通关中发生的扣押/销毁的责任由代理申请人承担。\n\n订购总额超过150美元时，可分多次进行或可能会根据申报金额征收关税。\n\n因报关信息不一致导致的报关滞留 COUZIK不负相关责任",
-  "order_exceeds_max_limit": "订单金额超过最大限额 %s",
+  "order_exceeds_max_limit": "订单金额超过最大限额",
   "catelog_load_failed": "分类加载失败：",
   "sub_catelog_load_failed": "子分类加载失败：",
   "no_sub_catelog_data": "暂无子分类数据",
@@ -387,5 +387,6 @@
   "user_id_missing_comments": "用户ID缺失，无法加载评论",
   "get_user_comments_failed": "获取用户评论失败",
   "user_no_comments": "该用户暂无评论数据",
-  "no_price": "暂无价格"
+  "no_price": "暂无价格",
+  "quantity_cannot_less_1": "数量不能小于1"
 }

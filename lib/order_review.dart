@@ -81,7 +81,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
         specsText = skuData.toString();
       }
     }
-    return specsText.isNotEmpty ? specsText : '无规格';
+    return specsText.isNotEmpty ? specsText : '';
   }
 
   // 提交评价
