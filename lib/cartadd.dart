@@ -743,8 +743,8 @@ class _CartState extends State<Cart> {
     price += totalTaobaoFee;
     
     // Set的大小即为不同商品种类的数量
-    // 处理浮点数精度问题，直接取整避免四舍五入
-    double finalPrice = price.floorToDouble();
+    // 处理浮点数精度问题，舍去个位数
+    double finalPrice = (price / 10).floorToDouble() * 10;
     return (finalPrice, quantity, uniqueProducts.length);
   }
   

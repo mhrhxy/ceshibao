@@ -322,9 +322,9 @@ class _PaymentPageState extends State<PaymentPage> {
         totalTaobaoFee += productTaobaoFee;
       }
       
-      // 将运费加到总价上，并对结果进行四舍五入（与sumAmount计算逻辑一致）
+      // 将运费加到总价上，并对结果舍去个位数
       totalPrice += totalTaobaoFee;
-      totalPrice = totalPrice.roundToDouble();
+      totalPrice = (totalPrice / 10).floorToDouble() * 10;
       
       _cachedProductStats = {
         'categoryCount': uniqueProducts.length,
@@ -363,9 +363,9 @@ class _PaymentPageState extends State<PaymentPage> {
       totalTaobaoFee += productTaobaoFee;
     }
     
-    // 将运费加到总价上，并对结果进行四舍五入（与sumAmount计算逻辑一致）
+    // 将运费加到总价上，并对结果舍去个位数
     totalPrice += totalTaobaoFee;
-    totalPrice = totalPrice.roundToDouble();
+    totalPrice = (totalPrice / 10).floorToDouble() * 10;
     
     // 移除不必要的打印语句
     // print('计算的商品总价: $totalPrice, 总运费: $totalTaobaoFee');
@@ -1559,8 +1559,8 @@ class _PaymentPageState extends State<PaymentPage> {
           double price = (product['price'] ?? 0).toDouble();
           double taobaoFee = (product['taobaofee'] ?? 0.0).toDouble();
           
-          // 先对单个商品总价进行四舍五入，避免浮点数累加误差
-          purchaseAmount += (price).roundToDouble() * quantity;
+          // 先对单个商品总价进行处理，避免浮点数累加误差
+          purchaseAmount += ((price * quantity) / 10).floorToDouble() * 10;
           totalTaobaoFee += taobaoFee;
           totalQuantity += quantity;
           
@@ -1624,24 +1624,24 @@ class _PaymentPageState extends State<PaymentPage> {
         }
         
         // 计算商品总价格（包含所有运费）
-        double productAllPrice = (purchaseAmount + totalTaobaoFee + 0.0).roundToDouble(); // 海外运费写死为0
+        double productAllPrice = ((purchaseAmount + totalTaobaoFee + 0.0) / 10).floorToDouble() * 10; // 海外运费写死为0
         
         // 计算商品总价格（包含淘宝运费，不包含海外运费）
-        double productNoSeaPrice = (purchaseAmount + totalTaobaoFee).roundToDouble();
+        double productNoSeaPrice = ((purchaseAmount + totalTaobaoFee) / 10).floorToDouble() * 10;
         
-        // 累加总金额和总数量，包含淘宝运费（使用四舍五入后的值）
-        totalSumAmount += (purchaseAmount + totalTaobaoFee).round();
+        // 累加总金额和总数量，包含淘宝运费（舍去个位数）
+        totalSumAmount += ((purchaseAmount + totalTaobaoFee) / 10).floor() * 10;
         totalNum += totalQuantity;
         
         // 添加店铺订单数据
         orderInfoDTOList.add({
-          'purchaseAmount': purchaseAmount.round(), // 商品总金额（与UI显示一致，进行四舍五入）
+          'purchaseAmount': ((purchaseAmount / 10).floorToDouble() * 10).toInt(), // 商品总金额（与UI显示一致，舍去个位数）
           'zip': _zipcode,
           'num': totalQuantity,
           'shopId': shopProducts.first['shopId'], // 使用实际的店铺ID，如果没有则使用哈希码
           'cartId': cartIds,
           'shopName': shopName,
-          'fee': totalTaobaoFee.round(), // 淘宝运费（与UI显示一致，进行四舍五入）
+          'fee': ((totalTaobaoFee / 10).floorToDouble() * 10).toInt(), // 淘宝运费（与UI显示一致，舍去个位数）
           'productAllPrice': productAllPrice,
           'productNoSeaPrice': productNoSeaPrice,
           'selfSupport': selfSupport, // 根据商品设置selfSupport值
@@ -1707,11 +1707,11 @@ class _PaymentPageState extends State<PaymentPage> {
         'orderAllInfo': {
           'couponId': _selectedCoupon != null ? _selectedCoupon!['couponUseId'] ?? 0 : 0, // 选择的优惠券ID（使用couponUseId）
           'pointsId': _pointsToUse, // 使用的积分数
-          'sumAmount': totalSumAmount.round(), // 购买商品总金额（与UI显示一致，进行四舍五入）
+          'sumAmount': ((totalSumAmount / 10).floor() * 10), // 购买商品总金额（与UI显示一致，舍去个位数）
           'num': totalNum, // 购买商品总数
           'selfSupport': orderInfoDTOList.isNotEmpty ? orderInfoDTOList.first['selfSupport'] ?? 1 : 1, // 是否自营1否 2是
           'fee': orderInfoDTOList.fold(0.0, (sum, item) => sum + (item['fee'] ?? 0.0)), // 淘宝运费
-          'productAllPrice': finalAmount.round(), // 商品总价格（与UI显示一致，进行四舍五入）
+          'productAllPrice': ((finalAmount / 10).floor() * 10), // 商品总价格（与UI显示一致，舍去个位数）
           'productNoSeaPrice': orderInfoDTOList.fold(0.0, (sum, item) => sum + (item['productNoSeaPrice'] ?? 0.0)).round(), // 商品总价格（与UI显示一致，进行四舍五入）
           'houseId': 1, // 仓库ID 默认为1
           'message': '', // 买家留言
