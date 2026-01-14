@@ -3055,12 +3055,7 @@ class _MyorderState extends State<Myorder> {
                                                                                   Text(
                                                                                     item.color.isNotEmpty
                                                                                         ? item.color
-                                                                                        : (AppLocalizations.of(
-                                                                                              context,
-                                                                                            )?.translate(
-                                                                                              'no_specification',
-                                                                                            ) ??
-                                                                                            '无规格'),
+                                                                                        : '',
                                                                                     style: TextStyle(
                                                                                       fontSize:
                                                                                           14.sp,
@@ -3191,12 +3186,7 @@ class _MyorderState extends State<Myorder> {
                                                                           .isNotEmpty
                                                                       ? item
                                                                           .color
-                                                                      : (AppLocalizations.of(
-                                                                            context,
-                                                                          )?.translate(
-                                                                            'no_specification',
-                                                                          ) ??
-                                                                          '无规格'),
+                                                                      : '',
                                                                   style: TextStyle(
                                                                     fontSize:
                                                                         14.sp,
