@@ -36,10 +36,20 @@ class PayCard {
   });
 
   factory PayCard.fromJson(Map<String, dynamic> json) {
+    // 清理URL，去除两端的空格和引号
+    String cleanedUrl = (json['url'] ?? '').toString().trim();
+    // 去除两端可能存在的引号
+    if (cleanedUrl.startsWith('"') || cleanedUrl.startsWith("'")) {
+      cleanedUrl = cleanedUrl.substring(1);
+    }
+    if (cleanedUrl.endsWith('"') || cleanedUrl.endsWith("'")) {
+      cleanedUrl = cleanedUrl.substring(0, cleanedUrl.length - 1);
+    }
+    
     return PayCard(
       payCardId: json['payCardId'],
       payMethod: json['payMethod'],
-      url: json['url'],
+      url: cleanedUrl,
       name: json['name'],
       nameCode: json['nameCode'],
     );
@@ -112,37 +122,38 @@ class _MyorderState extends State<Myorder> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 左侧：卡片名称和图片
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        card.name,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
-                      card.url.isNotEmpty
-                          ? Image.network(
-                            '$baseUrl${card.url}',
-                            width: 100.w,
-                            height: 60.h,
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (_, __, ___) => Container(
-                                  width: 100.w,
-                                  height: 60.h,
-                                  color: Colors.grey[200],
-                                  child: const Icon(
-                                    Icons.image_not_supported,
-                                    color: Colors.grey,
-                                  ),
+                  // 左侧：卡片图片
+                  card.url.isNotEmpty
+                      ? Image.network(
+                          card.url, // 直接使用完整URL，不再拼接baseUrl
+                          width: 100.w,
+                          height: 60.h,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (_, __, ___) => Container(
+                                width: 100.w,
+                                height: 60.h,
+                                color: Colors.grey[200],
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.grey,
                                 ),
-                          )
-                          : Container(),
-                    ],
+                              ),
+                        )
+                      : Container(
+                          width: 100.w,
+                          height: 60.h,
+                        ),
+                  SizedBox(width: 16.w),
+                  // 右侧：卡片名称
+                  Expanded(
+                    child: Text(
+                      card.name,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   // 右侧：选择框
                   Radio(
