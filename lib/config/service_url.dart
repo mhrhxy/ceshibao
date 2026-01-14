@@ -1,7 +1,7 @@
 
 // const baseUrl = "http://10.168.96.23:9999";
-// const baseUrl = "http://192.168.0.120:9999";
-const baseUrl = "https://www.couzik.com/stage-api/app";
+const baseUrl = "http://192.168.0.120:9999";
+// const baseUrl = "https://www.couzik.com/stage-api/app";
 // 首页
 const homeDataUrl = "$baseUrl/api/home/index";
 // 品牌列表
@@ -148,6 +148,8 @@ const noticeListUrl = "$baseUrl/system/notice/list";
 const noticeDetailUrl = "$baseUrl/system/notice/{noticeId}";
 // 查询用户通知类型接口
 const searchNotifyByUserUrl = "$baseUrl/notify/userManager/searchNotifyByUser";
+// 通知开关修改问题
+const updateNotifyUrl = "$baseUrl/notify/userManager";
 // 通过类型查询用户通知信息列表接口
 const searchNotifyByUserTypeUrl = "$baseUrl/notify/notify/searchNotifyByUser?type=";
 // 已读接口

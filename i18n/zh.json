@@ -133,7 +133,7 @@
   "sort_rating": "星级↑",                
   "sort_price": "价格↑",                 
   "no_product_data": "暂无商品数据",      
-  "load_data_fail": "加载失败：%s",
+  "load_data_fail": "加载失败",
   "stock":"库存",
   "Reviews":"评价",
   "ProductDetails":"宝贝详情",
