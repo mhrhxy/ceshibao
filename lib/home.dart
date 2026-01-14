@@ -596,11 +596,28 @@ class _HomeState extends State<Home> {
         data: searchParams,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)?.translate('image_search_request_sent') ?? "图片搜索请求已发送")
-        )
-      );
+      if (response.data['code'] == 200) {
+        // 图片搜索成功，跳转到搜索结果页面
+        final Map<String, dynamic> outerData = response.data['data'] ?? {};
+        final List<dynamic> productJsonList = outerData['data'] ?? [];
+        
+        // 跳转到搜索页面并显示结果
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SearchResultPage(
+              imageSearchResults: productJsonList.cast<Map<String, dynamic>>(),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.translate('image_search_failed') ?? "图片搜索失败"),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

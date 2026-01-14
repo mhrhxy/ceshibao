@@ -78,11 +78,13 @@ class Product {
 class SearchResultPage extends StatefulWidget {
   final String? keyword;
   final String? category;
+  final List<Map<String, dynamic>>? imageSearchResults;
 
   const SearchResultPage({
     super.key,
     this.keyword,
     this.category,
+    this.imageSearchResults,
   });
 
   @override
@@ -122,6 +124,35 @@ class _SearchResultPageState extends State<SearchResultPage> {
     _loadExchangeRate();
   }
   
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasFetchedData) {
+      if (widget.imageSearchResults != null && widget.imageSearchResults!.isNotEmpty) {
+        // 如果有图片搜索结果，直接处理结果
+        _processImageSearchResults();
+      } else {
+        // 否则执行正常的搜索
+        _fetchSearchData(_currentKeyword ?? '');
+      }
+      _hasFetchedData = true;
+    }
+  }
+  
+  // 处理图片搜索结果
+  void _processImageSearchResults() {
+    if (widget.imageSearchResults == null || widget.imageSearchResults!.isEmpty) {
+      return;
+    }
+    
+    setState(() {
+      _isImageSearch = true;
+      _isSearchLoading = false;
+      _products = widget.imageSearchResults!.map((json) => Product.fromJson(json, exchangeRate: _exchangeRate)).toList();
+      _hasMoreData = false;
+    });
+  }
+  
   // 加载汇率数据
   Future<void> _loadExchangeRate() async {
     try {
@@ -145,15 +176,6 @@ class _SearchResultPageState extends State<SearchResultPage> {
     } catch (e) {
       print('获取汇率失败: $e');
       // 失败时使用默认汇率
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_hasFetchedData) {
-      _fetchSearchData(_currentKeyword ?? '');
-      _hasFetchedData = true;
     }
   }
 

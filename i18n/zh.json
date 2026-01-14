@@ -388,5 +388,6 @@
   "get_user_comments_failed": "获取用户评论失败",
   "user_no_comments": "该用户暂无评论数据",
   "no_price": "暂无价格",
-  "quantity_cannot_less_1": "数量不能小于1"
+  "quantity_cannot_less_1": "数量不能小于1",
+  "image_search_request_sent": "图片搜索请求已发送"
 }

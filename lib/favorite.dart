@@ -505,6 +505,7 @@ class _Favorite extends State<Favorite> {
                   ? Center(child: CircularProgressIndicator()) // 初始加载时显示加载指示器
                   : ListView.builder(
                       controller: _scrollController,
+                      padding: EdgeInsets.symmetric(vertical: 10.h),
                       itemCount: collectList.length + (hasMore ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index == collectList.length) {
