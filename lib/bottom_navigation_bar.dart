@@ -23,10 +23,10 @@ List<BottomNavigationBarItem> buildBottomNavItems(BuildContext context) {
       icon: const Icon(Icons.search_sharp),
       label: loc.translate('search'),
     ),
-    BottomNavigationBarItem(
-      icon: const Icon(Icons.turned_in_not),
-      label: loc.translate('price_comparison'),
-    ),
+    // BottomNavigationBarItem(
+    //   icon: const Icon(Icons.turned_in_not),
+    //   label: loc.translate('price_comparison'),
+    // ),
     BottomNavigationBarItem(
       icon: const Icon(Icons.home_outlined),
       label: loc.translate('home'),
