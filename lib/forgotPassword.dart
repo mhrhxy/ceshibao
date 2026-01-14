@@ -36,9 +36,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   String? _pwdErrorText;
 
   // 布局参数
-  final double _labelWidth = 60;
-  final double _inputHorizontalMargin = 40;
-  final double _logoRightPadding = 30;
+  final double _labelWidth = 80.w;
+  final double _inputHorizontalMargin = 40.w;
+  final double _logoRightPadding = 30.w;
 
   // 新增：密码校验正则（仅允许小写字母、数字、特殊符号）
   static final RegExp _passwordRegExp = RegExp(
@@ -291,6 +291,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           child: Text(
             labelText,
             style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
         SizedBox(width: 10.w),
@@ -344,8 +346,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         SizedBox(
           width: _labelWidth,
           child: Text(
-            loc.translate('email') ,
+            loc.translate('email'),
             style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
         SizedBox(width: 10.w),

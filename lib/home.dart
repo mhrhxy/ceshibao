@@ -965,21 +965,29 @@ class _HomeState extends State<Home> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (catelog.fullPictureUrl != null)
-              Image.network(
-                catelog.fullPictureUrl!,
-                width: 24.w,
-                height: 24.h,
-                fit: BoxFit.cover,
-                errorBuilder:
-                    (context, error, stackTrace) => Icon(
-                      Icons.category,
-                      color: Colors.grey,
-                      size: 26.w,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15.r),
+              child: catelog.fullPictureUrl != null
+                  ? Image.network(
+                      catelog.fullPictureUrl!,
+                      width: 24.w,
+                      height: 24.h,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (context, error, stackTrace) => Image(
+                            image: AssetImage('images/tht.jpg'),
+                            width: 26.w,
+                            height: 26.h,
+                            fit: BoxFit.cover,
+                          ),
+                    )
+                  : Image(
+                      image: AssetImage('images/tht.jpg'),
+                      width: 26.w,
+                      height: 26.h,
+                      fit: BoxFit.cover,
                     ),
-              )
-            else
-              Icon(Icons.category, color: Colors.grey, size: 26.w),
+            ),
             SizedBox(width: 6.w),
             Expanded(
               child: Text(

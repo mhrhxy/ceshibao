@@ -31,9 +31,9 @@ class _ForgotAccountState extends State<ForgotAccount> {
   bool _isCopied = false; // 复制状态：false=未复制，true=已复制
 
   // 3. 布局参数（复用忘记密码页，保持风格统一）
-  final double _labelWidth = 60;
-  final double _inputHorizontalMargin = 40;
-  final double _logoRightPadding = 30;
+  final double _labelWidth = 80.w;
+  final double _inputHorizontalMargin = 40.w;
+  final double _logoRightPadding = 30.w;
 
   @override
   void initState() {
@@ -220,6 +220,8 @@ class _ForgotAccountState extends State<ForgotAccount> {
           child: Text(
             labelText,
             style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
         SizedBox(width: 10.w),
@@ -256,28 +258,30 @@ class _ForgotAccountState extends State<ForgotAccount> {
           width: _labelWidth,
           child: Text(
             loc.translate('email'),
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           flex: 2,
           child: SizedBox(
-            height: 50,
+            height: 50.h,
             child: TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               enabled: !_isLoading && _canGetVerifyCode,
               decoration: InputDecoration(
                 hintText: loc.translate('input_email_hint'),
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           flex: 1,
           child: SizedBox(
@@ -286,7 +290,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
               onPressed: _canGetVerifyCode && !_isLoading ? _sendVerifyCode : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _canGetVerifyCode ? const Color.fromARGB(255, 116, 115, 115) : const Color.fromARGB(255, 138, 138, 138),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
                 padding: EdgeInsets.zero,
               ),
               child: Text(

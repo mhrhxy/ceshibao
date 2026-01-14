@@ -129,6 +129,7 @@ flutter:
     - i18n/zh.json
     - i18n/ko.json
     - i18n/en.json
+    - images/tht.jpg
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -323,18 +323,14 @@ class _MineState extends State<Mine> {
         }
       },
       child: Container(
+        width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.sp,
-                color: Color(0xFF333333),
-              ),
-            ),
-          ],
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 16.sp,
+            color: Color(0xFF333333),
+          ),
         ),
       ),
     );

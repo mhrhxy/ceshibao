@@ -294,14 +294,29 @@ class _CategoriesState extends State<Categories> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.network(
-              catelog.fullPictureUrl ?? "",
-              width: 26.w,
-              height: 26.h,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(Icons.image_not_supported, color: Colors.grey, size: 26.r);
-              },
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15.r),
+              child: catelog.fullPictureUrl != null
+                  ? Image.network(
+                      catelog.fullPictureUrl!,
+                      width: 26.w,
+                      height: 26.h,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image(
+                          image: AssetImage('images/tht.jpg'),
+                          width: 26.w,
+                          height: 26.h,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    )
+                  : Image(
+                      image: AssetImage('images/tht.jpg'),
+                      width: 26.w,
+                      height: 26.h,
+                      fit: BoxFit.cover,
+                    ),
             ),
             SizedBox(width: 6.w),
             Expanded(

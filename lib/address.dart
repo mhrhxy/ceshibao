@@ -368,18 +368,21 @@ class _AddressBookPageState extends State<AddressBookPage> {
                   ],
               )
             else
-              Row(
-                children: [
-                  Checkbox(
-                      value: false,
-                      onChanged: (value) {
-                        if (value == true) _setAsDefault(address['userAddressId']);
-                      },
-                      activeColor: Colors.red,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    Text(AppLocalizations.of(context)?.translate('set_as_default') ?? "设为默认", style: TextStyle(fontSize: 14.sp, color: Color(0xFF333333))),
-                ],
+              GestureDetector(
+                onTap: () => _setAsDefault(address['userAddressId']),
+                child: Row(
+                  children: [
+                    Checkbox(
+                        value: false,
+                        onChanged: (value) {
+                          if (value == true) _setAsDefault(address['userAddressId']);
+                        },
+                        activeColor: Colors.red,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      Text(AppLocalizations.of(context)?.translate('set_as_default') ?? "设为默认", style: TextStyle(fontSize: 14.sp, color: Color(0xFF333333))),
+                  ],
+                ),
               ),
             const Spacer(),
             _buildActionButton(AppLocalizations.of(context)?.translate('delete') ?? "删除", address['userAddressId']),
