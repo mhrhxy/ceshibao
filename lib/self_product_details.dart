@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'review.dart';
 import 'userreviews.dart';
 import 'package:video_player/video_player.dart';
+import './model/toast_model.dart';
 
 class SelfProductDetails extends StatefulWidget {
   final String id; // 商品ID
@@ -340,13 +341,10 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
   ]) async {
     // 校验关键参数
     if ((_productId == null || _productId!.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)?.translate('product_info_missing') ??
-                '商品信息缺失，无法加入购物车',
-          ),
-        ),
+      ToastUtil.showCustomToast(
+        context,
+        AppLocalizations.of(context)?.translate('product_info_missing') ??
+            '商品信息缺失，无法加入购物车',
       );
       return false;
     }
@@ -356,12 +354,9 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null || token.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.translate('please_login') ?? '请先登录',
-            ),
-          ),
+        ToastUtil.showCustomToast(
+          context,
+          AppLocalizations.of(context)?.translate('please_login') ?? '请先登录',
         );
         return false;
       }
@@ -473,12 +468,9 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
       }
     } catch (e) {
       print('添加到购物车失败: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${AppLocalizations.of(context)?.translate('operation_failed') ?? '操作失败：'}${e.toString().replaceAll('Exception: ', '')}',
-          ),
-        ),
+      ToastUtil.showCustomToast(
+        context,
+        '${AppLocalizations.of(context)?.translate('operation_failed') ?? '操作失败：'}${e.toString().replaceAll('Exception: ', '')}',
       );
       return false;
     }
@@ -952,15 +944,12 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                               _quantity,
                             );
                             if (addSuccess) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLocalizations.of(
-                                          context,
-                                        )?.translate('add_cart_success') ??
-                                        '加入购物车成功',
-                                  ),
-                                ),
+                              ToastUtil.showCustomToast(
+                                context,
+                                AppLocalizations.of(
+                                      context,
+                                    )?.translate('add_cart_success') ??
+                                    '加入购物车成功',
                               );
                               Navigator.pop(context);
                               // 跳转到购物车页面，并自动选择推荐商品
@@ -1054,15 +1043,12 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
   // 收藏商品
   void _toggleFavorite() async {
     if (_productId == null || _productId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(
-                  context,
-                )?.translate('product_info_missing_operate') ??
-                '商品信息缺失，操作失败',
-          ),
-        ),
+      ToastUtil.showCustomToast(
+        context,
+        AppLocalizations.of(
+              context,
+            )?.translate('product_info_missing_operate') ??
+            '商品信息缺失，操作失败',
       );
       return;
     }
@@ -1075,12 +1061,9 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
       final token = prefs.getString('token');
 
       if (token == null || token.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.translate('please_login') ?? '请先登录',
-            ),
-          ),
+        ToastUtil.showCustomToast(
+          context,
+          AppLocalizations.of(context)?.translate('please_login') ?? '请先登录',
         );
         setState(() => isFavorite = wasFavorite);
         return;
@@ -1107,13 +1090,10 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
         if (response.data['code'] != 200 && !response.data['success']) {
           throw Exception(response.data['msg'] ?? '收藏失败');
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.translate('collect_success') ??
-                  '收藏成功',
-            ),
-          ),
+        ToastUtil.showCustomToast(
+          context,
+          AppLocalizations.of(context)?.translate('collect_success') ??
+              '收藏成功',
         );
       } else {
         String cancelUrl = reamcollect.replaceAll(
@@ -1125,26 +1105,20 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
         if (response.data['code'] != 200 && !response.data['success']) {
           throw Exception(response.data['msg'] ?? '取消收藏失败');
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(
-                    context,
-                  )?.translate('cancel_collect_success') ??
-                  '取消收藏成功',
-            ),
-          ),
+        ToastUtil.showCustomToast(
+          context,
+          AppLocalizations.of(
+                context,
+              )?.translate('cancel_collect_success') ??
+              '取消收藏成功',
         );
       }
     } catch (e) {
       setState(() => isFavorite = wasFavorite);
       debug.log('收藏操作异常：$e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${AppLocalizations.of(context)?.translate('operation_failed') ?? '操作失败：'}${e.toString()}',
-          ),
-        ),
+      ToastUtil.showCustomToast(
+        context,
+        '${AppLocalizations.of(context)?.translate('operation_failed') ?? '操作失败：'}${e.toString()}',
       );
     }
   }
@@ -1557,19 +1531,14 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                   onTap: () {
                                     if (comment['memberId'] == null ||
                                         comment['memberId'] == 0) {
-                                      ScaffoldMessenger.of(
+                                      ToastUtil.showCustomToast(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            AppLocalizations.of(
-                                                  context,
-                                                )?.translate(
-                                                  'user_id_missing',
-                                                ) ??
-                                                "用户ID缺失，无法跳转",
-                                          ),
-                                        ),
+                                        AppLocalizations.of(
+                                              context,
+                                            )?.translate(
+                                              'user_id_missing',
+                                            ) ??
+                                            "用户ID缺失，无法跳转",
                                       );
                                       return;
                                     }
