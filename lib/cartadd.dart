@@ -161,7 +161,10 @@ class CollectItem {
 }
 
 class Cart extends StatefulWidget {
-  const Cart({super.key});
+  // 是否自动选择推荐商品
+  final bool autoSelectRecommended;
+  
+  const Cart({super.key, this.autoSelectRecommended = false});
 
   @override
   State<Cart> createState() => _CartState();
@@ -295,6 +298,13 @@ class _CartState extends State<Cart> {
         _errorMsg = AppLocalizations.of(context)?.translate('member_info_parse_failed') ?? "会员信息解析失败，请重新登录";
       });
       return;
+    }
+
+    // 检查是否需要自动选择推荐商品
+    if (widget.autoSelectRecommended) {
+      setState(() {
+        _selfSupport = 2; // 2表示推荐商品
+      });
     }
 
     _fetchCartList();

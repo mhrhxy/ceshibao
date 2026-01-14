@@ -905,10 +905,10 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                 ),
                               );
                               Navigator.pop(context);
-                              // 跳转到购物车页面
+                              // 跳转到购物车页面，并自动选择推荐商品
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => Cart()),
+                                MaterialPageRoute(builder: (context) => Cart(autoSelectRecommended: true)),
                               );
                               // 更新页面选中状态
                               setState(() {
