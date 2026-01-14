@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mall/cartadd.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_mall/app_localizations.dart';
@@ -488,6 +489,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
     Map<String, String> _localSelectedSpecs = {};
     Map<String, dynamic> _localSelectedSku = {};
     int _quantity = 1; // 默认数量为1
+    TextEditingController _quantityController = TextEditingController(text: '$_quantity'); // 数量输入框控制器
 
     showModalBottomSheet(
       context: context,
@@ -546,6 +548,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                     sheetSetState(() {
                       _localSelectedSku = sku;
                       _quantity = 1; // 选择不同规格时重置数量为默认值
+                      _quantityController.text = '1'; // 更新控制器文本
                     });
                     break;
                   }
@@ -677,7 +680,16 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                     GestureDetector(
                                       onTap: () {
                                         if (_quantity > 1) {
-                                          sheetSetState(() => _quantity--);
+                                          int maxQuantity = _localSelectedSku.isNotEmpty && _localSelectedSku['productSkuDetail'] != null 
+                                              ? (_localSelectedSku['productSkuDetail']['inventory'] ?? 1) 
+                                              : 1;
+                                          int newQuantity = _quantity - 1;
+                                          newQuantity = newQuantity < 1 ? 1 : newQuantity;
+                                          newQuantity = newQuantity > maxQuantity ? maxQuantity : newQuantity;
+                                          sheetSetState(() {
+                                            _quantity = newQuantity;
+                                            _quantityController.text = '$newQuantity';
+                                          });
                                         }
                                       },
                                       child: Container(
@@ -694,20 +706,48 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                         ),
                                       ),
                                     ),
-                                    // 数量显示
+                                    // 数量显示（可编辑）
                                     Container(
                                       width: 40.w,
                                       height: 24.h,
-                                      alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         border: Border(
                                           top: BorderSide(color: Colors.grey, width: 1.w),
                                           bottom: BorderSide(color: Colors.grey, width: 1.w),
                                         ),
                                       ),
-                                      child: Text(
-                                        '$_quantity',
+                                      child:  TextField(
+                                        controller: _quantityController,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding: EdgeInsets.zero,
+                                          border: InputBorder.none,
+                                          alignLabelWithHint: true,
+                                        ),
+                                        textAlign: TextAlign.center,
                                         style: TextStyle(fontSize: 12.sp),
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly,
+                                        ],
+                                        onChanged: (value) {
+                                          int maxQuantity = _localSelectedSku.isNotEmpty && _localSelectedSku['productSkuDetail'] != null 
+                                              ? (_localSelectedSku['productSkuDetail']['inventory'] ?? 1) 
+                                              : 1;
+                                          int newQuantity = int.tryParse(value) ?? 0;
+                                          newQuantity = newQuantity < 1 ? 1 : newQuantity;
+                                          newQuantity = newQuantity > maxQuantity ? maxQuantity : newQuantity;
+                                          if (newQuantity != _quantity) {
+                                            sheetSetState(() {
+                                              _quantity = newQuantity;
+                                              // 更新控制器文本，避免输入冲突
+                                              _quantityController.value = TextEditingValue(
+                                                text: '$newQuantity',
+                                                selection: TextSelection.fromPosition(TextPosition(offset: '$newQuantity'.length)),
+                                              );
+                                            });
+                                          }
+                                        },
                                       ),
                                     ),
                                     // 加号按钮
@@ -717,7 +757,13 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                             ? (_localSelectedSku['productSkuDetail']['inventory'] ?? 1) 
                                             : 1;
                                         if (_quantity < maxQuantity) {
-                                          sheetSetState(() => _quantity++);
+                                          int newQuantity = _quantity + 1;
+                                          newQuantity = newQuantity < 1 ? 1 : newQuantity;
+                                          newQuantity = newQuantity > maxQuantity ? maxQuantity : newQuantity;
+                                          sheetSetState(() {
+                                            _quantity = newQuantity;
+                                            _quantityController.text = '$newQuantity';
+                                          });
                                         }
                                       },
                                       child: Container(

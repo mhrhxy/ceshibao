@@ -7,6 +7,7 @@ import 'package:daum_postcode_view/daum_postcode_view.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'dart:developer' as developer;
 import 'package:flutter_mall/app_localizations.dart'; // 导入国际化工具类
+import 'model/toast_model.dart';
 
 class AddAddressPage extends StatefulWidget {
   final int? userAddressId; // 可选参数：有则为修改，无则为新增
@@ -285,7 +286,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
         await HttpUtil.put(uoputedlist, data: submitData);
       }
 
-      _showErrorSnackBar(
+      ToastUtil.showCustomToast(
+        context,
         widget.userAddressId == null
             ? (AppLocalizations.of(context)?.translate('add_address_success') ??
                 '新增地址成功')
@@ -523,7 +525,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
                                           ),
                                         ),
                                         style: TextStyle(fontSize: 14.sp),
-                                        readOnly: true,
+                                        readOnly: false,
                                       ),
                                     ),
                                     TextButton(

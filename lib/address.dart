@@ -6,6 +6,7 @@ import 'package:flutter_mall/config/service_url.dart';
 import 'addressupdate.dart';
 import 'app_localizations.dart';
 import 'utils/http_util.dart';
+import 'model/toast_model.dart';
 
 class AddressUpdatePage extends StatelessWidget {
   final int addressId;
@@ -175,7 +176,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
       );
 
       if (response.data['code'] == 200) {
-        _showErrorSnackBar(AppLocalizations.of(context)?.translate('set_as_default_address_success') ?? "已设为默认地址");
+        ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('set_as_default_address_success') ?? "已设为默认地址");
         // 重新获取地址列表，但保持页面其他部分不变
         await fetchAddressList();
       } else {
@@ -203,7 +204,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
       );
 
       if (response.data['code'] == 200) {
-        _showErrorSnackBar(AppLocalizations.of(context)?.translate('delete_success') ?? "删除成功");
+        ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('delete_success') ?? "删除成功");
         _currentPage = 1;
         _maxPage = 1; // 重置最大页数
         fetchAddressList();
@@ -225,7 +226,7 @@ class _AddressBookPageState extends State<AddressBookPage> {
 
   void _copyAddressToClipboard(String address) {
     Clipboard.setData(ClipboardData(text: address));
-    _showErrorSnackBar(AppLocalizations.of(context)?.translate('address_copied_to_clipboard') ?? "地址已复制到剪贴板");
+    ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('address_copied_to_clipboard') ?? "地址已复制到剪贴板");
   }
 
   @override
