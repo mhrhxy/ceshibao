@@ -2401,39 +2401,40 @@ class _MyorderState extends State<Myorder> {
                                                     ((order.orderState == '2' && order.payStatus == '3') ||
                                                      (order.orderState == '3') ||
                                                      (order.orderState == '4' || order.orderState == '5' || order.orderState == '6')))
-                                                  Column(
-                                                    children: [
-                                                      SizedBox(height: 4.h),
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          // 申请售后的逻辑
-                                                          // 当只有一个子订单时，传递子订单的ID
-                                                          _applyAfterSales(
-                                                            order.shopOrders[0],
-                                                          );
-                                                        },
-                                                        style: TextButton.styleFrom(
-                                                          padding:
-                                                              EdgeInsets.symmetric(
-                                                                horizontal: 8.w,
-                                                                vertical: 2.h,
-                                                              ),
-                                                        ),
-                                                        child: Text(
-                                                          AppLocalizations.of(
-                                                                context,
-                                                              )?.translate(
-                                                                'apply_after_sales',
-                                                              ) ??
-                                                              '申请售后',
-                                                          style: TextStyle(
-                                                            fontSize: 12.sp,
-                                                            color: Colors.blue,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                                                  // 隐藏申请售后按钮
+                                                  // Column(
+                                                  //   children: [
+                                                  //     SizedBox(height: 4.h),
+                                                  //     TextButton(
+                                                  //       onPressed: () {
+                                                  //         // 申请售后的逻辑
+                                                  //         // 当只有一个子订单时，传递子订单的ID
+                                                  //         _applyAfterSales(
+                                                  //           order.shopOrders[0],
+                                                  //         );
+                                                  //       },
+                                                  //       style: TextButton.styleFrom(
+                                                  //         padding:
+                                                  //             EdgeInsets.symmetric(
+                                                  //               horizontal: 8.w,
+                                                  //               vertical: 2.h,
+                                                  //             ),
+                                                  //       ),
+                                                  //       child: Text(
+                                                  //         AppLocalizations.of(
+                                                  //               context,
+                                                  //             )?.translate(
+                                                  //               'apply_after_sales',
+                                                  //             ) ??
+                                                  //             '申请售后',
+                                                  //         style: TextStyle(
+                                                  //           fontSize: 12.sp,
+                                                  //           color: Colors.blue,
+                                                  //         ),
+                                                  //       ),
+                                                  //     ),
+                                                  //   ],
+                                                  // ),
                                                 // 去评价按钮显示逻辑：orderState为9并且observeIs为1时显示
                                                 // 只有当子订单数量为1时，才在总订单处显示评价按钮
                                                 if (order.orderState == '9' &&
@@ -2867,42 +2868,42 @@ class _MyorderState extends State<Myorder> {
                                                                                 // orderStatus 4\5\6：所有退款类型
                                                                                 (shopOrder.orderState == '4' || shopOrder.orderState == '5' || shopOrder.orderState == '6')
                                                                               ))
-                                                                            Padding(
-                                                                              padding: const EdgeInsets.only(
-                                                                                top:
-                                                                                    5,
-                                                                              ), // 调整垂直间距
-                                                                              child: TextButton(
-                                                                                onPressed: () {
-                                                                                  // 申请售后的逻辑，传递当前子订单
-                                                                                  _applyAfterSales(
-                                                                                    shopOrder,
-                                                                                  );
-                                                                                },
-                                                                                style: TextButton.styleFrom(
-                                                                                  padding: const EdgeInsets.symmetric(
-                                                                                    horizontal:
-                                                                                        8,
-                                                                                    vertical:
-                                                                                        2,
-                                                                                  ),
-                                                                                ),
-                                                                                child: Text(
-                                                                                  AppLocalizations.of(
-                                                                                        context,
-                                                                                      )?.translate(
-                                                                                        'apply_after_sales',
-                                                                                      ) ??
-                                                                                      '申请售后',
-                                                                                  style: TextStyle(
-                                                                                    fontSize:
-                                                                                        12.sp,
-                                                                                    color:
-                                                                                        Colors.blue,
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                            ),
+                                                                            // 隐藏申请售后按钮
+                                                                            // Padding(
+                                                                            //   padding: const EdgeInsets.only(
+                                                                            //     top:
+                                                                            //         5,
+                                                                            //   ), // 调整垂直间距
+                                                                            //   child: TextButton(
+                                                                            //     onPressed: () {
+                                                                            //       // 申请售后的逻辑，传递当前子订单
+                                                                            //       _applyAfterSales(
+                                                                            //         shopOrder,
+                                                                            //       );
+                                                                            //     },
+                                                                            //     style: TextButton.styleFrom(
+                                                                            //       padding: const EdgeInsets.symmetric(
+                                                                            //         horizontal:
+                                                                            //             8,
+                                                                            //         vertical:
+                                                                            //             2,
+                                                                            //       ),
+                                                                            //     ),
+                                                                            //     child: Text(
+                                                                            //       AppLocalizations.of(
+                                                                            //             context,
+                                                                            //           )?.translate(
+                                                                            //             'apply_after_sales',
+                                                                            //           ) ??
+                                                                            //           '申请售后',
+                                                                            //       style: TextStyle(
+                                                                            //         fontSize:
+                                                                            //             12.sp,
+                                                                            //         color: Colors.blue,
+                                                                            //       ),
+                                                                            //     ),
+                                                                            //   ),
+                                                                            // ),
                                                                           // 取消退款按钮：当有多个子订单且退款状态为1时显示在价格下方
                                                                           if (shopOrder.refundStatus ==
                                                                                   1 &&
