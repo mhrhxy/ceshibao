@@ -581,6 +581,18 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                   _promotionPriceCNY! < displayPriceCNY) {
                 displayPromotionPriceCNY = _promotionPriceCNY;
               }
+              
+              // 转换为韩元并舍去个位数
+              double displayPriceKRW = displayPriceCNY * _exchangeRate;
+              double? displayPromotionPriceKRW = displayPromotionPriceCNY != null 
+                  ? displayPromotionPriceCNY * _exchangeRate 
+                  : null;
+              
+              // 舍去个位数
+              displayPriceKRW = ((displayPriceKRW / 10).floor() * 10);
+              if (displayPromotionPriceKRW != null) {
+                displayPromotionPriceKRW = ((displayPromotionPriceKRW / 10).floor() * 10);
+              }
 
               return Container(
                 height: MediaQuery.of(context).size.height * 0.8,
@@ -610,23 +622,23 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
-                                    displayPromotionPriceCNY != null &&
-                                            displayPromotionPriceCNY !=
-                                                displayPriceCNY
-                                        ? "¥${displayPromotionPriceCNY.toStringAsFixed(2)}"
-                                        : "¥${displayPriceCNY.toStringAsFixed(2)}",
+                                    displayPromotionPriceKRW != null &&
+                                            displayPromotionPriceKRW !=
+                                                displayPriceKRW
+                                        ? "KRW ${displayPromotionPriceKRW.toInt().toString()}"
+                                        : "KRW ${displayPriceKRW.toInt().toString()}",
                                     style:  TextStyle(
                                       color: Colors.black,
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  if (displayPromotionPriceCNY != null &&
-                                      displayPromotionPriceCNY !=
-                                          displayPriceCNY) ...[
+                                  if (displayPromotionPriceKRW != null &&
+                                      displayPromotionPriceKRW !=
+                                          displayPriceKRW) ...[
                                     SizedBox(width: 16.w),
                                     Text(
-                                      "¥${displayPriceCNY.toStringAsFixed(2)}",
+                                      "KRW ${displayPriceKRW.toInt().toString()}",
                                       style:  TextStyle(
                                         color: Colors.grey,
                                         fontSize: 16.sp,
@@ -1360,8 +1372,8 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
           Text(
             mainPromotionPriceKRW != null &&
                     mainPromotionPriceKRW != mainOriginalPriceKRW
-                ? "KRW ${((mainPromotionPriceKRW / 10).floor() * 10).toString()}"
-                : "KRW ${((mainOriginalPriceKRW / 10).floor() * 10).toString()}",
+                ? "KRW ${((mainPromotionPriceKRW / 10).floor() * 10).toInt().toString()}"
+                : "KRW ${((mainOriginalPriceKRW / 10).floor() * 10).toInt().toString()}",
             style: TextStyle(
               fontSize: 18.sp,
               color: Colors.black,
@@ -1372,7 +1384,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
               mainPromotionPriceKRW != mainOriginalPriceKRW) ...[
             SizedBox(height: 4.h),
             Text(
-              "KRW ${((mainOriginalPriceKRW / 10).floor() * 10).toString()}",
+              "KRW ${((mainOriginalPriceKRW / 10).floor() * 10).toInt().toString()}",
               style: TextStyle(
                 fontSize: 14.sp,
                 color: Colors.grey,
@@ -1388,6 +1400,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                 : "¥${mainOriginalPriceCNY.toStringAsFixed(2)}",
             style: TextStyle(fontSize: 14.sp, color: Colors.grey),
           ),
+
         ],
       ),
     );
