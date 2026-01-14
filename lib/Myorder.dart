@@ -728,7 +728,7 @@ class _MyorderState extends State<Myorder> {
                       color: specsText,
                       quantity: orderProductInfo['quantity'] ?? 1,
                       price: formatPrice(
-                        (item['estimateAmountKRW'] ?? 0),
+                        (item['estimateAmountKRW'] ?? item['totalPriceKRW']),
                         'KRW',
                       ), // 使用新字段priceKRW作为显示价格
                       imageUrl:
