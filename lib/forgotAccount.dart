@@ -228,7 +228,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
               readOnly: readOnly,
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 border: const OutlineInputBorder(),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 suffixIcon: suffixIcon,
@@ -385,7 +385,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
                         child: Container(
                           alignment: Alignment.center,
                           width: double.infinity,
-                          height: 50,
+                          height: 50.h,
                           decoration: BoxDecoration(
                             color: _isLoading ? Colors.grey[300] : const Color.fromARGB(255, 243, 215, 53),
                             borderRadius: BorderRadius.circular(25),
