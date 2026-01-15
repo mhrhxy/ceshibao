@@ -1293,11 +1293,11 @@ class _ProductDetailspayState extends State<ProductDetails> {
                   color: const Color(0xFFF5F5F5),
                   child: Row(
                     children: [
-                      Text(
-                        AppLocalizations.of(context)?.translate('taobao') ?? "淘宝网",
-                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
-                      ),
-                      Text(AppLocalizations.of(context)?.translate('view_on') ?? "上查看", style: const TextStyle(color: Colors.grey)),
+                      // Text(
+                      //   AppLocalizations.of(context)?.translate('taobao') ?? "淘宝网",
+                      //   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                      // ),
+                      // Text(AppLocalizations.of(context)?.translate('view_on') ?? "上查看", style: const TextStyle(color: Colors.grey)),
                       const Spacer(),
                       DropdownButton<String>(
                         value: currentLanguage,
