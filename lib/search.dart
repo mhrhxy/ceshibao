@@ -191,6 +191,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
     setState(() {
       _isImageSearch = false;
       _currentKeyword = searchKey;
+      _products = [];
     });
 
     final String currentLanguage = Localizations.localeOf(context).languageCode;
@@ -678,18 +679,18 @@ class _SearchResultPageState extends State<SearchResultPage> {
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Container(
-                          height: 40.h,
+                          height: 44.h,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(20.r),
+                            borderRadius: BorderRadius.circular(22.r),
                           ),
                           child: Row(
                             children: [
+                              SizedBox(width: 12.w),
                               Container(
                                 width: 24.w,
                                 height: 24.h,
-                                margin: EdgeInsets.only(left: 12.w),
                                 decoration: BoxDecoration(
                                   color: Colors.orange,
                                   borderRadius: BorderRadius.circular(6.r),
@@ -713,8 +714,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
                                     hintText: AppLocalizations.of(context)!.translate("input_search_hint"),
                                     border: InputBorder.none,
                                     isDense: true,
-                                    contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                                    contentPadding: EdgeInsets.zero,
                                   ),
+                                  style: TextStyle(fontSize: 14.sp),
                                   onSubmitted: (value) {
                                     if (value.trim().isNotEmpty) {
                                       _currentPage = 1;
@@ -723,13 +725,16 @@ class _SearchResultPageState extends State<SearchResultPage> {
                                   },
                                 ),
                               ),
-                              IconButton(
-                                icon: Icon(Icons.camera_alt, color: Colors.grey, size: 24.w),
-                                onPressed: _isImageSearchLoading ? null : _showImageSourceActionSheet,
+                              SizedBox(width: 8.w),
+                              GestureDetector(
+                                onTap: _isImageSearchLoading ? null : _showImageSourceActionSheet,
+                                child: Container(
+                                  padding: EdgeInsets.all(8.w),
+                                  child: Icon(Icons.camera_alt, color: Colors.grey, size: 24.w),
+                                ),
                               ),
-                              IconButton(
-                                icon: Icon(Icons.search, color: Colors.grey, size: 24.w),
-                                onPressed: _isSearchLoading
+                              GestureDetector(
+                                onTap: _isSearchLoading
                                     ? null
                                     : () {
                                         final keyword = _searchController.text;
@@ -738,7 +743,12 @@ class _SearchResultPageState extends State<SearchResultPage> {
                                           _fetchSearchData(keyword);
                                         }
                                       },
+                                child: Container(
+                                  padding: EdgeInsets.all(8.w),
+                                  child: Icon(Icons.search, color: Colors.grey, size: 24.w),
+                                ),
                               ),
+                              SizedBox(width: 8.w),
                             ],
                           ),
                         ),

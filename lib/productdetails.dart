@@ -1575,22 +1575,6 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
                                 ),
                                 SizedBox(height: 4.h),
-                                Row(
-                                  children: [
-                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
-                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
-                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
-                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
-                                    Icon(Icons.star, color: Colors.yellow, size: 16.r),
-                                    SizedBox(width: 4.w),
-                                    Text("5.0", style: TextStyle(fontSize: 14.sp)),
-                                    SizedBox(width: 8.w),
-                                    Text(
-                                      AppLocalizations.of(context)?.translate('1700_fans') ?? "1700粉丝",
-                                      style: TextStyle(fontSize: 14.sp, color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
                               ],
                             ),
                           ),
