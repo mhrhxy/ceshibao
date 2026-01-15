@@ -1298,18 +1298,6 @@ class _ProductDetailspayState extends State<ProductDetails> {
                         style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
                       ),
                       Text(AppLocalizations.of(context)?.translate('view_on') ?? "上查看", style: const TextStyle(color: Colors.grey)),
-                      SizedBox(width: 12.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)?.translate('seller_product_view') ?? "查看卖家·商品",
-                          style: TextStyle(color: Colors.white, fontSize: 12.sp),
-                        ),
-                      ),
                       const Spacer(),
                       DropdownButton<String>(
                         value: currentLanguage,
