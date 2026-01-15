@@ -531,136 +531,159 @@ class _CategoriesState extends State<Categories> {
                                 )
                               : Column(
                                   children: [
-                                    // 一级分类行
-                                    ..._catelogRows.map((row) {
-                                      return Row(
-                                        children: List.generate(4, (colIndex) {
-                                          if (colIndex >= row.length) {
-                                            return const Expanded(child: SizedBox());
-                                          }
-                                          return Expanded(
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: 6.w,
-                                                vertical: 4.h,
-                                              ),
-                                              child: _buildCatelogItem(row[colIndex]),
-                                            ),
-                                          );
-                                        }),
-                                      );
-                                    }).toList(),
-                                    
-                                    // 子分类列表
-                                    if (_selectedCatelogId != null)
-                                      Container(
-                                        width: double.infinity,
-                                        height: 180.h,
-                                        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 10.w),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border(
-                                            bottom: BorderSide(color: Colors.grey.shade200, width: 1.w),
+                                    // 构建分类行和子分类列表
+                                    ...() {
+                                      List<Widget> widgets = [];
+                                      
+                                      // 遍历所有一级分类行
+                                      for (int rowIndex = 0; rowIndex < _catelogRows.length; rowIndex++) {
+                                        final row = _catelogRows[rowIndex];
+                                        
+                                        // 添加一级分类行
+                                        widgets.add(
+                                          Row(
+                                            children: List.generate(4, (colIndex) {
+                                              if (colIndex >= row.length) {
+                                                return const Expanded(child: SizedBox());
+                                              }
+                                              return Expanded(
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 6.w,
+                                                    vertical: 4.h,
+                                                  ),
+                                                  child: _buildCatelogItem(row[colIndex]),
+                                                ),
+                                              );
+                                            }),
                                           ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black12,
-                                              spreadRadius: 1.w,
-                                              blurRadius: 3.w,
-                                              offset: Offset(0, 2.h),
-                                            ),
-                                          ],
-                                        ),
-                                        child: _isSubCatelogLoading
-                                            ? const Center(child: CircularProgressIndicator())
-                                            : _subCatelogError.isNotEmpty
-                                                ? Center(
-                                                    child: Column(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        Text(
-                                                          "${AppLocalizations.of(context)?.translate('sub_catelog_load_failed') ?? '子分类加载失败：'}$_subCatelogError",
-                                                          style: const TextStyle(color: Colors.red),
-                                                        ),
-                                                        TextButton(
-                                                          onPressed: _selectedCatelogId != null
-                                                              ? () => _fetchSubCatelogData(_selectedCatelogId!)
-                                                              : null,
-                                                          child: Text(
-                                                            AppLocalizations.of(context)?.translate('retry') ?? "重试",
-                                                            style: const TextStyle(color: Colors.orange),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )
-                                                : _subCatelogList.isEmpty
-                                                    ? Center(
-                                                        child: Text(
-                                                          AppLocalizations.of(context)?.translate('no_sub_catelog_data') ?? "暂无子分类数据",
-                                                          style:  TextStyle(color: Colors.grey),
-                                                        ),
-                                                      )
-                                                    : ListView.builder(
-                                                        scrollDirection: Axis.horizontal,
-                                                        physics: const ClampingScrollPhysics(),
-                                                        itemCount: _subCatelogList.length,
-                                                        itemBuilder: (context, secIndex) {
-                                                          final secondCatelog = _subCatelogList[secIndex];
-                                                          final String? languageCode = 
-                                                              Provider.of<LanguageProvider>(context, listen: false)
-                                                                      ?.currentLocale
-                                                                      ?.languageCode;
-                                                          
-                                                          return Container(
-                                                            width: 150.w,
-                                                            margin: EdgeInsets.symmetric(horizontal: 8.w),
-                                                            child: Column(
-                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                              children: [
-                                                                Text(
-                                                                  secondCatelog.getCatelogNameByLanguage(languageCode),
-                                                                  style: TextStyle(
-                                                                    fontSize: 16.sp,
-                                                                    fontWeight: FontWeight.bold,
-                                                                    color: Colors.black87,
-                                                                  ),
+                                        );
+                                        
+                                        // 检查该行是否包含选中的分类项
+                                        bool containsSelected = row.any((catelog) => catelog.catelogId == _selectedCatelogId);
+                                        
+                                        // 如果包含选中的分类项且有子分类，则在该行后面添加子分类列表
+                                        if (containsSelected && _selectedCatelogId != null) {
+                                          widgets.add(
+                                            Container(
+                                              width: double.infinity,
+                                              height: 180.h,
+                                              padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 10.w),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                border: Border(
+                                                  bottom: BorderSide(color: Colors.grey.shade200, width: 1.w),
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black12,
+                                                    spreadRadius: 1.w,
+                                                    blurRadius: 3.w,
+                                                    offset: Offset(0, 2.h),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: _isSubCatelogLoading
+                                                  ? const Center(child: CircularProgressIndicator())
+                                                  : _subCatelogError.isNotEmpty
+                                                      ? Center(
+                                                          child: Column(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children: [
+                                                              Text(
+                                                                "${AppLocalizations.of(context)?.translate('sub_catelog_load_failed') ?? '子分类加载失败：'}$_subCatelogError",
+                                                                style: const TextStyle(color: Colors.red),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: _selectedCatelogId != null
+                                                                    ? () => _fetchSubCatelogData(_selectedCatelogId!)
+                                                                    : null,
+                                                                child: Text(
+                                                                  AppLocalizations.of(context)?.translate('retry') ?? "重试",
+                                                                  style: const TextStyle(color: Colors.orange),
                                                                 ),
-                                                                SizedBox(height: 8.h),
-                                                                Expanded(
-                                                                  child: Wrap(
-                                                                    direction: Axis.vertical,
-                                                                    spacing: 6.h,
-                                                                    runSpacing: 6.h,
-                                                                    children: secondCatelog.children.map((thirdCatelog) {
-                                                                      return GestureDetector(
-                                                                        onTap: () {
-                                                                          Navigator.push(
-                                                                            context,
-                                                                            MaterialPageRoute(
-                                                                              builder: (context) => SearchResultPage(
-                                                                                keyword: thirdCatelog.getCatelogNameByLanguage(languageCode),
-                                                                              ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        )
+                                                      : _subCatelogList.isEmpty
+                                                          ? Center(
+                                                              child: Text(
+                                                                AppLocalizations.of(context)?.translate('no_sub_catelog_data') ?? "暂无子分类数据",
+                                                                style:  TextStyle(color: Colors.grey),
+                                                              ),
+                                                            )
+                                                          : ListView.builder(
+                                                              scrollDirection: Axis.horizontal,
+                                                              physics: const ClampingScrollPhysics(),
+                                                              itemCount: _subCatelogList.length,
+                                                              itemBuilder: (context, secIndex) {
+                                                                final secondCatelog = _subCatelogList[secIndex];
+                                                                final String? languageCode = 
+                                                                    Provider.of<LanguageProvider>(context, listen: false)
+                                                                            ?.currentLocale
+                                                                            ?.languageCode;
+                                                                
+                                                                return Container(
+                                                                  width: 150.w,
+                                                                  margin: EdgeInsets.symmetric(horizontal: 8.w),
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                      Text(
+                                                                        secondCatelog.getCatelogNameByLanguage(languageCode),
+                                                                        style: TextStyle(
+                                                                          fontSize: 16.sp,
+                                                                          fontWeight: FontWeight.bold,
+                                                                          color: Colors.black87,
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(height: 8.h),
+                                                                      Expanded(
+                                                                        child: ScrollConfiguration(
+                                                                          behavior: ScrollBehavior(),
+                                                                          child: SingleChildScrollView(
+                                                                            child: Wrap(
+                                                                              direction: Axis.vertical,
+                                                                              spacing: 6.h,
+                                                                              runSpacing: 6.h,
+                                                                              children: secondCatelog.children.map((thirdCatelog) {
+                                                                                return GestureDetector(
+                                                                                  onTap: () {
+                                                                                    Navigator.push(
+                                                                                      context,
+                                                                                      MaterialPageRoute(
+                                                                                        builder: (context) => SearchResultPage(
+                                                                                          keyword: thirdCatelog.getCatelogNameByLanguage(languageCode),
+                                                                                        ),
+                                                                                      ),
+                                                                                    );
+                                                                                  },
+                                                                                  child: Text(
+                                                                                    thirdCatelog.getCatelogNameByLanguage(languageCode),
+                                                                                    style: TextStyle(
+                                                                                      fontSize: 14.sp,
+                                                                                      color: Colors.black54,
+                                                                                    ),
+                                                                                  ),
+                                                                                );
+                                                                              }).toList(),
                                                                             ),
-                                                                          );
-                                                                        },
-                                                                        child: Text(
-                                                                          thirdCatelog.getCatelogNameByLanguage(languageCode),
-                                                                          style: TextStyle(
-                                                                            fontSize: 14.sp,
-                                                                            color: Colors.black54,
                                                                           ),
                                                                         ),
-                                                                      );
-                                                                    }).toList(),
+                                                                      ),
+                                                                    ],
                                                                   ),
-                                                                ),
-                                                              ],
+                                                                );
+                                                              },
                                                             ),
-                                                          );
-                                                        },
-                                                      ),
-                                      ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                      
+                                      return widgets;
+                                    }().toList(),
                                   ],
                                 ),
                     ),
