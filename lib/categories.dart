@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dingbudaohang.dart';
 import 'search.dart';
 import 'activity_page.dart';
@@ -109,6 +111,10 @@ class _CategoriesState extends State<Categories> {
   String _activityError = '';
   int _currentIndex = 0; // 当前显示的活动索引
   Timer? _timer; // 自动轮播定时器
+  
+  // 图片搜索相关变量
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isImageSearchLoading = false;
 
   // 分类按行分组（每行4个）
   List<List<CatelogData>> get _catelogRows {
@@ -158,6 +164,170 @@ class _CategoriesState extends State<Categories> {
   void _restartTimer() {
     _timer?.cancel();
     _startTimer();
+  }
+
+  // 显示图片选择源对话框
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // 相册选择
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: Text(AppLocalizations.of(context)?.translate('album') ?? "相册"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              // 相机拍摄
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: Text(AppLocalizations.of(context)?.translate('camera') ?? "相机"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              // 取消按钮
+              ListTile(
+                title: Text(
+                  AppLocalizations.of(context)?.translate('cancel') ?? "取消",
+                  textAlign: TextAlign.center,
+                ),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 选择图片
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+
+      if (pickedFile == null) {
+        return;
+      }
+
+      await _uploadImageToTaobao(pickedFile);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.translate('image_selection_failed') ?? "图片选择失败，请重试")
+        )
+      );
+    }
+  }
+
+  // 图片上传
+  Future<void> _uploadImageToTaobao(XFile imageFile) async {
+    setState(() => _isImageSearchLoading = true);
+    try {
+      // 读取图片字节数据
+      final List<int> imageBytes = await imageFile.readAsBytes();
+      print("图片读取成功，字节长度：${imageBytes.length}");
+
+      // Base64转换与接口调用
+      final String base64Image = base64Encode(imageBytes);
+      final Response response = await HttpUtil.dio.post(
+        taobaoimg,
+        data: {"imageBase64": base64Image},
+        options: Options(
+          contentType: "application/json",
+          sendTimeout: const Duration(seconds: 10),
+        ),
+      );
+
+      if (response.data["code"] == 200) {
+        final String imageId = response.data["msg"];
+        await _searchByImage(imageId);
+      } else {
+        throw Exception(
+          "${AppLocalizations.of(context)?.translate('image_upload_failed') ?? "图片上传失败"}：${response.data["msg"] ?? "未知错误"}"
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "${AppLocalizations.of(context)?.translate('image_upload_failed') ?? "图片上传失败"}：${e.toString().substring(0, 80)}...",
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isImageSearchLoading = false);
+    }
+  }
+
+  // 图片搜索接口
+  Future<void> _searchByImage(String imageId) async {
+    setState(() => _isImageSearchLoading = true);
+
+    try {
+      final String currentLanguage = 
+          Provider.of<LanguageProvider>(
+            context,
+            listen: false,
+          ).currentLocale?.languageCode ?? "ko";
+
+      final Map<String, dynamic> searchParams = {
+        "imageId": imageId,
+        "language": currentLanguage,
+      };
+
+      final Response response = await HttpUtil.dio.post(
+        searchByImage,
+        data: searchParams,
+      );
+
+      if (response.data['code'] == 200) {
+        // 图片搜索成功，跳转到搜索结果页面
+        final Map<String, dynamic> outerData = response.data['data'] ?? {};
+        final List<dynamic> productJsonList = outerData['data'] ?? [];
+        
+        // 跳转到搜索页面并显示结果
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SearchResultPage(
+              imageSearchResults: productJsonList.cast<Map<String, dynamic>>(),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)?.translate('image_search_failed') ?? "图片搜索失败"),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "${AppLocalizations.of(context)?.translate('image_search_failed') ?? "图片搜索失败"}：${e.toString().substring(0, 50)}...",
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isImageSearchLoading = false);
+    }
   }
 
   // 获取活动列表数据
@@ -500,7 +670,12 @@ class _CategoriesState extends State<Categories> {
                                 },
                               ),
                             ),
-                            Icon(Icons.camera_alt, color: Colors.grey, size: 20.r),
+                            GestureDetector(
+                              onTap: () {
+                                _showImageSourceDialog();
+                              },
+                              child: Icon(Icons.camera_alt, color: Colors.grey, size: 20.r),
+                            ),
                             SizedBox(width: 8.w),
                             IconButton(
                               icon: Icon(Icons.search, color: Colors.grey, size: 20.r),
