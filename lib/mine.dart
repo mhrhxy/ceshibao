@@ -43,7 +43,7 @@ class _MineState extends State<Mine> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _fetchUserPoints(); // 每次依赖变化时刷新数据
+    // 移除在依赖变化时自动刷新数据的逻辑，避免语言切换时调用接口
   }
 
 

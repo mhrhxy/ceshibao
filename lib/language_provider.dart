@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 class LanguageProvider extends ChangeNotifier {
-  Locale _currentLocale = const Locale('zh'); // 默认中文
+  Locale _currentLocale = const Locale('ko'); // 默认韩文
 
   Locale get currentLocale => _currentLocale;
 
