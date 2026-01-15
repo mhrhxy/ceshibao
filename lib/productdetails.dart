@@ -1371,8 +1371,9 @@ class _ProductDetailspayState extends State<ProductDetails> {
                 Container(
                   padding: EdgeInsets.all(16.w),
                   color: Colors.white,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
                         _mainPromotionPriceKRW != null && _mainPromotionPriceKRW != _mainOriginalPriceKRW
@@ -1385,7 +1386,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                         ),
                       ),
                       if (_mainPromotionPriceKRW != null && _mainPromotionPriceKRW != _mainOriginalPriceKRW) ...[
-                        SizedBox(height: 4.h),
+                        SizedBox(width: 8.w),
                         Text(
                           "KRW ${((_mainOriginalPriceKRW / 10).floor() * 10).toString()}",
                           style: TextStyle(
@@ -1395,7 +1396,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                           ),
                         ),
                       ],
-                      SizedBox(height: 4.h),
+                      SizedBox(width: 16.w),
                       Text(
                         _mainPromotionPriceCNY != null && _mainPromotionPriceCNY != _mainOriginalPriceCNY
                             ? "¥${_mainPromotionPriceCNY?.toStringAsFixed(2)}"
