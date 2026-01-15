@@ -79,9 +79,9 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
   }
   
   // 格式化剩余时间为HH:MM:SS
-  String _formatRemainingTime() {
+  String _formatRemainingTime(BuildContext context) {
     if (_remainingTime.inSeconds <= 0) {
-      return '00时00分00秒';
+      return '00${AppLocalizations.of(context)?.translate('hour') ?? '时'}00${AppLocalizations.of(context)?.translate('minute') ?? '分'}00${AppLocalizations.of(context)?.translate('second') ?? '秒'}';
     }
     
     int days = _remainingTime.inDays;
@@ -91,10 +91,10 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
     
     if (days > 0) {
       // 如果有天数，显示X天HH时MM分SS秒格式
-      return '${days}天${hours.toString().padLeft(2, '0')}时${minutes.toString().padLeft(2, '0')}分${seconds.toString().padLeft(2, '0')}秒';
+      return '${days}${AppLocalizations.of(context)?.translate('day') ?? '天'}${hours.toString().padLeft(2, '0')}${AppLocalizations.of(context)?.translate('hour') ?? '时'}${minutes.toString().padLeft(2, '0')}${AppLocalizations.of(context)?.translate('minute') ?? '分'}${seconds.toString().padLeft(2, '0')}${AppLocalizations.of(context)?.translate('second') ?? '秒'}';
     } else {
       // 如果没有天数，显示HH时MM分SS秒格式
-      return '${hours.toString().padLeft(2, '0')}时${minutes.toString().padLeft(2, '0')}分${seconds.toString().padLeft(2, '0')}秒';
+      return '${hours.toString().padLeft(2, '0')}${AppLocalizations.of(context)?.translate('hour') ?? '时'}${minutes.toString().padLeft(2, '0')}${AppLocalizations.of(context)?.translate('minute') ?? '分'}${seconds.toString().padLeft(2, '0')}${AppLocalizations.of(context)?.translate('second') ?? '秒'}';
     }
   }
   
@@ -176,7 +176,7 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            '${widget.coupon.returnAmount.toInt() / 10}折', // 转换为折扣显示，去除小数，例如90 → 9折
+                            '${widget.coupon.returnAmount.toInt() / 10}${AppLocalizations.of(context)?.translate('discount') ?? '折'}', // 转换为折扣显示，去除小数，例如90 → 9折
                             style: TextStyle(
                               fontSize: 24.sp,
                               fontWeight: FontWeight.bold,
@@ -204,21 +204,30 @@ class _CouponCardWidgetState extends State<_CouponCardWidget> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.coupon.name,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: textColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Builder(builder: (context) {
+                        String couponName;
+                        if (widget.coupon.type == 1) { // 满减券
+                          couponName = '${AppLocalizations.of(context)?.translate('min_amount_to_use') ?? '满'}${widget.coupon.amount.toInt()}${AppLocalizations.of(context)?.translate('reduction') ?? '减'}${widget.coupon.returnAmount.toInt()}${AppLocalizations.of(context)?.translate('yuan') ?? '元'}${AppLocalizations.of(context)?.translate('discount_coupon') ?? '优惠券'}';
+                        } else { // 折扣券
+                          double discount = widget.coupon.returnAmount / 10; // 转换为折扣，例如90 → 9折
+                          couponName = '${AppLocalizations.of(context)?.translate('min_amount_to_use') ?? '满'}${widget.coupon.amount.toInt()}${AppLocalizations.of(context)?.translate('discount_at') ?? '打'}${discount}${AppLocalizations.of(context)?.translate('discount') ?? '折'}${AppLocalizations.of(context)?.translate('discount_coupon') ?? '优惠券'}';
+                        }
+                        return Text(
+                          couponName,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: textColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      }),
                       SizedBox(height: 8.h),
                       // 仅在endTime不为空且剩余时间大于0时显示倒计时
                       if (_showCountdown && _remainingTime > Duration.zero)
                         Text(
-                          '${AppLocalizations.of(context)?.translate('only') ?? '仅剩'}${_formatRemainingTime()}',
+                          '${AppLocalizations.of(context)?.translate('only') ?? '仅剩'}${_formatRemainingTime(context)}',
                           style: TextStyle(
                             fontSize: 12.0.sp,
                             fontWeight: FontWeight.bold,

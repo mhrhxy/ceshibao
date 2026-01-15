@@ -175,8 +175,8 @@ class HttpUtil {
             barrierDismissible: false, // 点击外部不关闭
             builder: (BuildContext dialogContext) {
               return AlertDialog(
-                title: const Text('登录提示'),
-                content: const Text('未登录，请先登录'),
+                title: Text(AppLocalizations.of(dialogContext)?.translate('login_tip') ?? '登录提示'),
+                content: Text(AppLocalizations.of(dialogContext)?.translate('not_logged_in') ?? '未登录，请先登录'),
                 actions: [
                   TextButton(
                     onPressed: () {
