@@ -863,14 +863,19 @@ class _HomeState extends State<Home> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              secondCatelog.getCatelogNameByLanguage(
-                                languageCode,
-                              ),
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                            GestureDetector(
+                              onTap: () {
+                                _jumpToSearchResult(keyword: secondCatelog.getCatelogNameByLanguage(languageCode));
+                              },
+                              child: Text(
+                                secondCatelog.getCatelogNameByLanguage(
+                                  languageCode,
+                                ),
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                             SizedBox(height: 8.h),

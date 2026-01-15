@@ -630,12 +630,24 @@ class _CategoriesState extends State<Categories> {
                                                                   child: Column(
                                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                                     children: [
-                                                                      Text(
-                                                                        secondCatelog.getCatelogNameByLanguage(languageCode),
-                                                                        style: TextStyle(
-                                                                          fontSize: 16.sp,
-                                                                          fontWeight: FontWeight.bold,
-                                                                          color: Colors.black87,
+                                                                      GestureDetector(
+                                                                        onTap: () {
+                                                                          Navigator.push(
+                                                                            context,
+                                                                            MaterialPageRoute(
+                                                                              builder: (context) => SearchResultPage(
+                                                                                keyword: secondCatelog.getCatelogNameByLanguage(languageCode),
+                                                                              ),
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                        child: Text(
+                                                                          secondCatelog.getCatelogNameByLanguage(languageCode),
+                                                                          style: TextStyle(
+                                                                            fontSize: 16.sp,
+                                                                            fontWeight: FontWeight.bold,
+                                                                            color: Colors.black87,
+                                                                          ),
                                                                         ),
                                                                       ),
                                                                       SizedBox(height: 8.h),
