@@ -399,5 +399,7 @@
   "user_no_comments": "该用户暂无评论数据",
   "no_price": "暂无价格",
   "quantity_cannot_less_1": "数量不能小于1",
+  "out_of_stock": "商品已售罄",
+  "reached_max_quantity": "已达最大购买数量",
   "image_search_request_sent": "图片搜索请求已发送"
 }

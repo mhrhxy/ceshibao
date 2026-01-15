@@ -492,7 +492,24 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
   void _showBottomSheet({bool isBuyNow = false}) {
     Map<String, String> _localSelectedSpecs = {};
     Map<String, dynamic> _localSelectedSku = {};
-    int _quantity = 1; // 默认数量为1
+    // 根据库存初始化数量
+    int initialStock = 0;
+    if (_selectedSku.isNotEmpty) {
+      // 检查是直接在_selectedSku中还是在productSkuDetail子对象中
+      if (_selectedSku['productSkuDetail'] != null) {
+        initialStock = _selectedSku['productSkuDetail']['inventory'] ?? 0;
+      } else {
+        initialStock = _selectedSku['stock'] ?? _selectedSku['inventory'] ?? 0;
+      }
+    } else if (_productSkuDetailList.isNotEmpty) {
+      // 检查productSkuDetailList中的库存字段
+      if (_productSkuDetailList[0]['productSkuDetail'] != null) {
+        initialStock = _productSkuDetailList[0]['productSkuDetail']['inventory'] ?? 0;
+      } else {
+        initialStock = _productSkuDetailList[0]['stock'] ?? _productSkuDetailList[0]['inventory'] ?? 0;
+      }
+    }
+    int _quantity = initialStock > 0 ? 1 : 0; // 库存为0时默认数量为0
     TextEditingController _quantityController = TextEditingController(text: '$_quantity'); // 数量输入框控制器
 
     showModalBottomSheet(
@@ -694,6 +711,9 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                             _quantity = newQuantity;
                                             _quantityController.text = '$newQuantity';
                                           });
+                                        } else if (_quantity == 1) {
+                                          // 已经是1，再减就会小于1，给出提示
+                                          ToastUtil.showCustomToast(sheetContext, AppLocalizations.of(context)?.translate('quantity_cannot_less_1') ?? '数量不能小于1');
                                         }
                                       },
                                       child: Container(
@@ -758,9 +778,12 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                     GestureDetector(
                                       onTap: () {
                                         int maxQuantity = _localSelectedSku.isNotEmpty && _localSelectedSku['productSkuDetail'] != null 
-                                            ? (_localSelectedSku['productSkuDetail']['inventory'] ?? 1) 
-                                            : 1;
-                                        if (_quantity < maxQuantity) {
+                                            ? (_localSelectedSku['productSkuDetail']['inventory'] ?? 0) 
+                                            : 0;
+                                        if (maxQuantity == 0) {
+                                          // 库存为0时提示
+                                          ToastUtil.showCustomToast(sheetContext, AppLocalizations.of(context)?.translate('out_of_stock') ?? '商品已售罄');
+                                        } else if (_quantity < maxQuantity) {
                                           int newQuantity = _quantity + 1;
                                           newQuantity = newQuantity < 1 ? 1 : newQuantity;
                                           newQuantity = newQuantity > maxQuantity ? maxQuantity : newQuantity;
@@ -768,6 +791,9 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                                             _quantity = newQuantity;
                                             _quantityController.text = '$newQuantity';
                                           });
+                                        } else {
+                                          // 已达最大库存，给出提示
+                                          ToastUtil.showCustomToast(sheetContext, AppLocalizations.of(context)?.translate('reached_max_quantity') ?? '已达最大购买数量');
                                         }
                                       },
                                       child: Container(

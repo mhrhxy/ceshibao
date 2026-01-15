@@ -14,6 +14,7 @@ import 'dingbudaohang.dart';
 import 'language_provider.dart';
 import 'top_area_widget.dart';
 import 'search.dart';
+import './model/toast_model.dart';
 // 统一图片基础地址
 const String baseImageUrl = "http://192.168.0.120:8080";
 
@@ -525,11 +526,7 @@ class _HomeState extends State<Home> {
 
       await _uploadImageToTaobao(pickedFile);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)?.translate('image_selection_failed') ?? "图片选择失败，请重试")
-        )
-      );
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('image_selection_failed') ?? "图片选择失败，请重试");
     }
   }
 
@@ -561,14 +558,7 @@ class _HomeState extends State<Home> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "${AppLocalizations.of(context)?.translate('image_upload_failed') ?? "图片上传失败"}：${e.toString().substring(0, 80)}...",
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      ToastUtil.showCustomToast(context, "${AppLocalizations.of(context)?.translate('image_upload_failed') ?? "图片上传失败"}：${e.toString().substring(0, 80)}...");
     } finally {
       if (mounted) setState(() => _isImageSearchLoading = false);
     }
@@ -619,13 +609,7 @@ class _HomeState extends State<Home> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "${AppLocalizations.of(context)?.translate('image_search_failed') ?? "图片搜索失败"}：${e.toString().substring(0, 50)}..."
-          )
-        )
-      );
+      ToastUtil.showCustomToast(context, "${AppLocalizations.of(context)?.translate('image_search_failed') ?? "图片搜索失败"}：${e.toString().substring(0, 50)}...");
     } finally {
       if (mounted) setState(() => _isImageSearchLoading = false);
     }

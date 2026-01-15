@@ -398,5 +398,7 @@
   "get_user_comments_failed": "Failed to get user comments",
   "user_no_comments": "No comments yet",
   "no_price": "No price",
-  "quantity_cannot_less_1": "Qty ≥ 1"
+  "quantity_cannot_less_1": "Qty ≥ 1",
+  "out_of_stock": "Out of Stock",
+  "reached_max_quantity": "Reached Max Qty"
 }

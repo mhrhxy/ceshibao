@@ -5,11 +5,14 @@ import 'dingbudaohang.dart';
 import './config/service_url.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import './app_localizations.dart';
 import 'review.dart';
 import 'userreviews.dart';
 import 'cartadd.dart';
 import 'utils/http_util.dart';
+import 'model/toast_model.dart';
+import 'language_provider.dart';
 
 // 商品详情页
 class ProductComment {
@@ -136,6 +139,26 @@ class _ProductDetailspayState extends State<ProductDetails> {
     super.initState();
     _loadExchangeRate();
     _fetchProductDetail();
+    // 从LanguageProvider获取初始语言，但只影响首次加载
+    _setInitialLanguageFromGlobal();
+  }
+  
+  // 从全局语言设置获取初始语言
+  void _setInitialLanguageFromGlobal() {
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    switch (languageProvider.currentLocale.languageCode) {
+      case 'zh':
+        currentLanguage = "中文";
+        break;
+      case 'en':
+        currentLanguage = "English";
+        break;
+      case 'ko':
+        currentLanguage = "한국어";
+        break;
+      default:
+        currentLanguage = "中文";
+    }
   }
   
   // 加载汇率
@@ -223,12 +246,9 @@ class _ProductDetailspayState extends State<ProductDetails> {
 
   void _toggleFavorite() async {
     if (_productId == null || _productId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)?.translate('product_info_missing_operate') ?? '商品信息缺失，操作失败'
-          )
-        )
+      ToastUtil.showCustomToast(
+        context,
+        AppLocalizations.of(context)?.translate('product_info_missing_operate') ?? '商品信息缺失，操作失败'
       );
       return;
     }
@@ -289,12 +309,9 @@ class _ProductDetailspayState extends State<ProductDetails> {
         if (response.data['code'] != 200 && !response.data['success']) {
           throw Exception(response.data['msg'] ?? '收藏失败');
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.translate('collect_success') ?? '收藏成功'
-            )
-          )
+        ToastUtil.showCustomToast(
+          context,
+          AppLocalizations.of(context)?.translate('collect_success') ?? '收藏成功'
         );
       } else {
         String cancelUrl = reamcollect.replaceAll(RegExp(r'\{productId\}'), _productId!);
@@ -303,23 +320,16 @@ class _ProductDetailspayState extends State<ProductDetails> {
         if (response.data['code'] != 200 && !response.data['success']) {
           throw Exception(response.data['msg'] ?? '取消收藏失败');
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.translate('cancel_collect_success') ?? '取消收藏成功'
-            )
-          )
+        ToastUtil.showCustomToast(
+          context,
+          AppLocalizations.of(context)?.translate('cancel_collect_success') ?? '取消收藏成功'
         );
       }
     } catch (e) {
       setState(() => isFavorite = wasFavorite);
-      debugPrint('收藏操作异常：$e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${AppLocalizations.of(context)?.translate('operation_failed') ?? '操作失败：'}${e.toString()}'
-          )
-        )
+      ToastUtil.showCustomToast(
+        context,
+        '${AppLocalizations.of(context)?.translate('operation_failed') ?? '操作失败：'}${e.toString()}'
       );
     }
   }
@@ -686,12 +696,9 @@ class _ProductDetailspayState extends State<ProductDetails> {
   Future<bool> _addToCart(dynamic selectedSku, {int quantity = 1}) async {
     // 校验关键参数
     if ((_productId == null || _productId!.isEmpty) || (_mpId == null || _mpId!.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)?.translate('product_info_missing') ?? '商品信息缺失，无法加入购物车'
-          )
-        )
+      ToastUtil.showCustomToast(
+        context,
+        AppLocalizations.of(context)?.translate('product_info_missing') ?? '商品信息缺失，无法加入购物车'
       );
       return false;
     }
@@ -702,13 +709,10 @@ class _ProductDetailspayState extends State<ProductDetails> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (token == null || token.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)?.translate('please_login') ?? '请先登录'
-            )
-          )
-        );
+        ToastUtil.showCustomToast(
+        context,
+        AppLocalizations.of(context)?.translate('please_login') ?? '请先登录'
+      );
         return false;
       }
 
@@ -779,12 +783,9 @@ class _ProductDetailspayState extends State<ProductDetails> {
         throw Exception(response.data['msg'] ?? '加入购物车失败');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${AppLocalizations.of(context)?.translate('operation_failed') ?? '操作失败：'}${e.toString().replaceAll('Exception: ', '')}'
-          )
-        )
+      ToastUtil.showCustomToast(
+        context,
+        '${AppLocalizations.of(context)?.translate('operation_failed') ?? '操作失败：'}${e.toString().replaceAll('Exception: ', '')}'
       );
       return false;
     }
@@ -793,7 +794,15 @@ class _ProductDetailspayState extends State<ProductDetails> {
   void _showBottomSheet({bool isBuyNow = false}) {
     Map<String, String> _localSelectedSpecs = {};
     dynamic _localSelectedSku;
-    int _quantity = 1; // 默认数量为1
+    // 根据库存初始化数量
+    int initialStock = 0;
+    if (_specGroups.isNotEmpty) {
+      // 检查不同可能的库存字段名
+      initialStock = _selectedSku?['quantity'] ?? _selectedSku?['stock'] ?? _selectedSku?['inventory'] ?? 0;
+    } else if (_skuList.isNotEmpty) {
+      initialStock = _skuList.first['quantity'] ?? _skuList.first['stock'] ?? _skuList.first['inventory'] ?? 0;
+    }
+    int _quantity = initialStock > 0 ? 1 : 0; // 库存为0时默认数量为0
 
     showModalBottomSheet(
       context: context,
@@ -943,7 +952,11 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                   onTap: () {
                                     if (_quantity > 1) {
                                       sheetSetState(() => _quantity--);
+                                    } else if (_quantity == 1) {
+                                      // 已经是1，再减就会小于1，给出提示
+                                      ToastUtil.showCustomToast(sheetContext, AppLocalizations.of(context)?.translate('quantity_cannot_less_1') ?? '数量不能小于1');
                                     }
+                                    // 数量为0时不处理
                                   },
                                   child: Container(
                                     width: 24.w,
@@ -978,9 +991,17 @@ class _ProductDetailspayState extends State<ProductDetails> {
                                 // 加号按钮
                                 GestureDetector(
                                   onTap: () {
-                                    int maxQuantity = _localSelectedSku != null ? (_localSelectedSku['quantity'] ?? 1) : 1;
-                                    if (_quantity < maxQuantity) {
-                                      sheetSetState(() => _quantity++);
+                                    if (_localSelectedSku != null) {
+                                      int maxQuantity = _localSelectedSku['quantity'] ?? 0;
+                                      if (maxQuantity == 0) {
+                                        // 库存为0时提示
+                                        ToastUtil.showCustomToast(sheetContext, AppLocalizations.of(context)?.translate('out_of_stock') ?? '商品已售罄');
+                                      } else if (_quantity < maxQuantity) {
+                                        sheetSetState(() => _quantity++);
+                                      } else {
+                                        // 已达最大库存，给出提示
+                                        ToastUtil.showCustomToast(sheetContext, AppLocalizations.of(context)?.translate('reached_max_quantity') ?? '已达最大购买数量');
+                                      }
                                     }
                                   },
                                   child: Container(
