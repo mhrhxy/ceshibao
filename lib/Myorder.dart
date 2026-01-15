@@ -1930,7 +1930,7 @@ class _MyorderState extends State<Myorder> {
                     // 清空导航栈并返回底部导航页，显示我的页面
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainTab(initialIndex: 4)),
+                      MaterialPageRoute(builder: (context) => const MainTab(initialIndex: 3)),
                       (route) => false, // 移除所有之前的路由
                     );
                   },
@@ -2025,67 +2025,67 @@ class _MyorderState extends State<Myorder> {
           ),
 
           // 筛选标签
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-            color: Colors.white,
-            child: Row(
-              children: [
-                const Spacer(), // 使用Spacer将直购和推荐标签推到右侧
-                // 右侧的直购和推荐标签
-                Row(
-                  children: [
-                    // 直购标签 - 未选中状态，增加宽度
-                    Row(
-                      children: [
-                        Container(
-                          width: 50.w, // 增加宽度
-                          height: 20.h,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey, width: 1.w),
-                            borderRadius: BorderRadius.circular(2.r),
-                          ),
-                        ),
-                        SizedBox(width: 5.w),
-                        Text(
-                          AppLocalizations.of(
-                                context,
-                              )?.translate('direct_purchase') ??
-                              '直购',
-                          style: TextStyle(fontSize: 12.sp),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 15.w),
-                    // 推荐标签 - 选中状态，增加宽度
-                    Row(
-                      children: [
-                        Container(
-                          width: 50.w, // 增加宽度
-                          height: 20.h,
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 241, 113, 156),
-                            borderRadius: BorderRadius.circular(2.r),
-                          ),
-                        ),
-                        SizedBox(width: 5.w),
-                        Text(
-                          AppLocalizations.of(
-                                context,
-                              )?.translate('recommended') ??
-                              '推荐',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.pink,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          // Container(
+          //   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          //   color: Colors.white,
+          //   child: Row(
+          //     children: [
+          //       const Spacer(), // 使用Spacer将直购和推荐标签推到右侧
+          //       // 右侧的直购和推荐标签
+          //       Row(
+          //         children: [
+          //           // 直购标签 - 未选中状态，增加宽度
+          //           Row(
+          //             children: [
+          //               Container(
+          //                 width: 50.w, // 增加宽度
+          //                 height: 20.h,
+          //                 decoration: BoxDecoration(
+          //                   color: Colors.white,
+          //                   border: Border.all(color: Colors.grey, width: 1.w),
+          //                   borderRadius: BorderRadius.circular(2.r),
+          //                 ),
+          //               ),
+          //               SizedBox(width: 5.w),
+          //               Text(
+          //                 AppLocalizations.of(
+          //                       context,
+          //                     )?.translate('direct_purchase') ??
+          //                     '直购',
+          //                 style: TextStyle(fontSize: 12.sp),
+          //               ),
+          //             ],
+          //           ),
+          //           SizedBox(width: 15.w),
+          //           // 推荐标签 - 选中状态，增加宽度
+          //           Row(
+          //             children: [
+          //               Container(
+          //                 width: 50.w, // 增加宽度
+          //                 height: 20.h,
+          //                 decoration: BoxDecoration(
+          //                   color: const Color.fromARGB(255, 241, 113, 156),
+          //                   borderRadius: BorderRadius.circular(2.r),
+          //                 ),
+          //               ),
+          //               SizedBox(width: 5.w),
+          //               Text(
+          //                 AppLocalizations.of(
+          //                       context,
+          //                     )?.translate('recommended') ??
+          //                     '推荐',
+          //                 style: TextStyle(
+          //                   fontSize: 12.sp,
+          //                   color: Colors.pink,
+          //                 ),
+          //               ),
+          //             ],
+          //           ),
+          //         ],
+          //       ),
+          //     ],
+          //   ),
+          // ),
 
           // 订单列表
           Expanded(
@@ -2178,11 +2178,16 @@ class _MyorderState extends State<Myorder> {
                                                 children: [
                                                   // 平台订单编号
                                                   if (order.orderPlateformNo != null && order.orderPlateformNo.isNotEmpty)
-                                                    Text(
-                                                      ' no：${order.orderPlateformNo}',
-                                                      style: TextStyle(
-                                                        fontSize: 12.sp,
-                                                        color: Colors.grey[500],
+                                                    Container(
+                                                      width: double.infinity,
+                                                      child: Text(
+                                                        'no：${order.orderPlateformNo}',
+                                                        style: TextStyle(
+                                                          fontSize: 12.sp,
+                                                          color: Colors.grey[500],
+                                                        ),
+                                                        textAlign: TextAlign.left,
+                                                        softWrap: true,
                                                       ),
                                                     ),
                                                 ],
@@ -2773,16 +2778,16 @@ class _MyorderState extends State<Myorder> {
                                                                               'no：${shopOrder.orderPlateformNo}',
                                                                               style: TextStyle(
                                                                                 fontSize:
-                                                                                    12,
+                                                                                    12.sp,
                                                                                 color:
                                                                                     Colors.grey[500],
                                                                               ),
                                                                             ),
                                                                           Text(
                                                                             shopOrder.shopName,
-                                                                            style: const TextStyle(
+                                                                            style:  TextStyle(
                                                                               fontSize:
-                                                                                  16,
+                                                                                  16.sp,
                                                                               fontWeight:
                                                                                   FontWeight.w500,
                                                                             ),
@@ -2791,7 +2796,7 @@ class _MyorderState extends State<Myorder> {
                                                                             '共${shopOrder.num}件商品',
                                                                             style: TextStyle(
                                                                               fontSize:
-                                                                                  14,
+                                                                                  14.sp,
                                                                               color:
                                                                                   Colors.grey[600],
                                                                             ),
