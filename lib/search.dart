@@ -486,7 +486,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
                   Text(
                     product.name,
                     style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w500),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 3.h),
@@ -496,8 +496,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 价格信息
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
                             product.priceKRW,
@@ -505,6 +506,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          SizedBox(width: 4.w),
                           Text(
                             product.priceCNY,
                             style: TextStyle(fontSize: 9.sp, color: Colors.grey[600]),
