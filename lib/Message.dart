@@ -255,18 +255,21 @@ class _MessageState extends State<Message> {
                                             Divider(height: 1.h, color: Color.fromARGB(221, 231, 229, 229)),
                                             SizedBox(height: 8.h),
                                             // 公告内容预览 - 使用Html组件渲染HTML内容
-                                            Html(
-                                              data: item['noticeContent'] ?? '',
-                                              style: {
-                                                'body': Style(
-                                                  fontSize: FontSize(14.sp),
-                                                  color: Colors.grey[600],
-                                                  margin: Margins.zero,
-                                                  padding: HtmlPaddings.zero,
-                                                  maxLines: 2,
-                                                  textOverflow: TextOverflow.ellipsis,
-                                                ),
-                                              },
+                                            // 使用IgnorePointer确保Html组件不会捕获点击事件，让外层GestureDetector处理
+                                            IgnorePointer(
+                                              child: Html(
+                                                data: item['noticeContent'] ?? '',
+                                                style: {
+                                                  'body': Style(
+                                                    fontSize: FontSize(14.sp),
+                                                    color: Colors.grey[600],
+                                                    margin: Margins.zero,
+                                                    padding: HtmlPaddings.zero,
+                                                    maxLines: 2,
+                                                    textOverflow: TextOverflow.ellipsis,
+                                                  ),
+                                                },
+                                              ),
                                             ),
                                             SizedBox(height: 12.h),
                                             // 公告类型和时间
