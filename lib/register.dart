@@ -216,9 +216,11 @@ class _RegisterState extends State<Register> {
       );
       return;
     }
-    if (!RegExp(r'^1[3-9]\d{9}$').hasMatch(phoneNumber)) {
-      // 手机号正则校验（可选，根据需求调整）
-      ToastUtil.showCustomToast(context, "请输入正确的手机号");
+    // 支持中国和韩国手机号格式
+    if (!RegExp(r'^(1[3-9]\d{9}|01[016789]\d{8})$').hasMatch(phoneNumber)) {
+      // 中国手机号格式：1[3-9]xxxxxxxxx
+      // 韩国手机号格式：01x-xxxx-xxxx（省略短横线后为01[016789]xxxxxxxx）
+      ToastUtil.showCustomToast(context, "请输入正确的手机号格式");
       return;
     }
     if (birthday.isEmpty) {
