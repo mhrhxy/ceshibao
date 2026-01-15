@@ -6,6 +6,7 @@ import 'config/service_url.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'announcementxq.dart';
 import 'Myorder.dart';
+import 'main_tab.dart';
 import 'app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'model/toast_model.dart'; // 导入ToastUtil
@@ -118,7 +119,12 @@ class _MessageState extends State<Message> {
                   // 返回按钮
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      // 返回到首页
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MainTab(initialIndex: 0)),
+                        (route) => false, // 移除所有之前的路由
+                      );
                     },
                     child: Container(
                       padding: EdgeInsets.all(8.w),
@@ -132,7 +138,7 @@ class _MessageState extends State<Message> {
                   // 标题
                   SizedBox(width: 16.w),
                   Text(
-                    '通知',
+                    AppLocalizations.of(context)?.translate('notification') ?? '通知',
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w500,

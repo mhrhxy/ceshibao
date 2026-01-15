@@ -6,6 +6,7 @@ import 'dingbudaohang.dart';
 import 'accountlogin.dart';
 import 'paymentmethod.dart';
 import 'notice.dart';
+import 'main_tab.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -42,7 +43,14 @@ class SettingsPage extends StatelessWidget {
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_back, color: Colors.black87, size: 20.w),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    // 返回到首页
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainTab(initialIndex: 0)),
+                      (route) => false, // 移除所有之前的路由
+                    );
+                  },
                 ),
                 Expanded(
                   child: Align(
