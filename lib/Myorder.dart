@@ -2179,7 +2179,7 @@ class _MyorderState extends State<Myorder> {
                                                   // 平台订单编号
                                                   if (order.orderPlateformNo != null && order.orderPlateformNo.isNotEmpty)
                                                     Text(
-                                                      ' ${order.orderPlateformNo}',
+                                                      ' no：${order.orderPlateformNo}',
                                                       style: TextStyle(
                                                         fontSize: 12.sp,
                                                         color: Colors.grey[500],
@@ -2770,7 +2770,7 @@ class _MyorderState extends State<Myorder> {
                                                                           // 子订单平台订单编号
                                                                           if (shopOrder.orderPlateformNo != null && shopOrder.orderPlateformNo.isNotEmpty)
                                                                             Text(
-                                                                              shopOrder.orderPlateformNo,
+                                                                              'no：${shopOrder.orderPlateformNo}',
                                                                               style: TextStyle(
                                                                                 fontSize:
                                                                                     12,
