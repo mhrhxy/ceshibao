@@ -26,6 +26,7 @@ class SelfProductDetails extends StatefulWidget {
 
 class _SelfProductDetailsState extends State<SelfProductDetails> {
   dynamic _productDetailData;
+  Map<String, dynamic> _productAutom = {}; // 商品基本信息
   List<dynamic> _images = [];
   List<dynamic> _productSkuNameList = []; // 规格名称列表
   List<dynamic> _productSkuDetailList = []; // 规格详细信息列表
@@ -35,7 +36,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
   bool _isLoading = true;
   String _mpId = '';
   double _exchangeRate = 0;
-  String _currentLanguage = '中文';
+  String _currentLanguage = 'zh';
   String _currentPrice = '0.00';
   String _currentPricePlus = '0.00';
   bool _isPlus = false; // 是否会员商品
@@ -65,6 +66,16 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
     super.initState();
     _fetchExchangeRate();
     _fetchProductDetail();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 根据当前上下文获取语言代码
+    final locale = Localizations.localeOf(context);
+    setState(() {
+      _currentLanguage = locale.languageCode;
+    });
   }
 
   // 获取汇率
@@ -114,6 +125,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
         if (_productDetailData != null && _productDetailData['code'] == 200) {
           final data = _productDetailData['data'];
           final productAutom = data['productAutom'];
+          _productAutom = productAutom; // 保存商品基本信息
 
           // 处理商品图片
           if (productAutom['picture'] != null &&
@@ -419,7 +431,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
             targetSku.isNotEmpty
                 ? (targetSku['productSkuDetail']?['skuDetailId'])
                 : "0",
-        "productName": _productTitle,
+        "productName": _productAutom['productName'] ?? '',
         "shopId": 0, // 自营商品店铺ID可能为0
         "shopName": "自营店铺",
         "secName": specName, // 使用生成的规格名称字符串，如果为空则不传具体值
@@ -453,8 +465,8 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
               }).toList(),
         }),
         "wangwangTalkUrl": "",
-        "productNameCn": _productTitle,
-        "productNameEn": _productTitle,
+        "productNameCn": _productAutom['productNameCn'] ?? '',
+        "productNameEn": _productAutom['productNameEn'] ?? '',
         "selfSupport": 2, // 2表示自营商品
       };
 

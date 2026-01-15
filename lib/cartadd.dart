@@ -953,16 +953,25 @@ class _CartState extends State<Cart> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          item.productName,
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontSize: 14.sp,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Builder(builder: (context) {
+                          final String currentLanguage = Localizations.localeOf(context).languageCode;
+                          String displayName = item.productName;
+                          if (currentLanguage == 'zh') {
+                            displayName = item.productNameCn;
+                          } else if (currentLanguage == 'en') {
+                            displayName = item.productNameEn;
+                          }
+                          return Text(
+                            displayName,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14.sp,
+                              height: 1.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        }),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

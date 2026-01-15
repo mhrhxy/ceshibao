@@ -430,16 +430,25 @@ class _Favorite extends State<Favorite> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // 商品名称（中文）
-                    Text(
-                      item.productNameCn,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: Colors.black87,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    // 商品名称（根据当前语言显示）
+                    Builder(builder: (context) {
+                      final String currentLanguage = Localizations.localeOf(context).languageCode;
+                      String displayName = item.productName;
+                      if (currentLanguage == 'zh') {
+                        displayName = item.productNameCn;
+                      } else if (currentLanguage == 'en') {
+                        displayName = item.productNameEn;
+                      }
+                      return Text(
+                        displayName,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    }),
                     
                     // 商品价格
                     Column(
