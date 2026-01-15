@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'bottom_navigation_bar.dart';
-import 'loginto.dart';
 import 'cartadd.dart';
+import 'loginto.dart';
+import 'utils/shared_preferences_util.dart';
 class MainTab extends StatefulWidget {
   final int initialIndex; // 初始选中的页面索引
   
@@ -36,27 +37,35 @@ class _MainTabState extends State<MainTab> {
               mainAxisSize: MainAxisSize.min, // 最小化列高度
               children: [
                 // 加号按钮
-                _buildFloatingButton(
-                  color: Colors.white,
-                  icon: Icons.add,
-                  onPressed: () {
-                     Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Loginto()),
-                        );
-                  },
-                ),
-                const SizedBox(height: 12), // 按钮间距
+                // _buildFloatingButton(
+                //   color: Colors.white,
+                //   icon: Icons.add,
+                //   onPressed: () {
+                //      Navigator.push(
+                //           context,
+                //           MaterialPageRoute(builder: (context) => const Loginto()),
+                //         );
+                //   },
+                // ),
+                // const SizedBox(height: 12), // 按钮间距
 
                 // 购物车按钮（无红色消息提示）
                 _buildFloatingButton(
                   color: Colors.white,
                   icon: Icons.shopping_cart,
                   onPressed: () {
-                     Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Cart()),
-                    );
+                    final token = SharedPreferencesUtil.getString('token');
+                    if (token != null && token.isNotEmpty) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Cart()),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Loginto()),
+                      );
+                    }
                   },
                 ),
               ],

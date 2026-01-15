@@ -7,6 +7,7 @@ import 'package:flutter_mall/app_localizations.dart';
 import 'loginto.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'package:flutter_mall/utils/http_util.dart';
+import 'model/toast_model.dart';
 
 /// 注册页面（完整功能：邮箱验证码接口 + 表单验证 + 倒计时 + 国际化）
 class Register extends StatefulWidget {
@@ -84,14 +85,14 @@ class _RegisterState extends State<Register> {
     // 1. 输入校验（同登录页的账号密码校验逻辑）
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('input_email_tip'),
       );
       return;
     }
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('email_format_error'),
       );
@@ -114,10 +115,9 @@ class _RegisterState extends State<Register> {
             context,
           )!.translate('countdown_60s');
         });
-        _showToast(
+        ToastUtil.showCustomToast(
           context,
           AppLocalizations.of(context)!.translate('verify_code_sent'),
-          isSuccess: true,
         );
 
         // 原有倒计时逻辑（保留，不改动）
@@ -146,7 +146,7 @@ class _RegisterState extends State<Register> {
         });
       } else {
         // 失败：显示接口返回的错误信息（同登录页的"登录失败提示"逻辑）
-        _showToast(
+        ToastUtil.showCustomToast(
           context,
           result.data['msg'] ??
               AppLocalizations.of(context)!.translate('send_code_failed'),
@@ -158,7 +158,7 @@ class _RegisterState extends State<Register> {
           e is DioError
               ? AppLocalizations.of(context)!.translate('network_error')
               : AppLocalizations.of(context)!.translate('send_code_exception');
-      _showToast(context, errorMsg);
+      ToastUtil.showCustomToast(context, errorMsg);
     } finally {
       // 6. 隐藏加载状态（同登录页的"无论成败都关闭加载"逻辑）
       if (mounted) {
@@ -182,35 +182,35 @@ class _RegisterState extends State<Register> {
 
     // 2. 基础参数校验（避免无效请求，与登录页校验逻辑一致）
     if (username.isEmpty) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('input_username_hint'),
       );
       return;
     }
     if (email.isEmpty) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('input_email_tip'),
       );
       return;
     }
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('email_format_error'),
       );
       return;
     }
     if (code.isEmpty) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('input_verify_code_hint'),
       );
       return;
     }
     if (phoneNumber.isEmpty) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('input_phone_hint'),
       );
@@ -218,25 +218,25 @@ class _RegisterState extends State<Register> {
     }
     if (!RegExp(r'^1[3-9]\d{9}$').hasMatch(phoneNumber)) {
       // 手机号正则校验（可选，根据需求调整）
-      _showToast(context, "请输入正确的手机号");
+      ToastUtil.showCustomToast(context, "请输入正确的手机号");
       return;
     }
     if (birthday.isEmpty) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('select_birthday_hint'),
       );
       return;
     }
     if (password.isEmpty) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('input_password_tip'),
       );
       return;
     }
     if (passwordCheck.isEmpty) {
-      _showToast(
+      ToastUtil.showCustomToast(
         context,
         AppLocalizations.of(context)!.translate('input_confirm_password_tip'),
       );
@@ -244,7 +244,7 @@ class _RegisterState extends State<Register> {
     }
     if (password != passwordCheck) {
       // 密码与确认密码一致性校验
-      _showToast(context, "两次输入的密码不一致");
+      ToastUtil.showCustomToast(context, "两次输入的密码不一致");
       return;
     }
 
@@ -274,10 +274,9 @@ class _RegisterState extends State<Register> {
       // 6. 处理接口返回（与登录/验证码一致：判断code==200）
       if (result.data['code'] == 200) {
         // 注册成功：提示+跳转到登录页（清除注册页栈，避免返回）
-        _showToast(
+        ToastUtil.showCustomToast(
           context,
           result.data['msg'],
-          isSuccess: true, // 成功提示用绿色（需确保_showToast支持该参数）
         );
         // 延迟跳转（让用户看到成功提示）
         if (mounted) {
@@ -290,7 +289,7 @@ class _RegisterState extends State<Register> {
         }
       } else {
         // 注册失败：显示接口返回的错误信息
-        _showToast(
+        ToastUtil.showCustomToast(
           context,
           result.data['msg'] ??
               AppLocalizations.of(context)!.translate('register_failed'),
@@ -302,7 +301,7 @@ class _RegisterState extends State<Register> {
           e is DioError
               ? AppLocalizations.of(context)!.translate('network_error')
               : AppLocalizations.of(context)!.translate('register_exception');
-      _showToast(context, errorMsg);
+      ToastUtil.showCustomToast(context, errorMsg);
     } finally {
       // 8. 隐藏加载状态（无论成败都执行，与登录页一致）
       if (mounted) {
@@ -433,20 +432,7 @@ class _RegisterState extends State<Register> {
   }
 
   /// 显示提示弹窗（原有逻辑完全保留）
-  void _showToast(
-    BuildContext context,
-    String message, {
-    bool isSuccess = false,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isSuccess ? Colors.green : Colors.redAccent,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+  // 使用ToastUtil代替本地_showToast方法
 
   /// 通用输入行组件（原有UI完全保留）
   Widget _buildInputRow({

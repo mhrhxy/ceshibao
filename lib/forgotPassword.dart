@@ -6,6 +6,7 @@ import 'package:flutter_mall/app_localizations.dart';
 import 'package:flutter_mall/login.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'package:flutter_mall/utils/http_util.dart';
+import 'model/toast_model.dart';
 
 /// 忘记密码页面（带密码格式校验）
 class ForgotPassword extends StatefulWidget {
@@ -86,11 +87,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     // ... 原有逻辑保持不变 ...
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
       return;
     }
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      _showToast(context, AppLocalizations.of(context)!.translate('email_format_error')  );
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('email_format_error')  );
       return;
     }
 
@@ -102,7 +103,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       );
 
       if (result.data['code'] == 200) {
-        _showToast(context, result.data['msg'] ?? AppLocalizations.of(context)!.translate('verify_code_sent'), isSuccess: true);
+        ToastUtil.showCustomToast(context, result.data['msg'] ?? AppLocalizations.of(context)!.translate('verify_code_sent'));
         setState(() {
           _canGetVerifyCode = false;
           _verifyCodeText = AppLocalizations.of(context)!.translate('countdown_60s') ;
@@ -129,13 +130,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           }
         });
       } else {
-        _showToast(context, result.data['msg'] );
+        ToastUtil.showCustomToast(context, result.data['msg'] );
       }
     } catch (e) {
       String errorMsg = e is DioError
           ? AppLocalizations.of(context)!.translate('network_error')
           : AppLocalizations.of(context)!.translate('send_exception_retry');
-      _showToast(context, errorMsg);
+      ToastUtil.showCustomToast(context, errorMsg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -149,15 +150,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     final code = _verifyCodeController.text.trim();
 
     if (memberName.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_account_tip'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_account_tip'));
       return;
     }
     if (email.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
       return;
     }
     if (code.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_verify_code_tip') );
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_verify_code_tip') );
       return;
     }
 
@@ -180,13 +181,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           _verifyCodeController.clear();
         });
       } else {
-        _showToast(context, result.data['msg']);
+        ToastUtil.showCustomToast(context, result.data['msg']);
       }
     } catch (e) {
       String errorMsg = e is DioError
           ? AppLocalizations.of(context)!.translate('network_error_check')
           : AppLocalizations.of(context)!.translate('verify_exception_retry');
-      _showToast(context, errorMsg);
+      ToastUtil.showCustomToast(context, errorMsg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -200,27 +201,27 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
     // 1. 密码非空校验
     if (newPwd.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_password_tip') );
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_password_tip') );
       return;
     }
     // 2. 密码长度校验
     if (newPwd.length < 6) {
-      _showToast(context, AppLocalizations.of(context)!.translate('new_pwd_min_length'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('new_pwd_min_length'));
       return;
     }
     // 3. 新增：密码格式校验（小写、数字、特殊符号）
     if (!_passwordRegExp.hasMatch(newPwd)) {
-      _showToast(context, AppLocalizations.of(context)!.translate('pwd_format_error'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('pwd_format_error'));
       return;
     }
     // 4. 确认密码校验
     if (confirmPwd.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_confirm_password_tip') );
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_confirm_password_tip') );
       return;
     }
     // 5. 两次密码一致性校验
     if (newPwd != confirmPwd) {
-      _showToast(context, AppLocalizations.of(context)!.translate('pwd_not_match'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('pwd_not_match'));
       return;
     }
 
@@ -237,7 +238,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       );
 
       if (result.data['code'] == 200) {
-        _showToast(context, result.data['msg'] , isSuccess: true);
+        ToastUtil.showCustomToast(context, result.data['msg'] );
         if (mounted) {
           Future.delayed(const Duration(seconds: 1), () {
             Navigator.of(context).pushAndRemoveUntil(
@@ -247,29 +248,20 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           });
         }
       } else {
-        _showToast(context, result.data['msg']);
+        ToastUtil.showCustomToast(context, result.data['msg']);
       }
     } catch (e) {
       String errorMsg = e is DioError
           ? AppLocalizations.of(context)!.translate('network_error_check')
           : AppLocalizations.of(context)!.translate('reset_exception_retry');
-      _showToast(context, errorMsg);
+      ToastUtil.showCustomToast(context, errorMsg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   /// 提示弹窗（不变）
-  void _showToast(BuildContext context, String message, {bool isSuccess = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isSuccess ? Colors.green : Colors.redAccent,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+  // 使用ToastUtil代替本地_showToast方法
 
   /// 通用输入行组件 - 新增密码错误提示
   Widget _buildInputRow({

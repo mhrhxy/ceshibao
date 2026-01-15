@@ -17,6 +17,7 @@ import 'package:flutter_mall/language_provider.dart';
 import 'forgotPassword.dart';
 import 'forgotAccount.dart';
 import 'register.dart';
+import 'model/toast_model.dart';
 
 /// 登录页面（完整版：登录成功后获取并保存用户信息）
 class Login extends StatefulWidget {
@@ -90,7 +91,7 @@ class _LoginState extends State<Login> {
       } else {
         // 获取用户信息失败（不阻断登录流程，仅提示）
         if (mounted) {
-          _showToast(
+          ToastUtil.showCustomToast(
             context, 
             AppLocalizations.of(context)!.translate('get_user_info_failed')
           );
@@ -99,7 +100,7 @@ class _LoginState extends State<Login> {
     } catch (e) {
       // 异常处理（网络错误等，不阻断登录）
       if (mounted) {
-        _showToast(
+        ToastUtil.showCustomToast(
           context, 
           '${AppLocalizations.of(context)!.translate('network_error')}：${e.toString()}'
         );
@@ -114,11 +115,11 @@ class _LoginState extends State<Login> {
     final password = _passwordController.text.trim();
     
     if (account.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_account_tip'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_account_tip'));
       return;
     }
     if (password.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_password_tip'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_password_tip'));
       return;
     }
 
@@ -160,7 +161,7 @@ class _LoginState extends State<Login> {
       } else {
         // 登录失败：显示错误信息
         if (mounted) {
-          _showToast(
+          ToastUtil.showCustomToast(
             context, 
             loginModel.msg.isNotEmpty ? loginModel.msg : AppLocalizations.of(context)!.translate('login_failed')
           );
@@ -172,7 +173,7 @@ class _LoginState extends State<Login> {
         String errorMsg = e is DioError
             ? AppLocalizations.of(context)!.translate('network_error')
             : AppLocalizations.of(context)!.translate('login_exception');
-        _showToast(context, errorMsg);
+        ToastUtil.showCustomToast(context, errorMsg);
       }
     } finally {
       // 7. 隐藏加载状态
@@ -182,19 +183,7 @@ class _LoginState extends State<Login> {
     }
   }
 
-  /// 通用提示弹窗
-  void _showToast(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: message.contains(AppLocalizations.of(context)!.translate('verify_code_sent'))
-            ? Colors.green
-            : Colors.redAccent,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+  // 使用ToastUtil代替本地_showToast方法
 
   /// 通用输入行组件
   Widget _buildInputRow({

@@ -7,6 +7,7 @@ import 'package:flutter_mall/app_localizations.dart';
 import 'package:flutter_mall/loginto.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'package:flutter_mall/utils/http_util.dart';
+import 'model/toast_model.dart';
 
 /// 忘记账号页面（分两步：1.邮箱验证 2.显示账号+复制）
 class ForgotAccount extends StatefulWidget {
@@ -65,11 +66,11 @@ class _ForgotAccountState extends State<ForgotAccount> {
     final email = _emailController.text.trim();
     // 邮箱校验
     if (email.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
       return;
     }
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      _showToast(context, AppLocalizations.of(context)!.translate('email_format_error'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('email_format_error'));
       return;
     }
 
@@ -82,7 +83,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
       );
 
       if (result.data['code'] == 200) {
-        _showToast(context, result.data['msg'] ?? "验证码已发送", isSuccess: true);
+        ToastUtil.showCustomToast(context, result.data['msg'] ?? "验证码已发送");
         setState(() {
           _canGetVerifyCode = false;
           _verifyCodeText = AppLocalizations.of(context)!.translate('countdown_60s');
@@ -110,13 +111,13 @@ class _ForgotAccountState extends State<ForgotAccount> {
           }
         });
       } else {
-        _showToast(context, result.data['msg']);
+        ToastUtil.showCustomToast(context, result.data['msg']);
       }
     } catch (e) {
       String errorMsg = e is DioError
           ? AppLocalizations.of(context)!.translate('network_error') ?? "网络错误"
           : "发送异常，请重试";
-      _showToast(context, errorMsg);
+      ToastUtil.showCustomToast(context, errorMsg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -128,11 +129,11 @@ class _ForgotAccountState extends State<ForgotAccount> {
     final code = _verifyCodeController.text.trim();
     // 表单校验
     if (email.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_email_tip'));
       return;
     }
     if (code.isEmpty) {
-      _showToast(context, AppLocalizations.of(context)!.translate('input_verify_code_tip'));
+      ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('input_verify_code_tip'));
       return;
     }
 
@@ -156,13 +157,13 @@ class _ForgotAccountState extends State<ForgotAccount> {
           _verifyCodeController.clear(); // 清空验证码
         });
       } else {
-        _showToast(context, result.data['msg']);
+        ToastUtil.showCustomToast(context, result.data['msg']);
       }
     } catch (e) {
       String errorMsg = e is DioError
           ? "网络错误，请检查网络"
           : "验证异常，请重试";
-      _showToast(context, errorMsg);
+      ToastUtil.showCustomToast(context, errorMsg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -179,7 +180,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
     Timer(const Duration(seconds: 2), () {
       if (mounted) setState(() => _isCopied = false);
     });
-    _showToast(context, AppLocalizations.of(context)!.translate('copy_success') ?? "复制成功", isSuccess: true);
+    ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('copy_success') ?? "复制成功");
   }
 
   /// 7. 核心逻辑4：第二步「确认」- 返回登录页
@@ -191,16 +192,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
   }
 
   /// 8. 通用提示弹窗（复用忘记密码页）
-  void _showToast(BuildContext context, String message, {bool isSuccess = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isSuccess ? Colors.green : Colors.redAccent,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+  // 使用ToastUtil代替本地_showToast方法
 
   /// 9. 通用输入行组件（复用忘记密码页）
   Widget _buildInputRow({

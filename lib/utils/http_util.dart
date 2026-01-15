@@ -176,7 +176,7 @@ class HttpUtil {
             builder: (BuildContext dialogContext) {
               return AlertDialog(
                 title: const Text('登录提示'),
-                content: const Text('登录已过期，请重新登录'),
+                content: const Text('未登录，请先登录'),
                 actions: [
                   TextButton(
                     onPressed: () {
