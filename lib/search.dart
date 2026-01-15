@@ -191,7 +191,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
     setState(() {
       _isImageSearch = false;
       _currentKeyword = searchKey;
-      _products = [];
+      if (!_isLoadingMore && !_isRefreshing) {
+        _products = [];
+      }
     });
 
     final String currentLanguage = Localizations.localeOf(context).languageCode;
@@ -484,14 +486,14 @@ class _SearchResultPageState extends State<SearchResultPage> {
                   Text(
                     product.name,
                     style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w500),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 3.h),
                   
-                  // 价格和店铺信息水平布局
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // 价格信息垂直布局
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 价格信息
                       Column(
@@ -511,17 +513,13 @@ class _SearchResultPageState extends State<SearchResultPage> {
                           ),
                         ],
                       ),
-                      
+                      SizedBox(height: 3.h),
                       // 店铺名称
-                      SizedBox(
-                        width: 70.w,
-                        child: Text(
-                          product.seller,
-                          style: TextStyle(fontSize: 10.sp, color: Colors.black87, fontWeight: FontWeight.w500),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.right,
-                        ),
+                      Text(
+                        product.seller,
+                        style: TextStyle(fontSize: 10.sp, color: Colors.black87, fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
