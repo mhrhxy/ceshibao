@@ -619,6 +619,37 @@ class _MyorderState extends State<Myorder> {
 
   // 加载订单项详情
   Future<void> loadOrderProducts(String orderId) async {
+    // 设置加载状态为true
+    setState(() {
+      for (var order in orderList) {
+        for (var shopOrder in order.shopOrders) {
+          if (shopOrder.id == orderId) {
+            ShopOrderData updatedShopOrder = ShopOrderData(
+              id: shopOrder.id,
+              shopName: shopOrder.shopName,
+              orderItems: shopOrder.orderItems,
+              isExpanded: shopOrder.isExpanded,
+              orderOriginNo: shopOrder.orderOriginNo,
+              orderPlateformNo: shopOrder.orderPlateformNo,
+              picture: shopOrder.picture,
+              productAllPrice: shopOrder.productAllPrice,
+              num: shopOrder.num,
+              observeIs: shopOrder.observeIs,
+              orderState: shopOrder.orderState,
+              payStatus: shopOrder.payStatus,
+              refundStatus: shopOrder.refundStatus,
+              remainingNum: shopOrder.remainingNum,
+              refundId: shopOrder.refundId,
+              isLoadingProducts: true,
+            );
+            int index = order.shopOrders.indexOf(shopOrder);
+            order.shopOrders[index] = updatedShopOrder;
+          }
+        }
+      }
+      orderList = List.from(orderList);
+    });
+
     try {
       // 修复URL格式，确保没有重复的问号
       String apiUrl = searchOrderProductListUrl.replaceAll('?', '');
@@ -821,6 +852,37 @@ class _MyorderState extends State<Myorder> {
       print(
         '${AppLocalizations.of(context)?.translate('load_order_items_failed') ?? '加载订单商品失败'}: $e',
       );
+    } finally {
+      // 设置加载状态为false
+      setState(() {
+        for (var order in orderList) {
+          for (var shopOrder in order.shopOrders) {
+            if (shopOrder.id == orderId) {
+              ShopOrderData updatedShopOrder = ShopOrderData(
+                id: shopOrder.id,
+                shopName: shopOrder.shopName,
+                orderItems: shopOrder.orderItems,
+                isExpanded: shopOrder.isExpanded,
+                orderOriginNo: shopOrder.orderOriginNo,
+                orderPlateformNo: shopOrder.orderPlateformNo,
+                picture: shopOrder.picture,
+                productAllPrice: shopOrder.productAllPrice,
+                num: shopOrder.num,
+                observeIs: shopOrder.observeIs,
+                orderState: shopOrder.orderState,
+                payStatus: shopOrder.payStatus,
+                refundStatus: shopOrder.refundStatus,
+                remainingNum: shopOrder.remainingNum,
+                refundId: shopOrder.refundId,
+                isLoadingProducts: false,
+              );
+              int index = order.shopOrders.indexOf(shopOrder);
+              order.shopOrders[index] = updatedShopOrder;
+            }
+          }
+        }
+        orderList = List.from(orderList);
+      });
     }
   }
 
@@ -2988,133 +3050,143 @@ class _MyorderState extends State<Myorder> {
                                                                 1 ||
                                                             shopOrder
                                                                 .isExpanded)
-                                                          Column(
-                                                            children:
-                                                                shopOrder
-                                                                    .orderItems
-                                                                    .map(
-                                                                      (
-                                                                        item,
-                                                                      ) => Container(
-                                                                        margin:  EdgeInsets.only(
-                                                                          bottom:
-                                                                              12.sp,
-                                                                        ),
-                                                                        padding:
-                                                                             EdgeInsets.all(
-                                                                              12.sp,
-                                                                            ),
-                                                                        decoration: BoxDecoration(
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(
-                                                                                8,
+                                                          // 显示加载动画或商品列表
+                                                          shopOrder.isLoadingProducts
+                                                              ? Container(
+                                                                  padding: EdgeInsets.all(20.h),
+                                                                  child: Center(
+                                                                    child: CircularProgressIndicator(
+                                                                      color: Colors.red,
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              : Column(
+                                                                  children:
+                                                                      shopOrder
+                                                                          .orderItems
+                                                                          .map(
+                                                                            (
+                                                                              item,
+                                                                            ) => Container(
+                                                                              margin:  EdgeInsets.only(
+                                                                                bottom:
+                                                                                    12.sp,
                                                                               ),
-                                                                          border: Border.all(
-                                                                            color:
-                                                                                Colors.grey[100]!,
-                                                                          ),
-                                                                        ),
-                                                                        child: Row(
-                                                                          children: [
-                                                                            // 商品图片
-                                                                            Image.network(
-                                                                              item.imageUrl,
-                                                                              width:
-                                                                                  60.w,
-                                                                              height:
-                                                                                  60.h,
-                                                                              fit:
-                                                                                  BoxFit.cover,
-                                                                              errorBuilder:
-                                                                                  (
-                                                                                    _,
-                                                                                    __,
-                                                                                    ___,
-                                                                                  ) => Container(
+                                                                              padding:
+                                                                                   EdgeInsets.all(
+                                                                                    12.sp,
+                                                                                  ),
+                                                                              decoration: BoxDecoration(
+                                                                                borderRadius:
+                                                                                    BorderRadius.circular(
+                                                                                      8,
+                                                                                    ),
+                                                                                border: Border.all(
+                                                                                  color:
+                                                                                      Colors.grey[100]!,
+                                                                                ),
+                                                                              ),
+                                                                              child: Row(
+                                                                                children: [
+                                                                                  // 商品图片
+                                                                                  Image.network(
+                                                                                    item.imageUrl,
                                                                                     width:
                                                                                         60.w,
                                                                                     height:
                                                                                         60.h,
-                                                                                    color:
-                                                                                        Colors.grey[200],
-                                                                                    child: const Icon(
-                                                                                      Icons.image_not_supported,
-                                                                                      color:
-                                                                                          Colors.grey,
-                                                                                    ),
-                                                                                  ),
-                                                                            ),
-                                                                             SizedBox(
-                                                                              width:
-                                                                                  12.w,
-                                                                            ),
-                                                                            // 商品信息
-                                                                            Expanded(
-                                                                              child: Column(
-                                                                                crossAxisAlignment:
-                                                                                    CrossAxisAlignment.start,
-                                                                                mainAxisAlignment:
-                                                                                    MainAxisAlignment.spaceBetween,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    item.name,
-                                                                                    style:  TextStyle(
-                                                                                      fontSize:
-                                                                                          16.sp,
-                                                                                      color:
-                                                                                          Colors.black87,
-                                                                                    ),
-                                                                                    maxLines:
-                                                                                        1,
-                                                                                    overflow:
-                                                                                        TextOverflow.ellipsis,
-                                                                                  ),
-                                                                                  Text(
-                                                                                    item.color.isNotEmpty
-                                                                                        ? item.color
-                                                                                        : '',
-                                                                                    style: TextStyle(
-                                                                                      fontSize:
-                                                                                          14.sp,
-                                                                                      color:
-                                                                                          Colors.grey[600],
-                                                                                    ),
-                                                                                  ),
-                                                                                  Row(
-                                                                                    mainAxisAlignment:
-                                                                                        MainAxisAlignment.spaceBetween,
-                                                                                    children: [
-                                                                                      Text(
-                                                                                        item.price,
-                                                                                        style:  TextStyle(
-                                                                                          fontSize:
-                                                                                              18.sp,
+                                                                                    fit:
+                                                                                        BoxFit.cover,
+                                                                                    errorBuilder:
+                                                                                        (
+                                                                                          _,
+                                                                                          __,
+                                                                                          ___,
+                                                                                        ) => Container(
+                                                                                          width:
+                                                                                              60.w,
+                                                                                          height:
+                                                                                              60.h,
                                                                                           color:
-                                                                                              Colors.red,
-                                                                                          fontWeight:
-                                                                                              FontWeight.w500,
+                                                                                              Colors.grey[200],
+                                                                                          child: const Icon(
+                                                                                            Icons.image_not_supported,
+                                                                                            color:
+                                                                                                Colors.grey,
+                                                                                          ),
                                                                                         ),
-                                                                                      ),
-                                                                                      Text(
-                                                                                        'x${item.quantity}',
-                                                                                        style: TextStyle(
-                                                                                          fontSize:
-                                                                                              15.sp,
-                                                                                          color:
-                                                                                              Colors.grey[600],
+                                                                                  ),
+                                                                                   SizedBox(
+                                                                                    width:
+                                                                                        12.w,
+                                                                                  ),
+                                                                                  // 商品信息
+                                                                                  Expanded(
+                                                                                    child: Column(
+                                                                                      crossAxisAlignment:
+                                                                                          CrossAxisAlignment.start,
+                                                                                      mainAxisAlignment:
+                                                                                          MainAxisAlignment.spaceBetween,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          item.name,
+                                                                                          style:  TextStyle(
+                                                                                            fontSize:
+                                                                                                16.sp,
+                                                                                            color:
+                                                                                                Colors.black87,
+                                                                                          ),
+                                                                                          maxLines:
+                                                                                              1,
+                                                                                          overflow:
+                                                                                              TextOverflow.ellipsis,
                                                                                         ),
-                                                                                      ),
-                                                                                    ],
+                                                                                        Text(
+                                                                                          item.color.isNotEmpty
+                                                                                              ? item.color
+                                                                                              : '',
+                                                                                          style: TextStyle(
+                                                                                            fontSize:
+                                                                                                14.sp,
+                                                                                            color:
+                                                                                                Colors.grey[600],
+                                                                                          ),
+                                                                                        ),
+                                                                                        Row(
+                                                                                          mainAxisAlignment:
+                                                                                              MainAxisAlignment.spaceBetween,
+                                                                                          children: [
+                                                                                            Text(
+                                                                                              item.price,
+                                                                                              style:  TextStyle(
+                                                                                                fontSize:
+                                                                                                    18.sp,
+                                                                                                color:
+                                                                                                    Colors.red,
+                                                                                                fontWeight:
+                                                                                                    FontWeight.w500,
+                                                                                              ),
+                                                                                            ),
+                                                                                            Text(
+                                                                                              'x${item.quantity}',
+                                                                                              style: TextStyle(
+                                                                                                fontSize:
+                                                                                                    15.sp,
+                                                                                                color:
+                                                                                                    Colors.grey[600],
+                                                                                              ),
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
                                                                                   ),
                                                                                 ],
                                                                               ),
                                                                             ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    )
-                                                                    .toList(),
-                                                          ),
+                                                                          )
+                                                                          .toList(),
+                                                                ),
                                                       ],
                                                     ),
                                                   )
@@ -3343,6 +3415,7 @@ class ShopOrderData {
   int refundStatus; // 退款状态 1. 申请退款 2. 淘宝退款 -1. 退款失败 3. 淘宝退款完成 4. 退款完成
   int remainingNum; // 剩余可退数量
   String? refundId; // 退款ID
+  bool isLoadingProducts; // 商品加载状态
 
   ShopOrderData({
     required this.id,
@@ -3358,6 +3431,7 @@ class ShopOrderData {
     this.orderState = '', // 默认订单状态为空
     this.payStatus = '', // 默认支付状态为空
     this.refundStatus = 0, // 默认退款状态为0
+    this.isLoadingProducts = false,
     this.remainingNum = 0, // 默认剩余可退数量为0
     this.refundId,
   });
