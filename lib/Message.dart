@@ -8,6 +8,7 @@ import 'announcementxq.dart';
 import 'Myorder.dart';
 import 'app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'model/toast_model.dart'; // 导入ToastUtil
 
 /// 消息页面
 
@@ -415,25 +416,16 @@ class _MessageState extends State<Message> {
                                                         final response = await HttpUtil.post(url);
                                                         
                                                         if (response.data['code'] == 200) {
-                                                          // 领取成功，刷新活动列表
+                                                          // 领取成功，显示提示并刷新活动列表
+                                                          ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('claim_success') ?? '领取成功');
                                                           _loadDataByType(2);
                                                         } else {
                                                           // 领取失败，显示提示
-                                                          ScaffoldMessenger.of(context).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(response.data['msg'] ?? AppLocalizations.of(context)?.translate('claim_failed') ?? '领取失败'),
-                                                              backgroundColor: Colors.red,
-                                                            ),
-                                                          );
+                                                          ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('claim_failed') ?? '领取失败');
                                                         }
                                                       } catch (e) {
                                                         // 网络请求失败，显示提示
-                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                          SnackBar(
-                                                            content: Text(AppLocalizations.of(context)?.translate('claim_failed_try_again') ?? '领取失败，请稍后重试'),
-                                                            backgroundColor: Colors.red,
-                                                          ),
-                                                        );
+                                                        ToastUtil.showCustomToast(context, AppLocalizations.of(context)?.translate('claim_failed_try_again') ?? '领取失败，请稍后重试');
                                                       }
                                                     },
                                                     style: ElevatedButton.styleFrom(
