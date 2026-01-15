@@ -274,21 +274,18 @@ class _ForgotAccountState extends State<ForgotAccount> {
           ),
         ),
         SizedBox(width: 10.w),
-        Expanded(
-          flex: 1,
-          child: SizedBox(
-            height: 30.h,
-            child: ElevatedButton(
-              onPressed: _canGetVerifyCode && !_isLoading ? _sendVerifyCode : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _canGetVerifyCode ? const Color.fromARGB(255, 116, 115, 115) : const Color.fromARGB(255, 138, 138, 138),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
-                padding: EdgeInsets.zero,
-              ),
-              child: Text(
-                _verifyCodeText,
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontSize: 12.sp),
-              ),
+        SizedBox(
+          height: 30.h,
+          child: ElevatedButton(
+            onPressed: _canGetVerifyCode && !_isLoading ? _sendVerifyCode : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _canGetVerifyCode ? const Color.fromARGB(255, 116, 115, 115) : const Color.fromARGB(255, 138, 138, 138),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            ),
+            child: Text(
+              _verifyCodeText,
+              style: TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontSize: 12.sp),
             ),
           ),
         ),

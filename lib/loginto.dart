@@ -56,70 +56,66 @@ class Loginto extends StatelessWidget {
           
           // 底部按钮区（保持不变）
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 30.0.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.0.w, vertical: 30.0.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // 语言切换按钮
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Consumer<LanguageProvider>(
-                      builder: (context, languageProvider, child) {
-                        return Row(
-                          children: [
-                            TextButton(
-                              onPressed: () => languageProvider.setChinese(),
-                              child: Text(
-                                '中文',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: languageProvider.currentLocale.languageCode == 'zh' 
-                                      ? Colors.blue 
-                                      : Colors.black87,
-                                  fontWeight: languageProvider.currentLocale.languageCode == 'zh' 
-                                      ? FontWeight.bold 
-                                      : FontWeight.normal,
-                                ),
-                              ),
+                Consumer<LanguageProvider>(
+                  builder: (context, languageProvider, child) {
+                    return Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 16.w,
+                      runSpacing: 8.h,
+                      children: [
+                        TextButton(
+                          onPressed: () => languageProvider.setChinese(),
+                          child: Text(
+                            '中文',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: languageProvider.currentLocale.languageCode == 'zh' 
+                                  ? Colors.blue 
+                                  : Colors.black87,
+                              fontWeight: languageProvider.currentLocale.languageCode == 'zh' 
+                                  ? FontWeight.bold 
+                                  : FontWeight.normal,
                             ),
-                            SizedBox(width: 16.w),
-                            TextButton(
-                              onPressed: () => languageProvider.setEnglish(),
-                              child: Text(
-                                'English',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: languageProvider.currentLocale.languageCode == 'en' 
-                                      ? Colors.blue 
-                                      : Colors.black87,
-                                  fontWeight: languageProvider.currentLocale.languageCode == 'en' 
-                                      ? FontWeight.bold 
-                                      : FontWeight.normal,
-                                ),
-                              ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => languageProvider.setEnglish(),
+                          child: Text(
+                            'English',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: languageProvider.currentLocale.languageCode == 'en' 
+                                  ? Colors.blue 
+                                  : Colors.black87,
+                              fontWeight: languageProvider.currentLocale.languageCode == 'en' 
+                                  ? FontWeight.bold 
+                                  : FontWeight.normal,
                             ),
-                            SizedBox(width: 16.w),
-                            TextButton(
-                              onPressed: () => languageProvider.setKorean(),
-                              child: Text(
-                                '한국어',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: languageProvider.currentLocale.languageCode == 'ko' 
-                                      ? Colors.blue 
-                                      : Colors.black87,
-                                  fontWeight: languageProvider.currentLocale.languageCode == 'ko' 
-                                      ? FontWeight.bold 
-                                      : FontWeight.normal,
-                                ),
-                              ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => languageProvider.setKorean(),
+                          child: Text(
+                            '한국어',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: languageProvider.currentLocale.languageCode == 'ko' 
+                                  ? Colors.blue 
+                                  : Colors.black87,
+                              fontWeight: languageProvider.currentLocale.languageCode == 'ko' 
+                                  ? FontWeight.bold 
+                                  : FontWeight.normal,
                             ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 SizedBox(height: 16.h),
                 
@@ -193,8 +189,10 @@ class Loginto extends StatelessWidget {
                 // SizedBox(height: 32.h),
                 
                 // 底部操作区
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8.w,
+                  runSpacing: 8.h,
                   children: [
                     TextButton(
                       onPressed: () {
@@ -205,7 +203,7 @@ class Loginto extends StatelessWidget {
                         );
                       },
                       style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
                         minimumSize: Size.zero,
                       ),
                       child: Text(
@@ -216,10 +214,7 @@ class Loginto extends StatelessWidget {
                         ),
                       ),
                     ),
-                    VerticalDivider(
-                      width: 1.w,
-                      color: Colors.grey,
-                    ),
+                    Text('', style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
                     TextButton(
                       onPressed: () {
                         // 邮箱注册逻辑
@@ -229,7 +224,7 @@ class Loginto extends StatelessWidget {
                         );
                       },
                       style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
                         minimumSize: Size.zero,
                       ),
                       child: Text(
@@ -240,10 +235,7 @@ class Loginto extends StatelessWidget {
                         ),
                       ),
                     ),
-                    VerticalDivider(
-                      width: 1.w,
-                      color: Colors.grey,
-                    ),
+                    Text('', style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
                     ElevatedButton(
                       onPressed: () {
                         // 跳转到首页
@@ -254,7 +246,7 @@ class Loginto extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 236, 82, 26),
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                         minimumSize: Size.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.r),

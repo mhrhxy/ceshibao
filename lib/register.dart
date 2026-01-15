@@ -524,31 +524,28 @@ class _RegisterState extends State<Register> {
           ),
         ),
         SizedBox(width: 10.w),
-        Expanded(
-          flex: 1,
-          child: SizedBox(
-            height: 30.h,
-            child: ElevatedButton(
-              onPressed:
-                  _canGetVerifyCode && !_isRegisterLoading
-                      ? _mockGetVerifyCode
-                      : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    _canGetVerifyCode
-                        ? const Color.fromARGB(255, 255, 255, 255)
-                        : const Color.fromARGB(255, 0, 0, 0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-                padding: EdgeInsets.zero,
+        SizedBox(
+          height: 30.h,
+          child: ElevatedButton(
+            onPressed:
+                _canGetVerifyCode && !_isRegisterLoading
+                    ? _mockGetVerifyCode
+                    : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  _canGetVerifyCode
+                      ? const Color.fromARGB(255, 255, 255, 255)
+                      : const Color.fromARGB(255, 0, 0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.r),
               ),
-              child: Text(
-                _verifyCodeText,
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 0, 0, 0),
-                  fontSize: 12.sp,
-                ),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            ),
+            child: Text(
+              _verifyCodeText,
+              style: TextStyle(
+                color: const Color.fromARGB(255, 0, 0, 0),
+                fontSize: 12.sp,
               ),
             ),
           ),

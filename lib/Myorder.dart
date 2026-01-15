@@ -1936,11 +1936,18 @@ class _MyorderState extends State<Myorder> {
 
   // 去评价
   void _goToReview(dynamic order) {
-    // 跳转到评价页面
+    // 跳转到评价页面，并在返回时刷新订单数据
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => OrderReviewPage(order: order)),
-    );
+    ).then((_) {
+      // 评论页面返回后，刷新当前订单列表
+      loadOrderList(
+        currentStatusIndex == -1 ? 0 : orderStatusList[currentStatusIndex]['orderState'],
+        currentStatusIndex == -1 ? 0 : orderStatusList[currentStatusIndex]['orderPayState'],
+        true,
+      );
+    });
   }
 
   // 切换订单状态
