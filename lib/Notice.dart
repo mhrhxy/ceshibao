@@ -103,14 +103,6 @@ class _Notices extends State<notice> {
           context,
           AppLocalizations.of(context)?.translate('update_failed') ?? '修改失败',
         );
-      } else {
-        // 如果接口返回成功，刷新通知列表
-        setState(() {
-          // 重新获取通知列表数据
-          _noticeTypesFuture = fetchNoticeTypes();
-          // 清空现有状态，以便重新初始化
-          _noticeStatus.clear();
-        });
       }
     } catch (e) {
       // 如果请求失败，回滚开关状态
