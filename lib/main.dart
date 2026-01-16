@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
             builder: (context, languageProvider, child) {
               return MaterialApp(
                 navigatorKey: NavKey.navKey,
-                title: 'shopping',
+                title: 'couzik',
                 locale: languageProvider.currentLocale, // 动态设置当前语言
                 localizationsDelegates: const [
                   AppLocalizations.delegate,

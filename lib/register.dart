@@ -525,7 +525,7 @@ class _RegisterState extends State<Register> {
         ),
         SizedBox(width: 10.w),
         SizedBox(
-          height: 30.h,
+          height: 45.h,
           child: ElevatedButton(
             onPressed:
                 _canGetVerifyCode && !_isRegisterLoading
@@ -539,7 +539,7 @@ class _RegisterState extends State<Register> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(4.r),
               ),
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             ),
             child: Text(
               _verifyCodeText,

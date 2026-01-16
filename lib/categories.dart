@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dingbudaohang.dart';
 import 'search.dart';
 import 'activity_page.dart';
+import 'loginto.dart';
 import 'package:flutter_mall/config/service_url.dart';
 import 'package:flutter_mall/utils/http_util.dart';
 import 'package:provider/provider.dart';
@@ -496,14 +498,27 @@ class _CategoriesState extends State<Categories> {
     
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          // 跳转到活动页面
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ActivityPage(),
-            ),
-          );
+        onTap: () async {
+          // 检查用户是否登录
+          final prefs = await SharedPreferences.getInstance();
+          final token = prefs.getString('token');
+          if (token == null || token.isEmpty) {
+            // 未登录，跳转到登录页面
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Loginto(),
+              ),
+            );
+          } else {
+            // 已登录，跳转到活动页面
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ActivityPage(),
+              ),
+            );
+          }
         },
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 4.w),

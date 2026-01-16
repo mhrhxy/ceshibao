@@ -230,7 +230,7 @@ class _ForgotAccountState extends State<ForgotAccount> {
                 hintText: hintText,
                 hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                 suffixIcon: suffixIcon,
               ),
             ),
@@ -275,13 +275,13 @@ class _ForgotAccountState extends State<ForgotAccount> {
         ),
         SizedBox(width: 10.w),
         SizedBox(
-          height: 30.h,
+          height: 45.h,
           child: ElevatedButton(
             onPressed: _canGetVerifyCode && !_isLoading ? _sendVerifyCode : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _canGetVerifyCode ? const Color.fromARGB(255, 116, 115, 115) : const Color.fromARGB(255, 138, 138, 138),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             ),
             child: Text(
               _verifyCodeText,

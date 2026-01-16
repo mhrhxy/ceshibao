@@ -2252,11 +2252,12 @@ class _MyorderState extends State<Myorder> {
                                                       child: Text(
                                                         'no：${order.orderPlateformNo}',
                                                         style: TextStyle(
-                                                          fontSize: 12.sp,
+                                                          fontSize: 9.sp,
                                                           color: Colors.grey[500],
                                                         ),
                                                         textAlign: TextAlign.left,
-                                                        softWrap: true,
+                                                        softWrap: false,
+                                                        overflow: TextOverflow.ellipsis,
                                                       ),
                                                     ),
                                                 ],
@@ -2847,10 +2848,13 @@ class _MyorderState extends State<Myorder> {
                                                                               'no：${shopOrder.orderPlateformNo}',
                                                                               style: TextStyle(
                                                                                 fontSize:
-                                                                                    12.sp,
+                                                                                    9.sp,
                                                                                 color:
                                                                                     Colors.grey[500],
                                                                               ),
+                                                                              textAlign: TextAlign.left,
+                                                                                softWrap: false,
+                                                                                overflow: TextOverflow.ellipsis,
                                                                             ),
                                                                           Text(
                                                                             shopOrder.shopName,

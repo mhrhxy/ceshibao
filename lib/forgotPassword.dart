@@ -290,32 +290,36 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         SizedBox(width: 10.w),
         Expanded(
           child: SizedBox(
-            height: errorText != null ? 70 : 50, // 有错误时增加高度
+            height: 50.h, // 有错误时增加高度
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  controller: controller,
-                  obscureText: obscureText,
-                  keyboardType: keyboardType,
-                  enabled: !_isLoading,
-                  readOnly: readOnly,
-                  decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: const TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: errorText != null ? Colors.red : Colors.grey, // 错误时显示红色边框
+                SizedBox(
+                  height: errorText != null ? 45.h : 50.h,
+                  child: TextField(
+                    controller: controller,
+                    obscureText: obscureText,
+                    keyboardType: keyboardType,
+                    enabled: !_isLoading,
+                    readOnly: readOnly,
+                    decoration: InputDecoration(
+                      hintText: hintText,
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: errorText != null ? Colors.red : Colors.grey, // 错误时显示红色边框
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                      suffixIcon: suffixIcon,
+                    ),
                   ),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                suffixIcon: suffixIcon,
-              ),
                 ),
                 // 新增：显示错误提示
                 if (errorText != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 4, left: 4),
+                    padding: EdgeInsets.only(top: 2.h, left: 4.w),
                     child: Text(
                       errorText,
                       style: TextStyle(color: Colors.red, fontSize: 12.sp),
@@ -355,7 +359,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               enabled: !_isLoading && _canGetVerifyCode,
               decoration: InputDecoration(
                 hintText: loc.translate('input_email_hint') ,
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 border: const OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               ),
@@ -364,13 +368,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         ),
         SizedBox(width: 10.w),
         SizedBox(
-          height:30.h,
+          height:45.h,
           child: ElevatedButton(
             onPressed: _canGetVerifyCode && !_isLoading ? _sendVerifyCode : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _canGetVerifyCode ? const Color.fromARGB(255, 116, 115, 115) : const Color.fromARGB(255, 138, 138, 138),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             ),
             child: Text(
               _verifyCodeText,

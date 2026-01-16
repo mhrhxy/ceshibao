@@ -38,14 +38,24 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
-      // 2. 调用logout接口（使用HttpUtil.post方法）
-      if (token != null && token.isNotEmpty) {
-        final response = await HttpUtil.post(logout); // 使用HttpUtil统一处理网络请求
-
-        // 接口返回非200时视为失败
-        if (response.data['code'] != 200) {
-          throw Exception(response.data['msg'] ?? (AppLocalizations.of(context)?.translate('logout_failed') ?? '注销失败'));
+      // 如果没有登录（token为空），直接跳转到登录页面
+      if (token == null || token.isEmpty) {
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const Loginto()),
+            (route) => false,
+          );
         }
+        return;
+      }
+
+      // 2. 调用logout接口（使用HttpUtil.post方法）
+      final response = await HttpUtil.post(logout); // 使用HttpUtil统一处理网络请求
+
+      // 接口返回非200时视为失败
+      if (response.data['code'] != 200) {
+        throw Exception(response.data['msg'] ?? (AppLocalizations.of(context)?.translate('logout_failed') ?? '注销失败'));
       }
 
       // 3. 清空本地数据
@@ -178,13 +188,27 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                   _buildAccountItem(
                     title: AppLocalizations.of(context)?.translate('exit_member') ?? '退出会员',
                     icon: Icons.power_settings_new_outlined,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ExitMemberPage(),
-                        ),
-                      );
+                    onTap: () async {
+                      // 检查用户是否登录
+                      final prefs = await SharedPreferences.getInstance();
+                      final token = prefs.getString('token');
+                      if (token == null || token.isEmpty) {
+                        // 未登录，跳转到登录页面
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Loginto(),
+                          ),
+                        );
+                      } else {
+                        // 已登录，跳转到退出会员页面
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ExitMemberPage(),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],
