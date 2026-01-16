@@ -612,11 +612,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                   ? displayPromotionPriceCNY * _exchangeRate 
                   : null;
               
-              // 舍去个位数
-              displayPriceKRW = ((displayPriceKRW / 10).floor() * 10);
-              if (displayPromotionPriceKRW != null) {
-                displayPromotionPriceKRW = ((displayPromotionPriceKRW / 10).floor() * 10);
-              }
+              // 不需要舍去个位数，保持原始计算结果
 
               return Container(
                 height: MediaQuery.of(context).size.height * 0.8,
@@ -1426,8 +1422,8 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
           Text(
             mainPromotionPriceKRW != null &&
                     mainPromotionPriceKRW != mainOriginalPriceKRW
-                ? "KRW ${((mainPromotionPriceKRW / 10).floor() * 10).toInt().toString()}"
-                : "KRW ${((mainOriginalPriceKRW / 10).floor() * 10).toInt().toString()}",
+                ? "KRW ${mainPromotionPriceKRW.toInt().toString()}"
+                : "KRW ${mainOriginalPriceKRW.toInt().toString()}",
             style: TextStyle(
               fontSize: 18.sp,
               color: Colors.black,
@@ -1438,7 +1434,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
               mainPromotionPriceKRW != mainOriginalPriceKRW) ...[
             SizedBox(width: 8.w),
             Text(
-              "KRW ${((mainOriginalPriceKRW / 10).floor() * 10).toInt().toString()}",
+              "KRW ${mainOriginalPriceKRW.toInt().toString()}",
               style: TextStyle(
                 fontSize: 14.sp,
                 color: Colors.grey,
