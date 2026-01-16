@@ -22,25 +22,81 @@ class Message extends StatefulWidget {
 }
 
 class _MessageState extends State<Message> {
-  // 当前选中的标签类型 1:订单 2:活动 3:公告
+  // 当前选中的标签类型
   int _currentTab = 1;
   bool _isLoading = false;
   List<dynamic> _messageList = [];
-
-  // 标签类型映射
-  final Map<int, String> _tabLabels = {
-    1: '', // 将在build方法中通过本地化设置
-    2: '',
-    3: '',
-  };
+  bool _isLoadingTabs = true;
+  // 动态标签列表
+  List<Map<String, dynamic>> _dynamicTabs = [];
   
   get child => null;
 
   @override
   void initState() {
     super.initState();
-    // 页面加载时默认调用第一个标签的接口（订单消息）
-    _loadDataByType(1);
+    // 加载通知类型
+    _loadNotificationTypes();
+  }
+
+  // 获取通知类型
+  Future<void> _loadNotificationTypes() async {
+    setState(() {
+      _isLoadingTabs = true;
+    });
+
+    try {
+      final response = await HttpUtil.get(searchNotifyByUserUrl);
+      if (response.data['code'] == 200 && response.data['data'] != null) {
+        List<dynamic> data = response.data['data'];
+        // 过滤出openStatue为1的类型
+        List<Map<String, dynamic>> tabs = data
+            .where((item) => item['openStatue'] == '1')
+            .map((item) => {
+                  'managerId': int.parse(item['managerId'].toString()),
+                  'managerName': item['managerName'],
+                  'openStatue': item['openStatue'],
+                })
+            .toList();
+
+        setState(() {
+          _dynamicTabs = tabs;
+          // 如果有标签，默认选中第一个
+          if (tabs.isNotEmpty) {
+            _currentTab = tabs[0]['managerId'];
+            // 加载默认标签的数据
+            _loadDataByType(_currentTab);
+          }
+        });
+      } else {
+        // 如果接口调用失败，使用默认标签
+        setState(() {
+          _dynamicTabs = [
+            {'managerId': 1, 'managerName': '订单信息通知', 'openStatue': '1'},
+            {'managerId': 2, 'managerName': '活动信息通知', 'openStatue': '1'},
+            {'managerId': 3, 'managerName': '公告信息通知', 'openStatue': '1'},
+          ];
+          _currentTab = 1;
+          _loadDataByType(_currentTab);
+        });
+      }
+    } catch (e) {
+      print('获取通知类型失败: $e');
+      // 网络错误时使用默认标签
+      setState(() {
+        _dynamicTabs = [
+          {'managerId': 1, 'managerName': '订单信息通知', 'openStatue': '1'},
+          {'managerId': 2, 'managerName': '活动信息通知', 'openStatue': '1'},
+          {'managerId': 3, 'managerName': '公告信息通知', 'openStatue': '1'},
+        ];
+        _currentTab = 1;
+        _loadDataByType(_currentTab);
+      });
+    } finally {
+      setState(() {
+        _isLoadingTabs = false;
+      });
+    }
   }
 
   // 根据标签类型调用接口
@@ -98,10 +154,6 @@ class _MessageState extends State<Message> {
 
   @override
   Widget build(BuildContext context) {
-    // 设置本地化标签文本
-    _tabLabels[1] = AppLocalizations.of(context)?.translate('order_message') ?? '订单消息';
-    _tabLabels[2] = AppLocalizations.of(context)?.translate('activity_message') ?? '活动消息';
-    _tabLabels[3] = AppLocalizations.of(context)?.translate('announcement') ?? '公告';
     
     return Scaffold(
       appBar: const FixedActionTopBar(),
@@ -149,48 +201,60 @@ class _MessageState extends State<Message> {
               ),
             ),
             // 标签切换区域
-            Container(
-              color: Colors.white,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: _tabLabels.entries.map((entry) {
-                  int type = entry.key;
-                  String label = entry.value;
-                  bool isActive = _currentTab == type;
-                  
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        _loadDataByType(type);
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        alignment: Alignment.center,
-                        child: Column(
-                          children: [
-                            Text(
-                              label,
-                              style: TextStyle(
-                                color: isActive ? Colors.blue : Colors.black87,
-                                fontSize: 16.sp,
-                                fontWeight: isActive ? FontWeight.w500 : FontWeight.normal,
+            _isLoadingTabs
+                ? Container(
+                    color: Colors.white,
+                    height: 50.h,
+                    alignment: Alignment.center,
+                    child: CircularProgressIndicator(),
+                  )
+                : Container(
+                    color: Colors.white,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _dynamicTabs.map((tab) {
+                          int type = tab['managerId'];
+                          String label = tab['managerName'];
+                          bool isActive = _currentTab == type;
+                          
+                          return Container(
+                            margin: EdgeInsets.symmetric(horizontal: 16.w),
+                            child: GestureDetector(
+                              onTap: () {
+                                _loadDataByType(type);
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 8.w),
+                                alignment: Alignment.center,
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      label,
+                                      style: TextStyle(
+                                        color: isActive ? Colors.blue : Colors.black87,
+                                        fontSize: 16.sp,
+                                        fontWeight: isActive ? FontWeight.w500 : FontWeight.normal,
+                                      ),
+                                      overflow: TextOverflow.visible,
+                                      softWrap: false,
+                                    ),
+                                    if (isActive)
+                                      Container(
+                                        margin: EdgeInsets.only(top: 4.h),
+                                        height: 2.h,
+                                        width: 40.w,
+                                        color: Colors.blue,
+                                      ),
+                                  ],
+                                ),
                               ),
                             ),
-                            if (isActive)
-                              Container(
-                                margin: EdgeInsets.only(top: 4.h),
-                                height: 2.h,
-                                width: 40.w,
-                                color: Colors.blue,
-                              ),
-                          ],
-                        ),
+                          );
+                        }).toList(),
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
-            ),
+                  ),
 
             // 内容区域 - 根据标签类型显示不同样式的列表
             Expanded(

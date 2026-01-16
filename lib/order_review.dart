@@ -235,6 +235,13 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                                     width: 80.w,
                                     height: 80.h,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey,
+                                        size: 65.w,
+                                      );
+                                    },
                                   ),
                                   SizedBox(width: 12.w),
                                   Expanded(

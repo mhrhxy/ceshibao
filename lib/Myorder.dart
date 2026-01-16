@@ -2481,12 +2481,12 @@ class _MyorderState extends State<Myorder> {
                                                 //    - orderState为4/5/6：仅退款、退货退款/仅部分退款/仅部分退货退款都能选择
                                                 // 3. remainingNum大于0时显示
                                                 // 4. 只有当子订单数量为1时，才在总订单处显示申请售后按钮
-                                                if (order.refundStatus != 1 &&
-                                                    order.remainingNum > 0 &&
-                                                    order.shopOrders.length == 1 &&
-                                                    ((order.orderState == '2' && order.payStatus == '3') ||
-                                                     (order.orderState == '3') ||
-                                                     (order.orderState == '4' || order.orderState == '5' || order.orderState == '6')))
+                                                // if (order.refundStatus != 1 &&
+                                                //     order.remainingNum > 0 &&
+                                                //     order.shopOrders.length == 1 &&
+                                                //     ((order.orderState == '2' && order.payStatus == '3') ||
+                                                //      (order.orderState == '3') ||
+                                                //      (order.orderState == '4' || order.orderState == '5' || order.orderState == '6')))
                                                   // 隐藏申请售后按钮
                                                   // Column(
                                                   //   children: [
@@ -2521,10 +2521,10 @@ class _MyorderState extends State<Myorder> {
                                                   //     ),
                                                   //   ],
                                                   // ),
-                                                // 去评价按钮显示逻辑：orderState为9并且observeIs为1时显示
+                                                // 去评价按钮显示逻辑：orderState为9并且observeIs不等于2时显示
                                                 // 只有当子订单数量为1时，才在总订单处显示评价按钮
                                                 if (order.orderState == '9' &&
-                                                    order.observeIs == '1' &&
+                                                    order.observeIs != '2' &&
                                                     order.shopOrders.length ==
                                                         1)
                                                   Column(
@@ -2903,8 +2903,8 @@ class _MyorderState extends State<Myorder> {
                                                                           // 去评价按钮：当有多个子订单时显示在价格下方
                                                                           if (shopOrder.orderState ==
                                                                                   '9' &&
-                                                                              shopOrder.observeIs ==
-                                                                                  '1' &&
+                                                                              shopOrder.observeIs !=
+                                                                                  '2' &&
                                                                               order.shopOrders.length >
                                                                                   1)
                                                                             Padding(
