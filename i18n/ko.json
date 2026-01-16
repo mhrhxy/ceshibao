@@ -147,6 +147,7 @@
   "cart_empty": "장바구니가 비어 있습니다",
   "favorites_empty": "찜한 목록이 비어 있습니다",
   "selected_products_info": "선택된 상품: ${totalTypes}종 총 수량: ${totalQuantity}개",
+  "share_link_copied": "공유 링크가 클립보드에 복사되었습니다",
   "shipping_fee": "배송비: 10,000원",
   "buy_now": "구매하기",
   "delete": "삭제",

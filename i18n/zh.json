@@ -146,6 +146,7 @@
   "cart_empty": "购物车为空",
   "favorites_empty": "收藏列表为空",
   "selected_products_info": "选中的商品:${totalTypes}种类 总数量:${totalQuantity}个",
+  "share_link_copied": "分享链接已复制到剪贴板",
   "shipping_fee": "配送费: 10,000元",
   "buy_now": "购买",
   "delete": "删除",

@@ -146,6 +146,7 @@
   "cart_empty": "Cart is empty",
   "favorites_empty": "Favorites is empty",
   "selected_products_info": "Selected: ${totalTypes} Types | Qty: ${totalQuantity}",
+  "share_link_copied": "Share link copied to clipboard",
   "shipping_fee": "Shipping: 10,000 KRW",
   "buy_now": "Buy Now",
   "delete": "Delete",

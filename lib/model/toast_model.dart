@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ToastUtil {
   static void showCustomToast(BuildContext context, String message) {
@@ -8,13 +9,13 @@ class ToastUtil {
         child: Align(
           alignment: Alignment.center, // 水平+垂直居中
           child: Material(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             color: Colors.black54,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
               child: Text(
                 message,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: TextStyle(color: Colors.white, fontSize: 14.sp),
                 textAlign: TextAlign.center,
               ),
             ),

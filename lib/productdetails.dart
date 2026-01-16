@@ -1326,7 +1326,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                             // 复制链接到剪贴板
                             Clipboard.setData(ClipboardData(text: shareLink)).then((_) {
                               // 显示复制成功提示
-                              ToastUtil.showCustomToast(context, '分享链接已复制到剪贴板');
+                              ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('share_link_copied'));
                               
                               // 可选：打开分享菜单
                               // Share.share(shareLink);
