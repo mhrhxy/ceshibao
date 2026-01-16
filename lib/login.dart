@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_mall/utils/http_util.dart';
 import 'package:flutter_mall/utils/shared_preferences_util.dart';
 import 'package:flutter_mall/config/service_url.dart';
@@ -13,7 +12,6 @@ import 'package:flutter_mall/model/login_model.dart';
 import 'package:flutter_mall/model/member_info_model.dart'; 
 import 'package:flutter_mall/main_tab.dart';
 import 'package:flutter_mall/app_localizations.dart';
-import 'package:flutter_mall/language_provider.dart';
 import 'forgotPassword.dart';
 import 'forgotAccount.dart';
 import 'register.dart';
@@ -197,14 +195,18 @@ class _LoginState extends State<Login> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // 固定宽度标签容器，确保输入框对齐
         SizedBox(
-          width: _labelWidth,
-          child: Text(
-            labelText,
-            style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+          width: 90.w, // 设置足够的固定宽度以适应英文标签
+          child: Padding(
+            padding: EdgeInsets.only(right: 16.w),
+            child: Text(
+              labelText,
+              style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+              textAlign: TextAlign.left,
+            ),
           ),
         ),
-        SizedBox(width: 10.w),
         Expanded(
           child: SizedBox(
             height: 50.h,
@@ -326,12 +328,14 @@ class _LoginState extends State<Login> {
 
                   SizedBox(height: 20.h),
 
-                  // 辅助按钮区
-                  Align(
-                    alignment: Alignment.centerRight,
+                  // 辅助按钮区 - 优化溢出处理
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(right: 10.w),
                     child: Wrap(
-                      spacing: 16.0.w,
-                      runSpacing: 4.0.h,
+                      alignment: WrapAlignment.end,
+                      spacing: 8.w, // 减少按钮间距
+                      runSpacing: 8.h,
                       children: [
                         TextButton(
                           onPressed: _isLoginLoading ? null : () {
@@ -340,11 +344,13 @@ class _LoginState extends State<Login> {
                             );
                           },
                           style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w),
+                            padding: EdgeInsets.symmetric(horizontal: 6.w),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                           child: Text(
                             loc.translate('register'),
-                            style: TextStyle(color: Colors.black87, fontSize: 14.sp),
+                            style: TextStyle(color: Colors.black87, fontSize: 11.sp),
                           ),
                         ),
                         TextButton(
@@ -353,9 +359,14 @@ class _LoginState extends State<Login> {
                               MaterialPageRoute(builder: (context) => const ForgotAccount()),
                             );
                           },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: 6.w),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                           child: Text(
                             loc.translate('forgot_account'),
-                            style: TextStyle(color: Colors.black87, fontSize: 14.sp),
+                            style: TextStyle(color: Colors.black87, fontSize: 11.sp),
                           ),
                         ),
                         TextButton(
@@ -364,9 +375,14 @@ class _LoginState extends State<Login> {
                               MaterialPageRoute(builder: (context) => const ForgotPassword()),
                             );
                           },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: 6.w),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                           child: Text(
                             loc.translate('forgot_password'),
-                            style: TextStyle(color: Colors.black87, fontSize: 14.sp),
+                            style: TextStyle(color: Colors.black87, fontSize: 11.sp),
                           ),
                         ),
                       ],

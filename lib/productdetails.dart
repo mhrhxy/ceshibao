@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mall/main_tab.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dingbudaohang.dart';
 import './config/service_url.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -1284,7 +1287,21 @@ class _ProductDetailspayState extends State<ProductDetails> {
                         ),
                         child: IconButton(
                           icon: Icon(Icons.arrow_back, color: Colors.white, size: 20.r),
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () {
+                            // 检查导航堆栈中是否有前一个页面
+                            if (Navigator.canPop(context)) {
+                              // 如果有前一个页面，直接返回
+                              Navigator.pop(context);
+                            } else {
+                              // 如果没有前一个页面（从深度链接打开的情况），跳转到首页
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const MainTab(initialIndex: 0),
+                                ),
+                              );
+                            }
+                          },
                           padding: EdgeInsets.zero,
                         ),
                       ),
@@ -1301,7 +1318,20 @@ class _ProductDetailspayState extends State<ProductDetails> {
                         ),
                         child: IconButton(
                           icon: Icon(Icons.share, color: Colors.white, size: 20.r),
-                          onPressed: () {},
+                          onPressed: () {
+                            // 生成符合AndroidManifest.xml配置的跳转地址
+                            // 格式：flutterappxm://detail/{productId}
+                            String shareLink = 'flutterappxm://detail/${widget.id}';
+                            
+                            // 复制链接到剪贴板
+                            Clipboard.setData(ClipboardData(text: shareLink)).then((_) {
+                              // 显示复制成功提示
+                              ToastUtil.showCustomToast(context, '分享链接已复制到剪贴板');
+                              
+                              // 可选：打开分享菜单
+                              // Share.share(shareLink);
+                            });
+                          },
                           padding: EdgeInsets.zero,
                         ),
                       ),
@@ -1679,7 +1709,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                       onPressed: () => _showBottomSheet(isBuyNow: false),
                       child: Text(
                         AppLocalizations.of(context)?.translate('add_to_cart_kr') ?? "加入购物车",
-                        style: TextStyle(fontSize: 16.sp, color: Colors.white),
+                        style: TextStyle(fontSize: 14.sp, color: Colors.white),
                       ),
                     ),
                   ),
@@ -1698,7 +1728,7 @@ class _ProductDetailspayState extends State<ProductDetails> {
                       onPressed: () => _showBottomSheet(isBuyNow: true),
                       child: Text(
                         AppLocalizations.of(context)?.translate('buy_request_kr') ?? "请求购买",
-                        style: TextStyle(fontSize: 16.sp, color: Colors.white),
+                        style: TextStyle(fontSize: 14.sp, color: Colors.white),
                       ),
                     ),
                   ),

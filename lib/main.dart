@@ -13,6 +13,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 // 导入订单页面
 import 'Myorder.dart';
+// 导入商品详情页面
+import 'productdetails.dart';
 
 // 程序的入口点
 void main() async {
@@ -63,13 +65,23 @@ class MyApp extends StatelessWidget {
                 onGenerateRoute: (settings) {
                   // 处理深度链接
                   if (settings.name?.startsWith('flutterappxm://') ?? false) {
-                    String path = settings.name!.replaceFirst('flutterappxm://', '');
+                    String fullUrl = settings.name!;
+                    Uri uri = Uri.parse(fullUrl);
                     
-                    if (path == 'orders') {
-                      // 导入Myorder页面
-                      return MaterialPageRoute(
-                        builder: (context) => const Myorder(),
-                      );
+                    if (uri.scheme == 'flutterappxm') {
+                      if (uri.host == 'detail') {
+                        // 处理商品详情链接，格式为flutterappxm://detail/{id}
+                        String productId = uri.path.replaceFirst('/', '');
+                        // 直接打开商品详情页，但确保返回时有页面可回
+                        return MaterialPageRoute(
+                          builder: (context) => ProductDetails(id: productId),
+                        );
+                      } else if (uri.host == 'orders') {
+                        // 处理订单页面链接
+                        return MaterialPageRoute(
+                          builder: (context) => const Myorder(),
+                        );
+                      }
                     }
                   }
                   
