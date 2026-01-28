@@ -190,3 +190,19 @@ const activityReceiveCouponUrl = "$baseUrl/product/coupon/couponUse/{activeId}";
 const orderCountUrl = "$baseUrl/order/countOrderList";
 // 设置用户默认地址
 const setDefaultAddressUrl = "$baseUrl/system/uaddress/setDefault/{addressId}";
+// 第三方登录查询数据
+const thirdFindInfoByTypeUrl = "$baseUrl/system/third/findInfoByType/{type}";
+// 获取naver授权信息
+const naverAuthUrl = "$baseUrl/member/naver/state";
+// 获取第三方登录接方式列表
+const thirdLoginMethodUrl = "$baseUrl/system/third/thirdLoginMethod";
+// 获取第三方登录接列表信息
+const thirdLoginMethodDetailUrl = "$baseUrl/system/thirdMember/thirdInfo";
+// 绑定第三方naver账号
+const bindNaverAccountUrl = "$baseUrl/system/thirdMember/naver/saveInfo";
+// 绑定第三方kakao账号
+const bindKakaoAccountUrl = "$baseUrl/system/thirdMember/kakao/saveInfo";
+// naver第三方登录
+const naverLoginUrl = "$baseUrl/member/naver/login";
+// kakao第三方登录
+const kakaoLoginUrl = "$baseUrl/member/kakao/login";

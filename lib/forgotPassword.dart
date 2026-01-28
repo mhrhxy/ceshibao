@@ -368,7 +368,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         ),
         SizedBox(width: 10.w),
         SizedBox(
-          height:45.h,
+          height:40.h,
           child: ElevatedButton(
             onPressed: _canGetVerifyCode && !_isLoading ? _sendVerifyCode : null,
             style: ElevatedButton.styleFrom(
@@ -403,9 +403,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 ),
               ),
               padding: EdgeInsets.only(
-                top: 50,
+                top: 50.w,
                 right: _logoRightPadding,
-                bottom: 30,
+                bottom: 30.w,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,

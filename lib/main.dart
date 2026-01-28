@@ -7,14 +7,12 @@ import 'package:flutter_mall/utils/shared_preferences_util.dart';
 import 'package:flutter_mall/welcome.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'config/nav_key.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
-// 导入订单页面
-import 'Myorder.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 // 导入商品详情页面
 import 'productdetails.dart';
+import 'self_product_details.dart';
 
 // 程序的入口点
 void main() async {
@@ -22,7 +20,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 初始化SharedPreferences
   await SharedPreferencesUtil.init();
+    // 获取 Key Hash 并打印
+// 打印 Key Hash
   // 启动应用程序
+  KakaoSdk.init(nativeAppKey: 'ca610cfd836872a2e451f79a1be06cf6');
   runApp(const MyApp());
 }
 
@@ -55,37 +56,65 @@ class MyApp extends StatelessWidget {
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-                supportedLocales: const [Locale('zh'), Locale('ko'),Locale('en')],
+                supportedLocales: const [
+                  Locale('zh'),
+                  Locale('ko'),
+                  Locale('en'),
+                ],
                 theme: ThemeData(
                   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
                   useMaterial3: true,
                 ),
                 home: const Welcome(),
-                // 配置深度链接处理
                 onGenerateRoute: (settings) {
-                  // 处理深度链接
-                  if (settings.name?.startsWith('flutterappxm://') ?? false) {
-                    String fullUrl = settings.name!;
-                    Uri uri = Uri.parse(fullUrl);
-                    
-                    if (uri.scheme == 'flutterappxm') {
-                      if (uri.host == 'detail') {
-                        // 处理商品详情链接，格式为flutterappxm://detail/{id}
-                        String productId = uri.path.replaceFirst('/', '');
-                        // 直接打开商品详情页，但确保返回时有页面可回
-                        return MaterialPageRoute(
-                          builder: (context) => ProductDetails(id: productId),
-                        );
-                      } else if (uri.host == 'orders') {
-                        // 处理订单页面链接
-                        return MaterialPageRoute(
-                          builder: (context) => const Myorder(),
-                        );
-                      }
+                  print('Route requested: ${settings.name}'); // 打印请求的路径
+  
+                  // 判断是否是深度链接，路径是否包含 'xq'
+                  if (settings.name?.startsWith('/xq') ?? false) {
+                    String fullUrl = settings.name!; // 获取完整的 URL
+                    Uri uri = Uri.parse(
+                      'couzikapp://' + fullUrl,
+                    ); // 拼接成完整的URL，防止uri解析出错
+
+                    // 打印 uri 路径，看看是否正确解析
+                    print('uri.pathSegments: ${uri.pathSegments}'); // 打印路径段
+
+                    // 处理商品详情页路径
+                    if (uri.host == '' && uri.pathSegments.isNotEmpty) {
+                      String productId =
+                          uri.pathSegments.last; // 获取最后一个路径段作为 productId
+                      print('跳转到商品详情页面，productId: $productId');
+                      return MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                ProductDetails(id: productId), // 跳转到商品详情页
+                      );
                     }
                   }
-                  
-                  // 默认路由处理
+
+                  // 判断是否是 'zyxq' 类型的深度链接
+                  if (settings.name?.startsWith('/zyxq') ?? false) {
+                    String fullUrl = settings.name!; // 获取完整的 URL
+                    Uri uri = Uri.parse(
+                      'couzikapp://' + fullUrl,
+                    ); // 拼接成完整的URL，防止uri解析出错
+
+                    // 打印 uri 路径，看看是否正确解析
+                    print('uri.pathSegments: ${uri.pathSegments}'); // 打印路径段
+
+                    // 处理自营商品详情页路径
+                    if (uri.host == '' && uri.pathSegments.isNotEmpty) {
+                      String productId =
+                          uri.pathSegments.last; // 获取最后一个路径段作为 productId
+                      print('跳转到自营商品详情页面，productId: $productId');
+                      return MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                SelfProductDetails(id: productId), // 跳转到自营商品详情页
+                      );
+                    }
+                  }
+                  // 默认返回 null，表示没有匹配到深度链接，跳到默认页面
                   return null;
                 },
               );

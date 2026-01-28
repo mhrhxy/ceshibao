@@ -1164,7 +1164,7 @@ class _MyorderState extends State<Myorder> {
           "payCost": usdAmount.toString(), // 支付金额（转换为美元，保留两位小数）
           "orderNo": orderData.orderPlateformNo, // 订单编号
           "paymentRedirectUrl":
-              "flutterappxm://pay/callback?orderNo=${orderData.orderPlateformNo}",
+              "couzikapp://pay/callback?orderNo=${orderData.orderPlateformNo}",
         },
       };
       print('NaverPay支付请求参数: $requestData');
@@ -1315,7 +1315,7 @@ class _MyorderState extends State<Myorder> {
           "payCost": krwAmount.toString(), // 支付金额（韩元，保留两位小数）
           "orderNo": orderData.orderPlateformNo, // 订单编号
           "paymentRedirectUrl":
-              "flutterappxm://pay/callback?orderNo=${orderData.orderPlateformNo}",
+              "couzikapp://pay/callback?orderNo=${orderData.orderPlateformNo}",
         },
         "cardBrand": "KAKAOBANK", // 卡银行
         "isCardNormal": 1, // 是否通用银行卡
@@ -1999,7 +1999,7 @@ class _MyorderState extends State<Myorder> {
                     // 清空导航栈并返回底部导航页，显示我的页面
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainTab(initialIndex: 3)),
+                      MaterialPageRoute(builder: (context) => const MainTab(initialIndex: 4)),
                       (route) => false, // 移除所有之前的路由
                     );
                   },

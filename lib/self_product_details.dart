@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'review.dart';
 import 'userreviews.dart';
 import 'package:video_player/video_player.dart';
+import 'package:share_plus/share_plus.dart';
 import './model/toast_model.dart';
 
 class SelfProductDetails extends StatefulWidget {
@@ -1309,10 +1310,21 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: IconButton(
-                icon: Icon(Icons.share, color: Colors.white, size: 20.r),
-                onPressed: () {},
-                padding: EdgeInsets.zero,
-              ),
+                          icon: Icon(Icons.share, color: Colors.white, size: 20.r),
+                          onPressed:   () {
+                            // 生成符合AndroidManifest.xml配置的跳转地址
+                            // 格式：couzikapp://detail/{productId}
+                            String shareLink = 'https://www.couzik.com/break?link=couzikapp://detail/zyxq/${widget.id}';
+                            // 使用share_plus打开分享菜单
+                            Share.share(shareLink, subject: '分享商品链接').then((_) {
+                              // 分享完成后复制链接到剪贴板
+                              Clipboard.setData(ClipboardData(text: shareLink));
+                              // 显示复制成功提示
+                              ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('share_link_copied'));
+                            });
+                          },
+                          padding: EdgeInsets.zero,
+                        ),
             ),
           ),
           // 媒体页码指示器
@@ -1819,7 +1831,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                 child: Text(
                   AppLocalizations.of(context)?.translate('add_to_cart_kr') ??
                       "加入购物车",
-                  style: TextStyle(fontSize: 16.sp, color: Colors.white),
+                  style: TextStyle(fontSize: 14.sp, color: Colors.white),
                 ),
               ),
             ),
@@ -1839,7 +1851,7 @@ class _SelfProductDetailsState extends State<SelfProductDetails> {
                 child: Text(
                   AppLocalizations.of(context)?.translate('buy_request_kr') ??
                       "请求购买",
-                  style: TextStyle(fontSize: 16.sp, color: Colors.white),
+                  style: TextStyle(fontSize: 14.sp, color: Colors.white),
                 ),
               ),
             ),

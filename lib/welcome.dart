@@ -39,7 +39,7 @@ class _WelcomeState extends State<Welcome> {
         // padding: const EdgeInsets.all(50.0),
         alignment: Alignment.center,
         child: Image.asset(
-          "images/shopping_cart.png",
+          "images/logo.png",
           width: 200.w,
           height: 105.h,
           fit: BoxFit.contain,

@@ -191,9 +191,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
     setState(() {
       _isImageSearch = false;
       _currentKeyword = searchKey;
-      if (!_isLoadingMore && !_isRefreshing) {
-        _products = [];
-      }
+      // 移除清空列表的逻辑，保持原有列表直到新数据返回
     });
 
     final String currentLanguage = Localizations.localeOf(context).languageCode;
@@ -236,7 +234,6 @@ class _SearchResultPageState extends State<SearchResultPage> {
         throw Exception(response.data['msg'] ?? errorText);
       }
     } catch (e) {
-      print("搜索接口失败：$e");
       String loadFailText = AppLocalizations.of(context)!.translate("load_data_fail");
       loadFailText = loadFailText.replaceAll("%s", e.toString().substring(0, 50));
       
@@ -817,6 +814,18 @@ class _SearchResultPageState extends State<SearchResultPage> {
                             ),
                           ),
                         ),
+                        const Spacer(), // 推加载动画到最右边
+                        _isSearchLoading ? Padding(
+                          padding: EdgeInsets.only(left: 10.w),
+                          child: SizedBox(
+                            width: 20.w,
+                            height: 20.h,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.w,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ) : const SizedBox.shrink(),
                       ],
                     ),
                   ),

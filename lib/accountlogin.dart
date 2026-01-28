@@ -7,6 +7,7 @@ import 'exit_member.dart';
 import 'loginto.dart';
 import 'statuinfo.dart';
 import 'unpdatpassword.dart';
+import 'partylogin.dart';
 import './config/service_url.dart'; // 仅新增接口地址依赖
 import './utils/http_util.dart'; // 导入HttpUtil工具类
 
@@ -152,12 +153,19 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
                   Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
 
                   // 2. 第三方登录（不变）
-                  // _buildAccountItem(
-                  //   title: AppLocalizations.of(context)?.translate('third_party_login') ?? '第三方登录',
-                  //   icon: Icons.people_outline,
-                  //   onTap: () {},
-                  // ),
-                  // Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
+                  _buildAccountItem(
+                    title: AppLocalizations.of(context)?.translate('third_party_login') ?? '第三方登录',
+                    icon: Icons.people_outline,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const partylogin(),
+                        ),
+                      );
+                    },
+                  ),
+                  Divider(height: 1.h, indent: 0, color: Color(0xFFEEEEEE)),
 
                   // 3. 密码更改（不变）
                   _buildAccountItem(

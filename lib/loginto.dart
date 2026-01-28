@@ -1,13 +1,44 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_mall/model/toast_model.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
 import 'register.dart';
 import 'main_tab.dart';
 import 'language_provider.dart';
 import 'app_localizations.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart'; // 引入Naver登录插件
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart'; // 引入Kakao登录插件
+import 'package:url_launcher/url_launcher.dart';
+import 'utils/http_util.dart';
+import 'utils/shared_preferences_util.dart';
+import 'config/service_url.dart';
+import 'config/constant_param.dart';
 class Loginto extends StatelessWidget {
   const Loginto({super.key});
+
+  /// 获取并保存最大订单限额接口（登录成功后调用）
+  static Future<void> _fetchAndSaveMaxOrderLimit(String token) async {
+    try {
+      // 设置请求头（携带登录成功的token）
+      HttpUtil.dio.options.headers['Authorization'] = 'Bearer $token';
+      
+      // 调用最大订单限额接口
+      var result = await HttpUtil.get(maxOrderPurchaseLimitUrl);
+      
+      if (result.data['code'] == 200) {
+        // 保存最大订单限额到本地
+        String maxLimit = result.data['msg'] ?? '0';
+        await SharedPreferencesUtil.saveString('maxOrderLimit', maxLimit);
+      }
+    } catch (e) {
+      // 异常处理
+      print('获取最大订单限额失败: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,73 +151,166 @@ class Loginto extends StatelessWidget {
                 SizedBox(height: 16.h),
                 
                 // KakaoTalk登录按钮
-                // ElevatedButton(
-                //   onPressed: () {
-                //     // KakaoTalk登录逻辑
-                //   },
-                //   style: ElevatedButton.styleFrom(
-                //     backgroundColor: Colors.yellow,
-                //     padding: EdgeInsets.symmetric(vertical: 16.h),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(8.r),
-                //     ),
-                //     elevation: 0,
-                //   ),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: [
-                //       Icon(Icons.chat_bubble_outline, color: Colors.black),
-                //       SizedBox(width: 8.w),
-                //       Text(
-                //         AppLocalizations.of(context).translate('continue_with_kakao'),
-                //         style: TextStyle(
-                //           color: Colors.black,
-                //           fontSize: 16.sp,
-                //           fontWeight: FontWeight.w500,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // SizedBox(height: 16.h),
+                ElevatedButton(
+                  onPressed: () async {
+                    // KakaoTalk登录逻辑
+                   try {
+                    final authToken = await UserApi.instance.loginWithKakaoTalk();
+                        print("Kakao login success");
+
+                        print("Access Token: ${authToken.accessToken}");
+                        // 获取用户信息
+                        final user = await UserApi.instance.me();
+                        print("User info: ${user.kakaoAccount?.profile?.nickname}");
+
+                         final loginParams = {
+                               "id":user.id,//第三方ID
+                                "kakaoAccount":{
+                                    "email":user.kakaoAccount?.email,//邮箱
+                                    "profile":{
+                                        "nickname":user.kakaoAccount?.profile?.nickname//昵称
+                                    }
+                                }
+                          };
+                          
+                          // 调用naver登录接口
+                          final loginResponse = await HttpUtil.post(kakaoLoginUrl, data: loginParams);
+                          
+                          if (loginResponse.data['code'] == 200) {
+                            // 登录成功，获取token
+                            final loginToken = loginResponse.data['token'];
+                            
+                            // 存储token
+                            await SharedPreferencesUtil.saveString(token, loginToken);
+                            
+                            // 获取并保存最大订单限额
+                            await _fetchAndSaveMaxOrderLimit(loginToken);
+                            
+                            // 跳转到首页
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MainTab()),
+                              (route) => false,
+                            );
+                          } else {
+                            // 登录失败
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('登录失败/未绑定第三方账号')),
+                            );
+                          }
+
+                      } catch (error) {
+                        print('카카오계정으로 로그인 실패 $error');
+                      }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.chat_bubble_outline, color: Colors.black),
+                      SizedBox(width: 8.w),
+                      Text(
+                        AppLocalizations.of(context).translate('continue_with_kakao'),
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16.h),
                 
-                // // Naver登录按钮
-                // ElevatedButton(
-                //   onPressed: () {
-                //     // Naver登录逻辑
-                //   },
-                //   style: ElevatedButton.styleFrom(
-                //     backgroundColor: Colors.green,
-                //     padding: EdgeInsets.symmetric(vertical: 16.h),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(8.r),
-                //     ),
-                //     elevation: 0,
-                //   ),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: [
-                //       Text(
-                //         'N',
-                //         style: TextStyle(
-                //           fontSize: 20.sp,
-                //           fontWeight: FontWeight.bold,
-                //           color: Colors.white,
-                //         ),
-                //       ),
-                //       SizedBox(width: 8.w),
-                //       Text(
-                //         AppLocalizations.of(context).translate('continue_with_naver'),
-                //         style: TextStyle(
-                //           color: Colors.white,
-                //           fontSize: 16.sp,
-                //           fontWeight: FontWeight.w500,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // SizedBox(height: 32.h),
+                // Naver登录按钮
+                ElevatedButton(
+                  onPressed: () async {
+                        try {
+                         final result = await FlutterNaverLogin.logIn();
+                          //获取当前有效的 accessToken
+                          final accessToken = await FlutterNaverLogin.getCurrentAccessToken();
+                          
+                          // 准备登录接口参数
+                          final loginParams = {
+                            "id": result.account?.id,
+                            "nickname": result.account?.nickname,
+                            "email": result.account?.email,
+                            "mobile": result.account?.mobile?.replaceAll('-', ''),//手机号
+                            "accessToken": accessToken.accessToken,
+                          };
+                          
+                          // 调用naver登录接口
+                          final loginResponse = await HttpUtil.post(naverLoginUrl, data: loginParams);
+                          
+                          if (loginResponse.data['code'] == 200) {
+                            // 登录成功，获取token
+                            final loginToken = loginResponse.data['token'];
+                            
+                            // 存储token
+                            await SharedPreferencesUtil.saveString(token, loginToken);
+                            
+                            // 获取并保存最大订单限额
+                            await _fetchAndSaveMaxOrderLimit(loginToken);
+                            
+                            // 跳转到首页
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MainTab()),
+                              (route) => false,
+                            );
+                          } else {
+                            // 登录失败
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('登录失败/未绑定第三方账号')),
+                            );
+                          }
+
+                        } catch (e) {
+                          // 如果登录失败，你可以显示错误提示给用户
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('登录失败，请重试！$e')),
+                          );
+                        }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'N',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        AppLocalizations.of(context).translate('continue_with_naver'),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 32.h),
                 
                 // 底部操作区
                 Wrap(
@@ -270,6 +394,8 @@ class Loginto extends StatelessWidget {
     );
   }
 }
+
+
 
 // 应用入口
 void main() {

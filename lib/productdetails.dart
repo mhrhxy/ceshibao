@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import 'dingbudaohang.dart';
 import './config/service_url.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -1320,16 +1321,14 @@ class _ProductDetailspayState extends State<ProductDetails> {
                           icon: Icon(Icons.share, color: Colors.white, size: 20.r),
                           onPressed: () {
                             // 生成符合AndroidManifest.xml配置的跳转地址
-                            // 格式：flutterappxm://detail/{productId}
-                            String shareLink = 'flutterappxm://detail/${widget.id}';
-                            
-                            // 复制链接到剪贴板
-                            Clipboard.setData(ClipboardData(text: shareLink)).then((_) {
+                            // 格式：couzikapp://detail/{productId}
+                            String shareLink = 'https://www.couzik.com/break?link=couzikapp://detail/xq/${widget.id}';
+                            // 使用share_plus打开分享菜单
+                            Share.share(shareLink, subject: '分享商品链接').then((_) {
+                              // 分享完成后复制链接到剪贴板
+                              Clipboard.setData(ClipboardData(text: shareLink));
                               // 显示复制成功提示
                               ToastUtil.showCustomToast(context, AppLocalizations.of(context)!.translate('share_link_copied'));
-                              
-                              // 可选：打开分享菜单
-                              // Share.share(shareLink);
                             });
                           },
                           padding: EdgeInsets.zero,
@@ -1597,8 +1596,8 @@ class _ProductDetailspayState extends State<ProductDetails> {
                       Row(
                         children: [
                           ClipOval(
-                            child: Image.network(
-                              "https://picsum.photos/id/64/60/60",
+                            child: Image.asset(
+                              "images/dianplogo.png",
                               width: 50.w,
                               height: 50.h,
                               fit: BoxFit.cover,
