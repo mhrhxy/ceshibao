@@ -57,6 +57,35 @@
 			</array>
 		</dict>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>kakaoca610cfd836872a2e451f79a1be06cf6</string>  <!-- 这里填入你的 Kakao App Key -->
+	</array>
+
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>kakaoca610cfd836872a2e451f79a1be06cf6</string>  <!-- 这里填入你的 Kakao App Key -->
+			</array>
+		</dict>
+	</array>
+
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>naverlogin</string> <!-- Naver 登录的 URL Scheme -->
+	</array>
+
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>naverlogin</string> <!-- Naver 登录的 URL Scheme -->
+			</array>
+		</dict>
+	</array>
 	<!-- 相册权限 -->
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>需要访问相册以选择图片进行搜索</string>
